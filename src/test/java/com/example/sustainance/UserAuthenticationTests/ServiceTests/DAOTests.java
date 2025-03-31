@@ -14,8 +14,8 @@ public class DAOTests {
     @BeforeEach
     public void setup(){
         this.userDAO = new BasicUserDAO();
-        this.userDAO.registerUser(new RegisterUserRequest("TrueEmail@gmail.com", "TruePassword"));
         this.userDAO.registerUser(new RegisterUserRequest("Place@gmail.com", "Holder"));
+        this.userDAO.registerUser(new RegisterUserRequest("TrueEmail@gmail.com", "TruePassword"));
     }
 
     @Test
@@ -41,13 +41,6 @@ public class DAOTests {
 
     @Test
     public void testUserExistsPOS(){
-        boolean expected = true;
-        boolean actual = this.userDAO.userExists("TrueEmail@gmail.com");
-        Assertions.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testRegisterUser(){
         boolean expected = true;
         boolean actual = this.userDAO.userExists("TrueEmail@gmail.com");
         Assertions.assertEquals(expected, actual);

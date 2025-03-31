@@ -18,7 +18,7 @@ public class UserAuthenticationService {
         this.CurrentlyActives = new HashSet<>();
     }
 
-    public RegisterUserResponse RegisterUser(RegisterUserRequest request){
+    public RegisterUserResponse registerUser(RegisterUserRequest request){
         RegisterUserResponse response = new RegisterUserResponse(false, null);
 
         if(this.userDAO.alreadyRegistered(request.getEmail())){
@@ -36,7 +36,7 @@ public class UserAuthenticationService {
     public attemptLogInResponse attemptLogIn(attemptLogInRequest request){
         attemptLogInResponse response = new attemptLogInResponse(false, null);
 
-        if(this.userDAO.userExists(request.getEmail())){
+        if(!this.userDAO.userExists(request.getEmail())){
             response.setResult(false);
             response.setReason(USER_DOESNT_EXIST_RESPONSE);
             return response;
