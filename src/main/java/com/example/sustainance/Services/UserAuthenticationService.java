@@ -1,7 +1,6 @@
 package com.example.sustainance.Services;
 
 import com.example.sustainance.Interfaces.UserDAO;
-import Models.*;
 import com.example.sustainance.Models.*;
 
 import java.util.HashSet;
