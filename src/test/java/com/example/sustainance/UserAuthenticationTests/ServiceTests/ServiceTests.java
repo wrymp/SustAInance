@@ -1,12 +1,12 @@
 package com.example.sustainance.UserAuthenticationTests.ServiceTests;
 
-import Models.*;
-import Services.UserAuthenticationService;
+import com.example.sustainance.Services.UserAuthenticationService;
+import com.example.sustainance.Models.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static Constants.englishConstants.*;
+import static com.example.sustainance.Constants.englishConstants.*;
 
 public class ServiceTests {
 

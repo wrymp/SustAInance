@@ -1,7 +1,7 @@
-package Interfaces;
+package com.example.sustainance.Repository.Interfaces;
 
-import Models.RegisterUserRequest;
-import Models.attemptLogInRequest;
+import com.example.sustainance.Models.RegisterUserRequest;
+import com.example.sustainance.Models.attemptLogInRequest;
 
 public interface UserDAO {
 

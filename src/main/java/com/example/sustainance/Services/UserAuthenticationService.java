@@ -1,13 +1,16 @@
-package Services;
+package com.example.sustainance.Services;
 
-import Interfaces.UserDAO;
-import Models.*;
+import com.example.sustainance.Repository.Interfaces.UserDAO;
+import com.example.sustainance.Models.*;
+import com.example.sustainance.Repository.InMemory.BasicUserDAO;
+import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static Constants.englishConstants.*;
+import static com.example.sustainance.Constants.englishConstants.*;
 
+@Service
 public class UserAuthenticationService {
     private UserDAO userDAO;
     private Set<String> CurrentlyActives;

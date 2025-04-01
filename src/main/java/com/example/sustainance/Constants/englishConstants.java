@@ -1,4 +1,4 @@
-package Constants;
+package com.example.sustainance.Constants;
 
 public class englishConstants {
     public static final String USER_ALREADY_REGISTERED_RESPONSE = "This Email is already in use.";

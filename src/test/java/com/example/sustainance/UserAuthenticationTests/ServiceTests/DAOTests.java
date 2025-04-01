@@ -1,8 +1,8 @@
 package com.example.sustainance.UserAuthenticationTests.ServiceTests;
 
-import Models.RegisterUserRequest;
-import Models.attemptLogInRequest;
-import Services.BasicUserDAO;
+import com.example.sustainance.Models.RegisterUserRequest;
+import com.example.sustainance.Models.attemptLogInRequest;
+import com.example.sustainance.Repository.InMemory.BasicUserDAO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
