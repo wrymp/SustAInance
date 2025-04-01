@@ -1,12 +1,13 @@
-package Services;
+package com.example.sustainance.Services;
 
-import Interfaces.UserDAO;
+import com.example.sustainance.Interfaces.UserDAO;
 import Models.*;
+import com.example.sustainance.Models.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static Constants.englishConstants.*;
+import static com.example.sustainance.Constants.englishConstants.*;
 
 public class UserAuthenticationService {
     private UserDAO userDAO;
