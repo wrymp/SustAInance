@@ -1,26 +1,44 @@
 package com.example.sustainance.Repository.InMemory;
 
+import com.example.sustainance.Errors.UserAlreadyExistsException;
+import com.example.sustainance.Errors.UserAlreadyLoggedInException;
+import com.example.sustainance.Errors.WrongCredentialsException;
 import com.example.sustainance.Repository.Interfaces.UserDAO;
 import com.example.sustainance.Models.RegisterUserRequest;
 import com.example.sustainance.Models.User;
 import com.example.sustainance.Models.attemptLogInRequest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import static com.example.sustainance.Constants.englishConstants.*;
 
 public class BasicUserDAO implements UserDAO {
     private List<User> Users;
+    private Set<String> CurrentlyActives;
 
     public BasicUserDAO() {
         this.Users = new ArrayList<>();
+        this.CurrentlyActives = new HashSet<>();
+    }
+
+
+    public void setUserAsInactive(String email) {
+        this.CurrentlyActives.remove(email);
+    }
+
+    private void setUserAsActive(String email) {
+        this.CurrentlyActives.add(email);
+    }
+
+    private boolean checkIfUserIsActive(String email) {
+        return this.CurrentlyActives.contains(email);
     }
 
     @Override
-    public boolean alreadyRegistered(String email) {
+    public boolean alreadyRegistered(String email) throws UserAlreadyExistsException {
         for (User currUser: this.Users){
             if(Objects.equals(currUser.getEmail(), email)){
-                return true;
+                throw new UserAlreadyExistsException(USER_ALREADY_REGISTERED_RESPONSE);
             }
         }
         return false;
@@ -43,14 +61,21 @@ public class BasicUserDAO implements UserDAO {
     }
 
     @Override
-    public boolean checkCredentials(attemptLogInRequest request) {
+    public boolean checkCredentials(attemptLogInRequest request) throws UserAlreadyLoggedInException, WrongCredentialsException {
+        if(this.checkIfUserIsActive(request.getEmail())) {
+            throw new UserAlreadyLoggedInException(USER_ALREADY_LOGGED_IN_RESPONSE);
+        }
+
         User loggingInUser = new User(request.getEmail(), request.getPassword());
         for (User currUser: this.Users){
             if(Objects.equals(currUser.getEmail(), loggingInUser.getEmail()) &&
                     Objects.equals(currUser.getPassword(), loggingInUser.getPassword())){
-                return true;
+
+                    this.setUserAsActive(currUser.getEmail());
+                    return true;
             }
         }
-        return false;
+
+        throw new WrongCredentialsException(WRONG_LOG_IN_CREDENTIALS_RESPONSE);
     }
 }

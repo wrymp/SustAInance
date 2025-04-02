@@ -1,82 +1,78 @@
 package com.example.sustainance.Services;
 
+import com.example.sustainance.Errors.*;
 import com.example.sustainance.Repository.Interfaces.UserDAO;
 import com.example.sustainance.Models.*;
 import com.example.sustainance.Repository.InMemory.BasicUserDAO;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import static com.example.sustainance.Constants.englishConstants.*;
 
 @Service
 public class UserAuthenticationService {
     private UserDAO userDAO;
-    private Set<String> CurrentlyActives;
 
     public UserAuthenticationService(){
 //        this.userDAO = MySQLUserDAO();
         this.userDAO = new BasicUserDAO();
-        this.CurrentlyActives = new HashSet<>();
     }
 
     public RegisterUserResponse registerUser(RegisterUserRequest request){
-        RegisterUserResponse response = new RegisterUserResponse(false, null);
-
-        if(this.userDAO.alreadyRegistered(request.getEmail())){
-            response.setResult(false);
-            response.setReason(USER_ALREADY_REGISTERED_RESPONSE);
-            return response;
+        try {
+            this.checkIfNormalCredentials(request.getEmail(), request.getPassword());
+            this.userDAO.alreadyRegistered(request.getEmail());
+            this.userDAO.registerUser(request);
+        } catch (IllegalCredentialsException | UserAlreadyExistsException e) {
+            System.out.println(e.getMessage());
+            return new RegisterUserResponse(false, e.getMessage());
         }
+        return new RegisterUserResponse(true, USER_SUCCESSFULLY_REGISTERED_RESPONSE);
+    }
 
-        this.userDAO.registerUser(request);
-        response.setResult(true);
-        response.setReason(USER_SUCCESSFULLY_REGISTERED_RESPONSE);
-        return response;
+    private void checkIfUserExists(attemptLogInRequest request) throws UserDoesntExistException {
+        if(!this.userDAO.userExists(request.getEmail())){
+            throw new UserDoesntExistException(USER_DOESNT_EXIST_RESPONSE);
+        }
+    }
+
+    private boolean checkEmailValidity(String email){
+        return !(email == null || email.isEmpty() || !email.contains("@"));
+    }
+
+    private boolean checkPasswordValidity(String password){
+        return !(password == null || password.isEmpty());
+    }
+
+    private boolean checkPasswordAcceptability(String password){
+        return password.length() >= 8;
+    }
+
+    private void checkIfNormalCredentials(String email, String password) throws IllegalCredentialsException {
+        if(!(this.checkEmailValidity(email) &&
+                this.checkPasswordValidity(password) &&
+                this.checkPasswordAcceptability(password))){
+            throw new IllegalCredentialsException(ILLEGAL_CREDENTIALS_RESPONSE);
+        }
     }
 
     public attemptLogInResponse attemptLogIn(attemptLogInRequest request){
-        attemptLogInResponse response = new attemptLogInResponse(false, null);
-
-        if(!this.userDAO.userExists(request.getEmail())){
-            response.setResult(false);
-            response.setReason(USER_DOESNT_EXIST_RESPONSE);
-            return response;
+        try{
+            this.checkIfNormalCredentials(request.getEmail(), request.getPassword());
+            this.checkIfUserExists(request);
+            this.userDAO.checkCredentials(request);
+        } catch (IllegalCredentialsException |
+                 UserDoesntExistException |
+                 UserAlreadyLoggedInException |
+                 WrongCredentialsException e) {
+            return new attemptLogInResponse(false, e.getMessage());
         }
 
-        if(this.checkIfUserIsActive(request.getEmail())){
-            response.setResult(false);
-            response.setReason(USER_ALREADY_LOGGED_IN_RESPONSE);
-            return response;
-        }
-
-        if(this.userDAO.checkCredentials(request)){
-            this.setUserAsActive(request.getEmail());
-            response.setResult(true);
-            response.setReason(USER_SUCCESSFULLY_LOGGED_IN_RESPONSE);
-            return response;
-        } else {
-            response.setResult(false);
-            response.setReason(WRONG_LOG_IN_CREDENTIALS_RESPONSE);
-            return response;
-        }
-    }
-
-    private void setUserAsActive(String email) {
-        this.CurrentlyActives.add(email);
-    }
-    private boolean checkIfUserIsActive(String email) {
-        return this.CurrentlyActives.contains(email);
-    }
-
-    private void setUserAsInactive(String email) {
-        this.CurrentlyActives.remove(email);
+        return new attemptLogInResponse(true, USER_SUCCESSFULLY_LOGGED_IN_RESPONSE);
     }
 
     public attemptLogOffResponse attemptLogOff(attemptLogoffRequest request){
         attemptLogOffResponse response = new attemptLogOffResponse(true, USER_LOGGED_OFF);
-        this.setUserAsInactive(request.getEmail());
+        this.userDAO.setUserAsInactive(request.getEmail());
         return response;
     }
 

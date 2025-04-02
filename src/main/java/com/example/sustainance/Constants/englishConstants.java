@@ -1,6 +1,7 @@
 package com.example.sustainance.Constants;
 
 public class englishConstants {
+    public static final String ILLEGAL_CREDENTIALS_RESPONSE = "Either the email or the password field was empty";
     public static final String USER_ALREADY_REGISTERED_RESPONSE = "This Email is already in use.";
     public static final String USER_SUCCESSFULLY_REGISTERED_RESPONSE = "User was successfully registered.";
     public static final String USER_DOESNT_EXIST_RESPONSE = "A user with this email doesn't exist.";
