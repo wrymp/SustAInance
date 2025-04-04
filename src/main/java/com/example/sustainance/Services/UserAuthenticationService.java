@@ -4,18 +4,17 @@ import com.example.sustainance.Errors.*;
 import com.example.sustainance.Models.JSONClasses.*;
 import com.example.sustainance.Repository.Interfaces.UserDAO;
 import com.example.sustainance.Repository.InMemory.BasicUserDAO;
+import com.example.sustainance.Repository.SQLImpl.JpaUserDAO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.example.sustainance.Constants.englishConstants.*;
 
 @Service
 public class UserAuthenticationService {
-    private UserDAO userDAO;
 
-    public UserAuthenticationService(){
-//        this.userDAO = MySQLUserDAO();
-        this.userDAO = new BasicUserDAO();
-    }
+    @Autowired
+    private UserDAO userDAO = new JpaUserDAO();
 
     public RegisterUserResponse registerUser(RegisterUserRequest request){
         try {
