@@ -4,9 +4,9 @@ import com.example.sustainance.Errors.UserAlreadyExistsException;
 import com.example.sustainance.Errors.UserAlreadyLoggedInException;
 import com.example.sustainance.Errors.WrongCredentialsException;
 import com.example.sustainance.Repository.Interfaces.UserDAO;
-import com.example.sustainance.Models.RegisterUserRequest;
+import com.example.sustainance.Models.JSONClasses.RegisterUserRequest;
 import com.example.sustainance.Models.User;
-import com.example.sustainance.Models.attemptLogInRequest;
+import com.example.sustainance.Models.JSONClasses.attemptLogInRequest;
 
 import java.util.*;
 

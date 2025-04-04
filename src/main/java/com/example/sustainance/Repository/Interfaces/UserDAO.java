@@ -3,8 +3,8 @@ package com.example.sustainance.Repository.Interfaces;
 import com.example.sustainance.Errors.UserAlreadyExistsException;
 import com.example.sustainance.Errors.UserAlreadyLoggedInException;
 import com.example.sustainance.Errors.WrongCredentialsException;
-import com.example.sustainance.Models.RegisterUserRequest;
-import com.example.sustainance.Models.attemptLogInRequest;
+import com.example.sustainance.Models.JSONClasses.RegisterUserRequest;
+import com.example.sustainance.Models.JSONClasses.attemptLogInRequest;
 
 public interface UserDAO {
 

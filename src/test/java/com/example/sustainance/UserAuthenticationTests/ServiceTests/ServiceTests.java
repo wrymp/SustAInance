@@ -1,7 +1,7 @@
 package com.example.sustainance.UserAuthenticationTests.ServiceTests;
 
+import com.example.sustainance.Models.JSONClasses.*;
 import com.example.sustainance.Services.UserAuthenticationService;
-import com.example.sustainance.Models.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.example.sustainance.Models;
+package com.example.sustainance.Models.JSONClasses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

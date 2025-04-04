@@ -1,8 +1,8 @@
 package com.example.sustainance.Services;
 
 import com.example.sustainance.Errors.*;
+import com.example.sustainance.Models.JSONClasses.*;
 import com.example.sustainance.Repository.Interfaces.UserDAO;
-import com.example.sustainance.Models.*;
 import com.example.sustainance.Repository.InMemory.BasicUserDAO;
 import org.springframework.stereotype.Service;
 
