@@ -1,15 +1,15 @@
-package com.example.sustainance.Models;
+package com.example.sustainance.Models.UserAuth;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class RegisterUserResponse {
+public class attemptLogOffResponse {
     private boolean result;
     private String reason;
 
-    public RegisterUserResponse(boolean newResult, String newReason) {
+    public attemptLogOffResponse(boolean newResult, String newReason) {
         this.result = newResult;
         this.reason = newReason;
     }
