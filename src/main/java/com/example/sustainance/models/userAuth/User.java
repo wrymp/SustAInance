@@ -1,4 +1,4 @@
-package com.example.sustainance.Models;
+package com.example.sustainance.models.userAuth;
 
 import lombok.Getter;
 

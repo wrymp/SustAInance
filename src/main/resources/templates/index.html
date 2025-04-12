@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Home Page</title>
+    <title>SustAInance - AI-Powered Recipe Generator</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<h1>Welcome to the Home Page</h1>
+<div class="container">
+    <h1>Welcome to SustAInance</h1>
+    <nav>
+        <ul>
+            <li><a th:href="@{/recipe/generator}">Generate Recipe</a></li>
+        </ul>
+    </nav>
+</div>
 </body>
 </html>

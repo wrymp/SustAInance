@@ -1,13 +1,13 @@
-package com.example.sustainance.Models;
+package com.example.sustainance.models.userAuth;
 
 import lombok.Getter;
 
 @Getter
-public class attemptLogInRequest {
+public class RegisterUserRequest {
     private String email;
     private String password;
 
-    public attemptLogInRequest(String newEmail, String newPassword) {
+    public RegisterUserRequest(String newEmail, String newPassword) {
         this.email = newEmail;
         this.password = newPassword;
     }

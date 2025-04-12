@@ -1,9 +1,9 @@
-package com.example.sustainance.Services;
+package com.example.sustainance.services;
 
-import com.example.sustainance.Interfaces.UserDAO;
-import com.example.sustainance.Models.RegisterUserRequest;
-import com.example.sustainance.Models.User;
-import com.example.sustainance.Models.attemptLogInRequest;
+import com.example.sustainance.interfaces.UserDAO;
+import com.example.sustainance.models.userAuth.RegisterUserRequest;
+import com.example.sustainance.models.userAuth.User;
+import com.example.sustainance.models.userAuth.attemptLogInRequest;
 
 import java.util.ArrayList;
 import java.util.List;
