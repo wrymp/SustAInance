@@ -1,9 +1,10 @@
-package com.example.sustainance.Services;
+package com.example.sustainance.services;
 
 
-import com.example.sustainance.Models.Ingredients.Ingredient;
+import com.example.sustainance.models.ingredients.Ingredient;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@Service
 public class IngredientSelectionService {
     private final List<Ingredient> ingredients;
 

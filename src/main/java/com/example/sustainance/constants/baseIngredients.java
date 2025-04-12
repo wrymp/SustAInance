@@ -1,6 +1,6 @@
-package com.example.sustainance.Constants;
+package com.example.sustainance.constants;
 
-import com.example.sustainance.Models.Ingredients.Ingredient;
+import com.example.sustainance.models.ingredients.Ingredient;
 
 import java.util.List;
 

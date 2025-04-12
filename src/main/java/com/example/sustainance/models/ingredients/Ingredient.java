@@ -1,4 +1,4 @@
-package com.example.sustainance.Models.Ingredients;
+package com.example.sustainance.models.ingredients;
 
 
 import lombok.Getter;
