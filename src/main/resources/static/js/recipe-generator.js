@@ -1,6 +1,7 @@
 class RecipeApp {
     constructor() {
         this.selectedIngredients = [];
+        this.cachedIngredients = [];
         this.initializeApp();
     }
 
@@ -15,6 +16,7 @@ class RecipeApp {
         try {
             const response = await fetch('/api/recipe/list');
             const ingredients = await response.json();
+            this.cachedIngredients = ingredients
             this.displayBaseIngredients(ingredients);
         } catch (error) {
             console.error('Error loading ingredients:', error);
@@ -23,13 +25,26 @@ class RecipeApp {
 
     // Set up event listeners for buttons
     setupEventListeners() {
+        document.getElementById('searchBar')
+            .addEventListener('input', () => this.searchForIngredient());
         document.getElementById('generateRecipe')
             .addEventListener('click', () => this.generateRecipe());
+    }
+
+    // search for Ingredients based on keyword
+    searchForIngredient() {
+        let ingredients = this.cachedIngredients;
+        const searchBarValue = document.getElementById('searchBar').value.trim().toLowerCase();
+        if (searchBarValue.length > 0) {
+            ingredients = ingredients.filter(ing => ing.name.toLowerCase().includes(searchBarValue));
+        }
+        this.displayBaseIngredients(ingredients);
     }
 
     // Display base ingredients in the UI
     displayBaseIngredients(ingredients) {
         const container = document.getElementById('baseIngredients');
+
         container.innerHTML = ingredients.map(ing => `
             <div class="ingredient-item">
                 <span>${ing.name}</span>

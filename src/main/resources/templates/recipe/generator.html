@@ -8,28 +8,29 @@
 <div class="container">
     <h1>Recipe Generator</h1>
 
-    <!-- Section for displaying available base ingredients -->
+    <div>
+        <h2>Search for Ingredients</h2>
+        <input type="search" id="searchBar">
+
+
+
+    </div>
+
     <div class="ingredient-selector">
         <h2>Available Ingredients</h2>
         <div id="baseIngredients">
-            <!-- This div will be populated by JavaScript loadBaseIngredients() -->
         </div>
     </div>
 
-    <!-- Section for showing selected ingredients -->
     <div class="selected-ingredients">
         <h2>Selected Ingredients</h2>
         <div id="selectedIngredients">
-            <!-- This div will be populated by JavaScript updateSelectedIngredients() -->
         </div>
     </div>
 
-    <!-- Button to generate recipe -->
     <button id="generateRecipe">Generate Recipe</button>
 
-    <!-- Section where the generated recipe will be displayed -->
     <div id="recipeResult">
-        <!-- Generated recipe will appear here -->
     </div>
 </div>
 <script th:src="@{/js/recipe-generator.js}"></script>
