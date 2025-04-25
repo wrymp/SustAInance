@@ -112,6 +112,15 @@ button[onclick*="addIngredient"]:hover {
     background-color: #45a049;
 }
 
+button[onclick*="addCustomIngredient"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+button[onclick*="addCustomIngredient"]:hover {
+    background-color: #45a049;
+}
+
 button[onclick*="removeIngredient"] {
     background-color: #ff4444;
     color: white;
@@ -189,6 +198,13 @@ button[onclick*="removeIngredient"]:hover {
     margin-bottom: 15px;
     padding-bottom: 5px;
     border-bottom: 1px solid #ddd;
+}
+
+.top-bar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
 }
 
 .recipe-ingredients {

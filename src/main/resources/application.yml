@@ -2,7 +2,7 @@ spring:
   application:
     name: SustAInance
 server:
-  port: 8000
+  port: 9097
 ai:
   github:
     key: ${GITHUB_TOKEN}

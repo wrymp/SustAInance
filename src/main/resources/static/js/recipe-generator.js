@@ -7,6 +7,7 @@ class RecipeApp {
 
     async initializeApp() {
         // Load base ingredients when app starts
+        // await this.readPreferences();
         await this.loadBaseIngredients();
         this.setupEventListeners();
     }
@@ -142,6 +143,82 @@ class RecipeApp {
             <pre>${recipe}</pre>
         </div>
     `;
+    }
+
+    async addCustomIngredient(button) {
+        const name = document.getElementById("customIngredientName").value;
+        document.getElementById("customIngredientName").value = ''
+        const quantity = document.getElementById("customIngredientAmt").value;
+        document.getElementById("customIngredientAmt").value = ''
+        const unit = document.getElementById("customIngredientUnit").value;
+        document.getElementById("customIngredientUnit").value = ''
+
+        if (quantity <= 0) {
+            alert('Please enter a valid quantity');
+            return;
+        }
+
+        const ingredient = {
+            name: name,
+            quantity: parseFloat(quantity),
+            unit: unit
+        };
+
+        try {
+            const response = await fetch('/api/recipe/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ingredient)
+            });
+
+            const updatedIngredients = await response.json();
+            this.updateSelectedIngredients(updatedIngredients);
+        } catch (error) {
+            console.error('Error adding ingredient:', error);
+        }
+    }
+
+    getCookie(name) {
+        const decodedCookies = decodeURIComponent(document.cookie);
+        const cookieArr = decodedCookies.split(';');
+        for (let i = 0; i < cookieArr.length; i++) {
+            let c = cookieArr[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name + "=") === 0) {
+                return c.substring(name.length + 1, c.length);
+            }
+        }
+        return "";
+    }
+
+    async readPreferences() {
+        const preferenceString = this.getCookie("preferenceString")
+        if(preferenceString === ""){
+            return
+        }
+
+        const preference = {
+            preferenceStr: preferenceString
+        };
+
+        try {
+            // API ENDPOINT STILL IN WORK I THINK?
+            // const response = await fetch('/api/recipe/add', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(preference)
+            // });
+            //
+            // await response.json();
+        } catch (error) {
+            console.error('Error adding ingredient:', error);
+        }
     }
 }
 

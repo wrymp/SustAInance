@@ -19,4 +19,11 @@ public class WebController {
         model.addAttribute("baseIngredients", baseIngredients.BASE_INGREDIENTS);
         return "recipe/generator";
     }
+
+    @GetMapping("/recipe/preferences")
+    public String preferenceSelector(Model model) {
+        // Make sure this line is working
+//        model.addAttribute("pre", baseIngredients.BASE_INGREDIENTS);
+        return "recipe/preferences";
+    }
 }

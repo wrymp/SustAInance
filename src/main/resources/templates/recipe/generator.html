@@ -2,17 +2,25 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Recipe Generator - SustAInance</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/generator.css}">
 </head>
 <body>
 <div class="container">
     <h1>Recipe Generator</h1>
 
-    <div>
-        <h2>Search for Ingredients</h2>
-        <input type="search" id="searchBar">
+    <div class="top-bar">
+        <div>
+            <h2>Search for Ingredients</h2>
+            <input type="search" id="searchBar">
+        </div>
+        <div>
+            <h2>Add Custom Ingredients</h2>
 
-
+            <input type="text" id="customIngredientName" placeholder="Name">
+            <input type="text" id="customIngredientAmt" placeholder="Amount">
+            <input type="text" id="customIngredientUnit" placeholder="Unit">
+            <button onclick="app.addCustomIngredient(this)" id="addCustomIngredient">Add</button>
+        </div>
 
     </div>
 
