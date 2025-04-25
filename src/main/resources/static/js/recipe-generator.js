@@ -1,13 +1,14 @@
 class RecipeApp {
     constructor() {
         this.selectedIngredients = [];
+        this.preferenceString = "";
         this.cachedIngredients = [];
         this.initializeApp();
     }
 
     async initializeApp() {
         // Load base ingredients when app starts
-        // await this.readPreferences();
+        await this.readPreferences();
         await this.loadBaseIngredients();
         this.setupEventListeners();
     }
@@ -196,26 +197,29 @@ class RecipeApp {
     }
 
     async readPreferences() {
-        const preferenceString = this.getCookie("preferenceString")
-        if(preferenceString === ""){
-            return
-        }
+        const cookiePreferenceString = this.getCookie("preferenceString")
+        // if(cookiePreferenceString === ""){
+        //     return
+        // }
+        this.preferenceString = cookiePreferenceString
+
+
 
         const preference = {
-            preferenceStr: preferenceString
+            preferenceString: this.preferenceString
         };
 
         try {
-            // API ENDPOINT STILL IN WORK I THINK?
-            // const response = await fetch('/api/recipe/add', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(preference)
-            // });
-            //
-            // await response.json();
+            const response = await fetch('/api/recipe/addPreference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(preference)
+            });
+
+            const updatedPreference = await response.json();
+            console.log(updatedPreference)
         } catch (error) {
             console.error('Error adding ingredient:', error);
         }

@@ -28,7 +28,8 @@ class RecipeApp {
     }
 
     setCookie(name, value) {
-        document.cookie = `${name}=${value};;path=/`;
+        const encodedValue = encodeURIComponent(value);
+        document.cookie = `${name}=${encodedValue};path=/`;
     }
 
     getCookie(name) {

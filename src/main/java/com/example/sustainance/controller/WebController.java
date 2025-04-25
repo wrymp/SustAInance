@@ -23,7 +23,6 @@ public class WebController {
     @GetMapping("/recipe/preferences")
     public String preferenceSelector(Model model) {
         // Make sure this line is working
-//        model.addAttribute("pre", baseIngredients.BASE_INGREDIENTS);
         return "recipe/preferences";
     }
 }

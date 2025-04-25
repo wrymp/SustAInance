@@ -2,6 +2,7 @@ package com.example.sustainance.controller;
 
 
 import com.example.sustainance.models.ingredients.Ingredient;
+import com.example.sustainance.models.ingredients.Preference;
 import com.example.sustainance.services.IngredientSelectionService;
 import com.example.sustainance.services.AIService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,13 @@ public class RecipeController {
     @PostMapping("/add")
     public ResponseEntity<List<Ingredient>> addIngredient(@RequestBody Ingredient ingredient) {
         ingredientService.addIngredient(ingredient);
+        return ResponseEntity.ok(ingredientService.getIngredients());
+    }
+
+    @PostMapping("/addPreference")
+    public ResponseEntity<List<Ingredient>> addPreference(@RequestBody Preference preference) {
+        log.info("RECVED PREF: "+preference.getPreferenceString());
+        ingredientService.addPreference(preference);
         return ResponseEntity.ok(ingredientService.getIngredients());
     }
 
