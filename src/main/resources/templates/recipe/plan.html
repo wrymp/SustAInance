@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Preference Selection - SustAInance</title>
+    <link rel="stylesheet" th:href="@{/css/preferences.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Make a meal plan</h1>
+    <input list="timespans" id="timeframe"></input>
+
+    <datalist id="timespans">
+        <option value="1 week">
+        <option value="2 weeks">
+        <option value="3 weeks">
+        <option value="1 month">
+        <option value="3 month">
+        <option value="6 month">
+    </datalist>
+    <input type="text" placeholder="feel free to input any and all preferences you might have" id="preferenceFieldValue">
+    </input>
+    <button id="generateMealPlan"> generate Meal Plan</button>
+
+    <div id="resultContainer"></div>
+</div>
+<script th:src="@{/js/plan.js}"></script>
+</body>
+</html>

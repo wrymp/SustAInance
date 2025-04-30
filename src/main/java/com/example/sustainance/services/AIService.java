@@ -54,7 +54,60 @@ public class AIService {
             options.setModel(model);
 
             ChatCompletions completions = client.getChatCompletions(model, options);
-            log.info("Received response from AI API");
+            log.info("Received response from AI API on recipe ");
+
+            String recipe = completions.getChoices().get(0).getMessage().getContent();
+            return formatRecipe(recipe);
+        } catch (Exception e) {
+            log.error("Error in recipe generation", e);
+            throw e;
+        }
+    }
+
+    public String generateMealPlan(String FoodPreferences, String timefranme, String PlanPreference, String ingredients) {
+        log.info("Generating Meal Plan for food preferences: {}, for a period of: {}",
+                FoodPreferences+" "+PlanPreference, timefranme);
+        try {
+            ChatCompletionsOptions options = new ChatCompletionsOptions(
+                    Arrays.asList(
+                            new ChatMessage(ChatRole.SYSTEM)
+                                    .setContent("You are a professional chef creating recipes."),
+                            new ChatMessage(ChatRole.USER)
+                                    .setContent(String.format("""
+                            Create a Meal plan working with these preferences:\s
+                            %s for the foods
+                            %s for the plan
+                           \s
+                            The plan should last for %s.
+                           \s
+                            list of INGREDIENTS you can use:
+                            %s
+                            IF THE TIME FRAME IS TOO LONG TO WRITE IT ALL DESCRIBE A WEEKLY SCHEDULE AND ADD ANY EXCEPTIONS AS EXTRAS.
+                            IF THERE ARE NOT ENOUGH INGREDIENTS FOR THE WHOLE PLAN, GIVE A SHOPPING LIST FOR THOSE INGREDIENTS LIKE SO:
+                            === INGREDIENT_NAME ===: Quantity
+                           
+                            Give the recipe for each day like so:
+                           \s
+                            ===  [Day Name]   ===
+                            
+                            for each recipe:
+                            === [Recipe Name] ===
+                           \s
+                            Ingredients:
+                            [List each ingredient]
+                           \s
+                            Instructions:
+                            [Numbered steps]
+                           \s
+                            Cooking Time: [time this dish needs]
+                           \s""", FoodPreferences, PlanPreference, timefranme))
+                    )
+            );
+
+            options.setModel(model);
+
+            ChatCompletions completions = client.getChatCompletions(model, options);
+            log.info("Received response from AI API on Meal Plan");
 
             String recipe = completions.getChoices().get(0).getMessage().getContent();
             return formatRecipe(recipe);

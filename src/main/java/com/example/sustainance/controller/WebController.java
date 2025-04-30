@@ -25,4 +25,10 @@ public class WebController {
         // Make sure this line is working
         return "recipe/preferences";
     }
+
+    @GetMapping("/recipe/plan")
+    public String mealPlanGenerator(Model model) {
+        // Make sure this line is working
+        return "recipe/plan";
+    }
 }

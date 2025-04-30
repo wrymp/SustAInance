@@ -2,6 +2,7 @@ package com.example.sustainance.controller;
 
 
 import com.example.sustainance.models.ingredients.Ingredient;
+import com.example.sustainance.models.ingredients.MealPlanRequest;
 import com.example.sustainance.models.ingredients.Preference;
 import com.example.sustainance.services.IngredientSelectionService;
 import com.example.sustainance.services.AIService;
@@ -59,6 +60,23 @@ public class RecipeController {
         try {
             String recipe = AIService.generateRecipe(ingredients);
             log.info("Recipe generated successfully");
+            return ResponseEntity.ok(recipe);
+        } catch (Exception e) {
+            log.error("Error generating recipe", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error generating recipe: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/generateMealPlan")
+    public ResponseEntity<String> generateMealPlan(@RequestBody MealPlanRequest mealPlanRequest) {
+        log.info("Received generate Meal Plan request");
+        String ingredients = ingredientService.toString();
+        log.info("Ingredients to use: {}", ingredients);
+        try {
+            String recipe = AIService.generateMealPlan(mealPlanRequest.getFoodPreferenceString(),
+                    mealPlanRequest.getTimeframe(), mealPlanRequest.getPlanPreferenceString(), ingredients);
+            log.info("Meal plan generated successfully");
             return ResponseEntity.ok(recipe);
         } catch (Exception e) {
             log.error("Error generating recipe", e);
