@@ -77,6 +77,7 @@ public class RecipeController {
             String recipe = AIService.generateMealPlan(mealPlanRequest.getFoodPreferenceString(),
                     mealPlanRequest.getTimeframe(), mealPlanRequest.getPlanPreferenceString(), ingredients);
             log.info("Meal plan generated successfully");
+            log.info(recipe);
             return ResponseEntity.ok(recipe);
         } catch (Exception e) {
             log.error("Error generating recipe", e);

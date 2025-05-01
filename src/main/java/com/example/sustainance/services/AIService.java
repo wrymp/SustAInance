@@ -65,6 +65,16 @@ public class AIService {
     }
 
     public String generateMealPlan(String FoodPreferences, String timefranme, String PlanPreference, String ingredients) {
+        if(FoodPreferences.isEmpty()){
+            FoodPreferences = "No Preference for any kind of food";
+        }
+        if(ingredients.isEmpty()){
+            FoodPreferences = "No list given, assume I have everything.";
+        }
+        if(PlanPreference.isEmpty()){
+            PlanPreference = "No Preference for any kind of plan";
+        }
+
         log.info("Generating Meal Plan for food preferences: {}, for a period of: {}",
                 FoodPreferences+" "+PlanPreference, timefranme);
         try {
@@ -94,13 +104,15 @@ public class AIService {
                             === [Recipe Name] ===
                            \s
                             Ingredients:
-                            [List each ingredient]
+                            [List each ingredient like so
+                            {ing name: quant, unit}
+                            ]
                            \s
                             Instructions:
                             [Numbered steps]
                            \s
                             Cooking Time: [time this dish needs]
-                           \s""", FoodPreferences, PlanPreference, timefranme))
+                           \s""", FoodPreferences, PlanPreference, timefranme, ingredients))
                     )
             );
 

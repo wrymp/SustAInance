@@ -47,7 +47,7 @@ class MealPlanApp {
                 body: JSON.stringify(mealPlanRequest)
             });
 
-            const mealPlanString = await response.json();
+            const mealPlanString = await response.text();
             this.updateResult(mealPlanString);
         } catch (error) {
             console.error('Error adding ingredient:', error);
@@ -58,7 +58,12 @@ class MealPlanApp {
     }
 
     updateResult(newValue) {
-        document.getElementById("resultContainer").value = newValue
+        const container = document.getElementById("resultContainer")
+        container.innerHTML = `
+        <div class="plan_content">
+            <pre>${newValue}</pre>
+        </div>
+    `;
     }
 }
 
