@@ -89,12 +89,13 @@ public class AIService {
                             %s for the plan
                            \s
                             The plan should last for %s.
+                            IF THE TIME FRAME IS TOO LONG TO WRITE IT ALL AS A WEEKLY SCHEDULE AND ADD ANY EXCEPTIONS AS EXTRAS.
                            \s
                             list of INGREDIENTS you can use:
                             %s
-                            IF THE TIME FRAME IS TOO LONG TO WRITE IT ALL DESCRIBE A WEEKLY SCHEDULE AND ADD ANY EXCEPTIONS AS EXTRAS.
-                            IF THERE ARE NOT ENOUGH INGREDIENTS FOR THE WHOLE PLAN, GIVE A SHOPPING LIST FOR THOSE INGREDIENTS LIKE SO:
-                            === INGREDIENT_NAME ===: Quantity
+                            IF THERE ARE NOT ENOUGH INGREDIENTS FOR THE WHOLE PLAN, GIVE A SHOPPING LIST FOR THOSE INGREDIENTS AT THE END LIKE SO:
+                            === INGREDIENT_NAME : Quantity
+                            AND START IT WITH THE KEYWORD "SHOPPING LIST:"
                            
                             Give the recipe for each day like so:
                            \s

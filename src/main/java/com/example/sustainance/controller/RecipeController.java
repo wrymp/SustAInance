@@ -4,6 +4,7 @@ package com.example.sustainance.controller;
 import com.example.sustainance.models.ingredients.Ingredient;
 import com.example.sustainance.models.ingredients.MealPlanRequest;
 import com.example.sustainance.models.ingredients.Preference;
+import com.example.sustainance.services.EmailSenderService;
 import com.example.sustainance.services.IngredientSelectionService;
 import com.example.sustainance.services.AIService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +22,13 @@ import java.util.List;
 public class RecipeController {
     private final IngredientSelectionService ingredientService;
     private final AIService AIService;
+    private final EmailSenderService emailSenderService;
 
     public RecipeController(IngredientSelectionService ingredientService,
-                            AIService AIService) {
+                            AIService AIService, EmailSenderService emailSenderService) {
         this.ingredientService = ingredientService;
         this.AIService = AIService;
+        this.emailSenderService = emailSenderService;
     }
 
     @PostMapping("/add")
@@ -78,6 +81,17 @@ public class RecipeController {
                     mealPlanRequest.getTimeframe(), mealPlanRequest.getPlanPreferenceString(), ingredients);
             log.info("Meal plan generated successfully");
             log.info(recipe);
+
+
+            int index = recipe.indexOf("SHOPPING LIST:");
+            String shopping_list = recipe.substring(index);
+            recipe = recipe.substring(0, index);
+            System.out.println(shopping_list);
+            if(!mealPlanRequest.getRecipient().isEmpty()){
+                this.emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shopping_list);
+            }
+
+
             return ResponseEntity.ok(recipe);
         } catch (Exception e) {
             log.error("Error generating recipe", e);

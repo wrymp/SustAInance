@@ -31,11 +31,13 @@ class MealPlanApp {
         const FoodTypePreferenceString = this.getCookie("preferenceString")
         const timeframeString =  document.getElementById('timeframe').value;
         const PlanPreferenceString =  document.getElementById('timeframe').value;
+        const recipient = this.getCookie("cachedEmail")
 
         const mealPlanRequest = {
             foodPreferenceString: FoodTypePreferenceString,
             planPreferenceString: PlanPreferenceString,
-            timeframe: timeframeString
+            timeframe: timeframeString,
+            recipient: recipient
         };
 
         try {

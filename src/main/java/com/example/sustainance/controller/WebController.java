@@ -31,4 +31,10 @@ public class WebController {
         // Make sure this line is working
         return "recipe/plan";
     }
+
+    @GetMapping("/recipe/fauxlogin")
+    public String fauxLogin(Model model) {
+        // Make sure this line is working
+        return "recipe/fauxLogin";
+    }
 }
