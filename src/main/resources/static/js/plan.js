@@ -50,6 +50,7 @@ class MealPlanApp {
             });
 
             const mealPlanString = await response.text();
+            this.setCookie("planString", mealPlanString);
             this.updateResult(mealPlanString);
         } catch (error) {
             console.error('Error adding ingredient:', error);
@@ -57,6 +58,11 @@ class MealPlanApp {
 
 
         return undefined;
+    }
+
+    setCookie(name, value) {
+        const encodedValue = encodeURIComponent(value);
+        document.cookie = `${name}=${encodedValue};path=/`;
     }
 
     updateResult(newValue) {

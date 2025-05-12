@@ -84,11 +84,13 @@ public class RecipeController {
 
 
             int index = recipe.indexOf("SHOPPING LIST:");
-            String shopping_list = recipe.substring(index);
-            recipe = recipe.substring(0, index);
-            System.out.println(shopping_list);
-            if(!mealPlanRequest.getRecipient().isEmpty()){
-                this.emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shopping_list);
+            if (index >= 0) {
+                String shopping_list = recipe.substring(index);
+                recipe = recipe.substring(0, index);
+                System.out.println(shopping_list);
+                if (!mealPlanRequest.getRecipient().isEmpty()) {
+                    this.emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shopping_list);
+                }
             }
 
 

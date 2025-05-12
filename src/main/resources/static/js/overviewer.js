@@ -1,36 +1,27 @@
-class RecipeApp {
+class OverviewerApp {
     constructor() {
         this.initializeApp();
     }
 
-    async initializeApp() {
-        this.checkIfPreferenceExists();
-        this.setupEventListeners();
+    initializeApp() {
+        this.checkIfInfoExists();
     }
 
-    checkIfPreferenceExists() {
+    checkIfInfoExists() {
         const preferenceString = this.getCookie("preferenceString")
+        const planString = this.getCookie("planString")
+        console.log(preferenceString)
+        console.log(planString)
         if(preferenceString === ""){
         } else {
             const container = document.getElementById('existingPreference');
             container.innerHTML = "<h1> This is your already saved preference: "+preferenceString+"</h1>"
         }
-    }
-
-    setupEventListeners() {
-        document.getElementById('saveButton')
-            .addEventListener('click', () => this.savePreferences());
-    }
-
-    savePreferences() {
-        const preferenceFieldValue = document.getElementById('preferenceFieldValue').value.trim();
-        document.getElementById('preferenceFieldValue').value = ""
-        this.setCookie("preferenceString", preferenceFieldValue)
-    }
-
-    setCookie(name, value) {
-        const encodedValue = encodeURIComponent(value);
-        document.cookie = `${name}=${encodedValue};path=/`;
+        if(planString === ""){
+        } else {
+            const container = document.getElementById('existingPlan');
+            container.innerHTML = "<h1> This is your already saved meal plan: "+planString+"</h1>"
+        }
     }
 
     getCookie(name) {
@@ -50,4 +41,4 @@ class RecipeApp {
 }
 
 // Initialize the application
-const app = new RecipeApp();
+const app = new OverviewerApp();

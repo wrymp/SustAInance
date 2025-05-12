@@ -37,4 +37,10 @@ public class WebController {
         // Make sure this line is working
         return "recipe/fauxLogin";
     }
+
+    @GetMapping("/recipe/overviewer")
+    public String overviewer(Model model) {
+        // Make sure this line is working
+        return "recipe/overviewer";
+    }
 }
