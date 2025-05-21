@@ -2,21 +2,23 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>SustAInance - AI-Powered Recipe Generator</title>
-    <link rel="stylesheet" th:href="@{/css/generator.css}">
+    <link rel="stylesheet" th:href="@{/css/mainPage.css}">
 </head>
 <body>
 <div class="container">
-    <h1>Welcome to SustAInance</h1>
-    <nav>
-        <ul>
-            <li><a th:href="@{/recipe/generator}">Generate Recipe</a></li>
-            <li><a th:href="@{/recipe/preferences}">Select Preferences</a></li>
-            <li><a th:href="@{/recipe/plan}">Generate meal plan</a></li>
-            <li><a th:href="@{/recipe/fauxlogin}">faux login</a></li>
-            <li><a th:href="@{/recipe/overviewer}">overview</a></li>
+    <div class="upperHalf">
+        <div class="introText">SustAInance</div>
+        <div class="introSubtext">The first automated AI-assisted food guide that helps you with any and all nutritional needs</div>
+        <div class="introButtons">
+            <button class="logInButton">Log In</button>
+            <button class="signUpButton">Sign Up</button>
+        </div>
 
-        </ul>
-    </nav>
+    </div>
+    <div class="lowerHalf">
+        © 2025 SustAInance. This is a work of non-fiction. Any and all mentions of real people, places, or questionable food habits are entirely deliberate. WE (yes, WE) knew what we were doing. All rights reserved, some rights imagined, and any resemblance to real life is absolutely on purpose.
+    </div>
 </div>
+<script th:src="@{/js/landingPage.js}"></script>
 </body>
 </html>
