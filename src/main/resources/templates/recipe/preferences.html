@@ -6,11 +6,26 @@
 </head>
 <body>
 <div class="container">
-    <h1>Preference Selection</h1>
-    <div id="existingPreference"></div>
-    <input type="text" placeholder="feel free to input any and all preferences you might have" id="preferenceFieldValue">
-    </input>
-    <button id="saveButton">Save Preference</button>
+
+    <div class="leftPart">
+        <div class="userInfo">
+            <img class="PFP">
+            <div class="greeting">Hello, fine shyt</div>
+        </div>
+        <button class="makeMealButton">Make a new meal</button>
+        <button class="makePlanButton">Make a new plan</button>
+        <button class="setPreferenceButton">Set a new preference</button>
+        <button class="settingsButton">settings ⚙</button>
+    </div>
+
+
+    <div class="rightPart">
+        <h1>Preference Selection</h1>
+        <div id="existingPreference"></div>
+        <input type="text" placeholder="feel free to input any and all preferences you might have" id="preferenceFieldValue">
+        </input>
+        <button id="saveButton">Save Preference</button>
+    </div>
 </div>
 <script th:src="@{/js/preferences.js}"></script>
 </body>

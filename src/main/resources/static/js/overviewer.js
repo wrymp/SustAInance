@@ -32,7 +32,6 @@ class OverviewerApp {
     }
 
     goToSettingsPage(){
-
     }
 
     checkIfInfoExists() {

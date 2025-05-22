@@ -20,6 +20,29 @@ class RecipeApp {
     setupEventListeners() {
         document.getElementById('saveButton')
             .addEventListener('click', () => this.savePreferences());
+        document.querySelector('.makeMealButton')
+            .addEventListener('click', () => this.goToMealMakerPage());
+        document.querySelector('.makePlanButton')
+            .addEventListener('click', () => this.goToPlanMakerPage());
+        document.querySelector('.setPreferenceButton')
+            .addEventListener('click', () => this.goToSetPreferencePage());
+        document.querySelector('.settingsButton')
+            .addEventListener('click', () => this.goToSettingsPage());
+    }
+
+    goToMealMakerPage(){
+        window.location.href = "/recipe/generator";
+    }
+
+    goToPlanMakerPage(){
+        window.location.href = "/recipe/plan";
+    }
+
+    goToSetPreferencePage(){
+        window.location.href = "/recipe/preferences";
+    }
+
+    goToSettingsPage(){
     }
 
     savePreferences() {
