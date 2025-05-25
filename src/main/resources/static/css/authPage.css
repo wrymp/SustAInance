@@ -1,0 +1,97 @@
+html, body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.container{
+    width: 100%;
+}
+
+.upperHalf {
+    width: 100%;
+    height: 90vh;
+    background-image: url("../images/mainBCKG.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: column;
+}
+
+.lowerHalf {
+    width: 100%;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    color: #000000;
+    font-size: 20px;
+}
+
+.introText{
+    color: white;
+    font-size: 70px;
+}
+
+#dataBox{
+    width: 30%;
+    height: 50%;
+    background-color: white;
+    border: 2px solid #888888;
+    border-radius: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: column;
+}
+
+#emailField{
+    width: 80%;
+    height: 10%;
+    border: 2px solid #888888;
+    border-radius: 5px;
+}
+
+#passField{
+    width: 80%;
+    height: 10%;
+    border: 2px solid #888888;
+    border-radius: 5px;
+}
+
+#passAgainField{
+    width: 80%;
+    height: 10%;
+    border: 2px solid #888888;
+    border-radius: 5px;
+}
+
+#signUpWithCredentials{
+    width: 30%;
+    height: 10%;
+    border: 2px solid #a3ff00;
+    background-color: #000000;
+    color: #a3ff00;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#logInWithCredentials{
+    width: 30%;
+    height: 10%;
+    border: 2px solid #000000;
+    background-color: #a3ff00;
+    color: #000000;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+}

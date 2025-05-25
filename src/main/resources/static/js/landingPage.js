@@ -10,9 +10,9 @@ class LandingPageAPP {
 
     setupEventListeners() {
         document.querySelector('.logInButton')
-            .addEventListener('click', () => this.goToAuthPage());
+            .addEventListener('click', () => this.goToAuthPage('logIn'));
         document.querySelector('.signUpButton')
-            .addEventListener('click', () => this.goToAuthPage());
+            .addEventListener('click', () => this.goToAuthPage('signUp'));
     }
 
     checkIfLoggedIn() {
@@ -38,8 +38,8 @@ class LandingPageAPP {
         return "";
     }
 
-    goToAuthPage() {
-        window.location.href = "/recipe/fauxlogin";
+    goToAuthPage(authType) {
+        window.location.href = "/recipe/authPage?authType=" + encodeURIComponent(authType);
     }
 }
 

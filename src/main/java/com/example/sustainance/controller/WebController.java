@@ -43,4 +43,10 @@ public class WebController {
         // Make sure this line is working
         return "recipe/overviewer";
     }
+
+    @GetMapping("/recipe/authPage")
+    public String authPage(Model model) {
+        // Make sure this line is working
+        return "recipe/authPage";
+    }
 }
