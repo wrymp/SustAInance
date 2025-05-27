@@ -37,8 +37,10 @@ class OverviewerApp {
     checkIfInfoExists() {
         const preferenceString = this.getCookie("preferenceString")
         const planString = this.getCookie("planString")
+        const cachedEmail = this.getCookie("cachedEmail")
         console.log(preferenceString)
         console.log(planString)
+        console.log(cachedEmail)
         if(preferenceString === ""){
         } else {
             const container = document.getElementById('preferencesDiv');
@@ -48,6 +50,11 @@ class OverviewerApp {
         } else {
             const container = document.getElementById('plansDiv');
             container.innerHTML = "<h1> This is your already saved meal plan: "+planString+"</h1>"
+        }
+        if(cachedEmail === ""){
+        } else {
+            const container = document.getElementById('greetingDiv');
+            container.innerHTML = "Hello, "+cachedEmail+"</h1>"
         }
     }
 

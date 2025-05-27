@@ -21,7 +21,7 @@ class authAPP {
             <button id="logInWithCredentials"> LOG IN </button>
             <div class="orText"> OR </div>
             <div id="g_id_onload"
-                 data-client_id="CLIENT_ID"
+                 data-client_id=""
                  data-context="signin"
                  data-callback="handleCredentialResponse"
                  data-auto_prompt="false">
@@ -41,7 +41,7 @@ class authAPP {
             <button id="signUpWithCredentials">Sign Up</button>
             <div class="orText"> OR </div>
             <div id="g_id_onload"
-                 data-client_id="YOUR_CLIENT_ID"
+                 data-client_id=""
                  data-callback="handleCredentialResponse"
                  data-auto_prompt="false">
             </div>
@@ -63,12 +63,6 @@ class authAPP {
             .addEventListener('click', () => this.logIn());
 
     }
-
-    handleCredentialResponse(response) {
-        console.log("Encoded JWT ID token: " + response.credential);
-        // You can send this JWT to your backend to verify it and log the user in
-    }
-
 
     setCookie(name, value) {
         const encodedValue = encodeURIComponent(value);
@@ -98,6 +92,26 @@ class authAPP {
         return undefined;
     }
 }
+
+window.handleCredentialResponse = function(response) {
+    console.log("Encoded JWT ID token: " + response.credential);
+
+    // Decode the JWT payload
+    const base64Url = response.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join('')));
+
+    console.log("Decoded payload:", payload);
+    if (response && response.credential) {
+            // Name: ${payload.name}
+            // Email: ${payload.email}
+            // Picture: ${payload.picture}`;
+            app.setCookie("cachedEmail", payload.email)
+            window.location.href = "/recipe/overviewer"
+    }
+};
 
 // Initialize the application
 const app = new authAPP();
