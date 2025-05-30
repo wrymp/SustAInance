@@ -8,3 +8,5 @@ ai:
     key: ${GITHUB_TOKEN}
     url: https://models.inference.ai.azure.com
     model: gpt-4o
+google:
+  key: ${GOOGLE_KEY}

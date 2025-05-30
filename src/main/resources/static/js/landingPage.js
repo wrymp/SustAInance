@@ -4,6 +4,7 @@ class LandingPageAPP {
     }
 
     async initializeApp() {
+        document.cookie = "cachedEmail=; path=/; max-age=0";
         this.setupEventListeners();
         this.checkIfLoggedIn();
     }
