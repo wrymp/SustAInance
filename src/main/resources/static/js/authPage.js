@@ -134,6 +134,7 @@ class authAPP {
                 const result = await response.json();
                 console.log('Sign Up success:', result.message);
                 this.setCookie("cachedEmail", givenEmail)
+                this.setCookie("cachedToken", result.token);
                 window.location.href = "/recipe/overviewer"
             } else {
                 console.log('Unexpected error:', response.status);
@@ -167,6 +168,7 @@ class authAPP {
                 const result = await response.json();
                 console.log('Login success:', result.message);
                 this.setCookie("cachedEmail", givenEmail)
+                this.setCookie("cachedToken", result.token);
                 window.location.href = "/recipe/overviewer"
 
             } else if (response.status === 401) {
