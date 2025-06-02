@@ -5,8 +5,8 @@
         }
 
         async initializeApp() {
-            this.setupEventListeners();
             await this.checkIfLoggedIn();
+            this.setupEventListeners();
         }
 
         setupEventListeners() {

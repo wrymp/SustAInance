@@ -1,7 +1,12 @@
 package com.example.sustainance.services;
+import com.example.sustainance.interfaces.SavedMealsDAO;
 import com.example.sustainance.interfaces.UserDAO;
+import com.example.sustainance.models.ingredients.addMealRequest;
+import com.example.sustainance.models.ingredients.getMealsRequest;
+import com.example.sustainance.models.ingredients.getMealsResponse;
 import com.example.sustainance.models.userAuth.RegisterUserRequest;
 import com.example.sustainance.models.userAuth.attemptLogInRequest;
+import com.example.sustainance.models.userAuth.getTokenResponse;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
@@ -10,14 +15,14 @@ import java.sql.*;
 import java.util.*;
 
 @Service
-public class PostgresUserDAO implements UserDAO{
+public class PostgresSavedMealsDAO implements SavedMealsDAO {
     private static final String URL = System.getenv("DATABASE_URL");
     private static final String USER = System.getenv("POSTGRES_USERNAME");
     private static final String PASSWORD = System.getenv("POSTGRES_PASSWORD");
 
     private Connection connection;
 
-    public PostgresUserDAO(){
+    public PostgresSavedMealsDAO() {
         connect();
     }
 
@@ -82,32 +87,35 @@ public class PostgresUserDAO implements UserDAO{
     }
 
     @Override
-    public boolean alreadyRegistered(String email) {
-        String query = "SELECT * FROM \"UserTable\" WHERE \"UserEmail\" = '"+email+"';";
-        List<Map<String, Object>> result = this.executeQuery(query);
-        return !result.isEmpty();
-    }
-
-    @Override
-    public void registerUser(RegisterUserRequest request) {
-        String mangledPassword = this.hash(request.getPassword());
-        String update = "INSERT INTO \"UserTable\" (\"UserEmail\", \"Password\", \"MascotEnabled\", \"Preference\") " +
-                "VALUES ('"+request.getEmail()+"', '"+mangledPassword+"', false, '');";
+    public void addNewMeal(addMealRequest request) {
+        String update = "INSERT INTO \"FavoriteMeals\" (\"UserEmail\", \"Meal\") " +
+                "VALUES ('"+request.getEmail()+"', '"+request.getMeal()+"');";
         this.executeUpdate(update);
     }
 
     @Override
-    public boolean userExists(String email) {
-        String query = "SELECT * FROM \"UserTable\" WHERE \"UserEmail\" = '"+email+"';";
-        List<Map<String, Object>> result = this.executeQuery(query);
-        return !result.isEmpty();
-    }
+    public getMealsResponse getMeals(getMealsRequest request) {
+        String email = request.getEmail();
 
-    @Override
-    public boolean checkCredentials(attemptLogInRequest request) {
-        String mangledPassword = this.hash(request.getPassword());
-        String query = "SELECT * FROM \"UserTable\" WHERE \"UserEmail\" = '"+request.getEmail()+"' AND \"Password\" = '"+mangledPassword+"';";
-        List<Map<String, Object>> result = this.executeQuery(query);
-        return !result.isEmpty();
+        String query = "SELECT \"Meal\" FROM \"FavoriteMeals\" " +
+                "WHERE \"UserEmail\" = '" + email + "'";
+
+        List<Map<String, Object>> results = executeQuery(query);
+
+        ArrayList<String> resultMeals = new ArrayList<>();
+        if (!results.isEmpty()) {
+            for (Map<String, Object> row : results){
+                String meal = (String) row.get("Meal");
+                resultMeals.add(meal);
+            }
+        }
+
+
+        String cleanup = "DELETE FROM \"FavoriteMeals\" WHERE " +
+                "(\"UserEmail\", \"Date\") NOT IN (SELECT \"UserEmail\", \"Date\" FROM \"FavoriteMeals\" " +
+                "WHERE \"UserEmail\" = '"+email+"' ORDER BY \"Date\" DESC LIMIT 10 );";
+        executeUpdate(cleanup);
+
+        return new getMealsResponse(resultMeals.toArray(new String[0]));
     }
 }

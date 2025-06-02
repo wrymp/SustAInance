@@ -49,4 +49,10 @@ public class WebController {
         // Make sure this line is working
         return "recipe/authPage";
     }
+
+    @GetMapping("/recipe/mealView")
+    public String mealView(Model model) {
+        // Make sure this line is working
+        return "recipe/mealView";
+    }
 }

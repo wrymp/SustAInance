@@ -105,7 +105,12 @@ html, body{
     background-color: white;
     /*border-radius: 8px;*/
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+    box-sizing: border-box;
 }
 
 /*h1 {*/

@@ -18,12 +18,16 @@ public class PostgresTokenDAO implements TokensDAO{
 
     private Connection connection;
 
-    public PostgresTokenDAO() throws SQLException {
+    public PostgresTokenDAO() {
         connect();
     }
 
-    private void connect() throws SQLException {
-        connection = DriverManager.getConnection(URL, USER, PASSWORD);
+    private void connect() {
+        try {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void close() {
