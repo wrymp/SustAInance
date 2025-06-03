@@ -1,22 +1,17 @@
 package com.example.sustainance.models.ingredients;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.util.List;
 
-import lombok.Getter;
-
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ingredient {
-    private final String name;
-    private final String unit;
-    private final double quantity;
-
-    public Ingredient(String iName, String iUnit, double iQuantity) {
-        this.name = iName;
-        this.unit = iUnit;
-        this.quantity = iQuantity;
-    }
-
-    @Override
-    public String toString() {
-        return this.quantity + " " + this.unit + "s of " + this.name;
-    }
+    private String name;
+    private double quantity;
+    private String unit;
+    private String category;
+    private List<String> availableUnits;
 }

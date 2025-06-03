@@ -23,21 +23,22 @@ public class IngredientSelectionService {
         this.ingredients = new ArrayList<>();
     }
 
-    public void addIngredient(Ingredient newIngredient){
+    public void addIngredient(Ingredient newIngredient) {
+        ingredients.removeIf(ing -> Objects.equals(ing.getName(), newIngredient.getName()));
         this.ingredients.add(newIngredient);
     }
 
     public void addPreference(Preference preference){
-        this.preference = preference.toString();
+        this.preference = preference.getPreferenceString();
     }
 
     public void remove(Ingredient removeIngredient){
-        for (int i = 0; i < this.ingredients.size(); i++) {
-            Ingredient ingredient = this.ingredients.get(i);
-            if(Objects.equals(ingredient.getName(), removeIngredient.getName())){
-                this.ingredients.remove(i);
-            }
-        }
+        ingredients.removeIf(ing ->
+                Objects.equals(ing.getName(), removeIngredient.getName()));
+    }
+
+    public List<Ingredient> getIngredients() {
+        return new ArrayList<>(this.ingredients);
     }
 
     @Override

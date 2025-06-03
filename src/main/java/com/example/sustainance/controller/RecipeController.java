@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.sustainance.constants.baseIngredients;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/recipe")
-@CrossOrigin(origins = "*")
 @Slf4j
 public class RecipeController {
     private final IngredientSelectionService ingredientService;
@@ -45,8 +45,11 @@ public class RecipeController {
     }
 
     @DeleteMapping("/remove")
-    public ResponseEntity<List<Ingredient>> removeIngredient(@RequestBody Ingredient ingredient) {
-        ingredientService.remove(ingredient);
+    public ResponseEntity<List<Ingredient>> removeIngredient(@RequestBody Map<String, String> request) {
+        String ingredientName = request.get("name");
+        Ingredient ingredientToRemove = new Ingredient();
+        ingredientToRemove.setName(ingredientName);
+        ingredientService.remove(ingredientToRemove);
         return ResponseEntity.ok(ingredientService.getIngredients());
     }
 
