@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 public class AIProperties {
 
     private Github github = new Github();
-    private Cache cache = new Cache();
     private Openai openai = new Openai();
     private Prompts prompts = new Prompts();
 
@@ -19,13 +18,6 @@ public class AIProperties {
         private String key;
         private String url;
         private String model;
-    }
-
-    @Data
-    public static class Cache {
-        private boolean enabled = true;
-        private int ttlHours = 1;
-        private int maxSize = 500;
     }
 
     @Data

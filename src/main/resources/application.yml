@@ -10,10 +10,6 @@ ai:
     key: ${GITHUB_TOKEN}
     url: https://models.inference.ai.azure.com
     model: gpt-4o
-  cache:
-    enabled: true
-    ttl-hours: 1
-    max-size: 500
   openai:
     max-tokens: 1500
     temperature: 0.7

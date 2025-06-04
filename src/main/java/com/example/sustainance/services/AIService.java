@@ -28,8 +28,7 @@ public class AIService {
         this.model = config.getModel();
         this.promptService = promptService;
         this.aiProperties = aiProperties;
-        log.info("AI Service initialized with endpoint: {} | Cache enabled: {}",
-                config.getUrl(), aiProperties.getCache().isEnabled());
+        log.info("AI Service initialized with endpoint: {}", config.getUrl());
     }
 
     @Cacheable(value = "recipes", key = "#ingredients")
@@ -139,9 +138,5 @@ public class AIService {
         }
 
         return formatted.toString().trim();
-    }
-
-    public boolean isCacheEnabled() {
-        return aiProperties.getCache().isEnabled();
     }
 }
