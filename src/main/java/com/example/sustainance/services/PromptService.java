@@ -1,6 +1,7 @@
 package com.example.sustainance.services;
 
 import com.example.sustainance.config.AIProperties;
+import com.example.sustainance.models.Preference.RecipePreferences;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,39 +21,87 @@ public class PromptService {
         return aiProperties.getPrompts().getMealPlan().getSystemMessage();
     }
 
-    public String buildRecipePrompt(String ingredients) {
+    public String buildRecipePrompt(String ingredients, RecipePreferences preferences) {
+        // Build preferences context
+        StringBuilder preferencesContext = new StringBuilder();
+
+        if (preferences.getCuisine() != null && !preferences.getCuisine().isEmpty()) {
+            preferencesContext.append("🌍 Cuisine Style: ").append(preferences.getCuisine()).append("\n");
+        }
+
+        if (preferences.getMealType() != null && !preferences.getMealType().isEmpty()) {
+            preferencesContext.append("🍽️ Meal Type: ").append(preferences.getMealType()).append("\n");
+        }
+
+        if (preferences.getCookingTime() != null && !preferences.getCookingTime().isEmpty()) {
+            preferencesContext.append("⏰ Target Cooking Time: ").append(preferences.getCookingTime()).append(" minutes\n");
+        }
+
+        if (preferences.getDifficulty() != null && !preferences.getDifficulty().isEmpty()) {
+            preferencesContext.append("📊 Difficulty Level: ").append(preferences.getDifficulty()).append("\n");
+        }
+
+        if (preferences.getDietaryRestrictions() != null && !preferences.getDietaryRestrictions().isEmpty()) {
+            preferencesContext.append("🥗 Dietary Requirements: ").append(String.join(", ", preferences.getDietaryRestrictions())).append("\n");
+        }
+
         return String.format("""
-            Create a delicious, practical recipe using ONLY these ingredients: %s
+            Create a delicious, practical recipe using the provided ingredients with these preferences:
             
-            IMPORTANT RULES:
-            - Use ONLY the ingredients provided - no substitutions or additions
-            - If ingredients seem insufficient, create the best possible dish with what's available
-            - Provide realistic cooking times and temperatures
-            - Include helpful cooking tips
-            - Make portions appropriate for the ingredient quantities given
-            - Be creative but practical
+            MAIN INGREDIENTS: %s
+            
+            USER PREFERENCES:
+            %s
+            
+            🚨 CRITICAL INGREDIENT RULES:
+            ✅ ALLOWED to add (common kitchen basics):
+            - Salt, black pepper, white pepper
+            - Basic dried herbs (oregano, basil, thyme, rosemary)
+            - Basic spices (garlic powder, onion powder, paprika)
+            - Cooking oil/butter (if cooking requires it)
+            - Water for cooking
+            
+            ❌ FORBIDDEN to add (major ingredients):
+            - Flour, bread, pasta, rice (unless provided)
+            - Cheese, dairy products (unless provided)
+            - Meat, fish, eggs (unless provided)
+            - Fresh vegetables/fruits (unless provided)
+            - Nuts, seeds (unless provided)
+            - Sauces, condiments (unless provided)
+            - Baking ingredients (baking powder, vanilla, etc.)
+            
+            🎯 PREFERENCE INTEGRATION:
+            - Follow the cuisine style if specified
+            - Respect all dietary restrictions strictly
+            - Adjust cooking method for the target time
+            - Match the difficulty level requested
+            - Design for the specified meal type
             
             Format your response EXACTLY like this:
             
             === [Creative Recipe Name] ===
             
             Ingredients:
-            • [ingredient]: [exact amount from input]
-            • [ingredient]: [exact amount from input]
+            • [main ingredient]: [exact amount from input]
+            • [main ingredient]: [exact amount from input]
+            • [basic seasoning]: [small amount] (if needed)
             
             Instructions:
-            1. [Detailed step with temperature/time if needed]
-            2. [Next step with specific techniques]
-            3. [Continue with clear, actionable steps]
+            1. **[Action]** [Detailed step with temperature/time if needed]
+            2. **[Action]** [Next step with specific techniques]
+            3. **[Action]** [Continue with clear, actionable steps]
             
             Chef's Tips:
-            • [Helpful cooking tip]
+            • [Helpful cooking tip related to cuisine/preferences]
             • [Storage or serving suggestion]
             
             Cooking Time: [prep time] + [cook time] = [total time]
             Serves: [number of people]
             Difficulty: [Easy/Medium/Hard]
-            """, ingredients);
+            """,
+                ingredients,
+                !preferencesContext.isEmpty() ? preferencesContext.toString() : "No specific preferences provided"
+        );
     }
 
     public String buildMealPlanPrompt(String foodPreferences, String planPreference, String timeframe, String ingredients) {

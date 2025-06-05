@@ -4,8 +4,8 @@ import com.azure.ai.openai.OpenAIClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.ai.openai.models.*;
 import com.azure.core.credential.AzureKeyCredential;
-import com.example.sustainance.config.AIConfig;
 import com.example.sustainance.config.AIProperties;
+import com.example.sustainance.models.Preference.RecipePreferences;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,25 +20,32 @@ public class AIService {
     private final PromptService promptService;
     private final AIProperties aiProperties;
 
-    public AIService(AIConfig config, PromptService promptService, AIProperties aiProperties) {
+    public AIService(AIProperties aiProperties, PromptService promptService) {
+
         this.client = new OpenAIClientBuilder()
-                .credential(new AzureKeyCredential(config.getKey()))
-                .endpoint(config.getUrl())
+                .credential(new AzureKeyCredential(aiProperties.getGithub().getKey()))
+                .endpoint(aiProperties.getGithub().getUrl())
                 .buildClient();
-        this.model = config.getModel();
+        this.model = aiProperties.getGithub().getModel();
         this.promptService = promptService;
         this.aiProperties = aiProperties;
-        log.info("AI Service initialized with endpoint: {}", config.getUrl());
+
+        log.info("🤖 AI Service initialized:");
+        log.info("   Endpoint: {}", aiProperties.getGithub().getUrl());
+        log.info("   Model: {}", this.model);
+        log.info("   Max Tokens: {}", aiProperties.getOpenai().getMaxTokens());
+        log.info("   Temperature: {}", aiProperties.getOpenai().getTemperature());
     }
 
-    @Cacheable(value = "recipes", key = "#ingredients")
-    public String generateRecipe(String ingredients) {
+    @Cacheable(value = "recipes", key = "#ingredients + '_' + #preferences.hashCode()")
+    public String generateRecipe(String ingredients, RecipePreferences preferences) {
         log.info("🔥 CACHE MISS - Calling OpenAI API for ingredients: {}", ingredients);
+        log.info("🎯 Preferences: {}", preferences);
         log.info("⏱️ Starting API call at: {}", System.currentTimeMillis());
 
         try {
             String systemMessage = promptService.getRecipeSystemMessage();
-            String userPrompt = promptService.buildRecipePrompt(ingredients);
+            String userPrompt = promptService.buildRecipePrompt(ingredients, preferences);
 
             ChatCompletionsOptions options = new ChatCompletionsOptions(
                     Arrays.asList(
@@ -47,13 +54,13 @@ public class AIService {
                     )
             );
 
-            // Set AI parameters for better results
+            // Set AI parameters using all properties from AIProperties
             options.setModel(model);
             options.setMaxTokens(aiProperties.getOpenai().getMaxTokens());
             options.setTemperature(aiProperties.getOpenai().getTemperature());
-            options.setTopP(0.9);
-            options.setFrequencyPenalty(0.1);
-            options.setPresencePenalty(0.1);
+            options.setTopP(aiProperties.getOpenai().getTopP());
+            options.setFrequencyPenalty(aiProperties.getOpenai().getFrequencyPenalty());
+            options.setPresencePenalty(aiProperties.getOpenai().getPresencePenalty());
 
             ChatCompletions completions = client.getChatCompletions(model, options);
             String rawRecipe = completions.getChoices().get(0).getMessage().getContent();
@@ -68,7 +75,7 @@ public class AIService {
         }
     }
 
-    @Cacheable(value = "mealPlans", key = "#foodPreferences + '_' + #timeframe + '_' + #planPreference")
+    @Cacheable(value = "mealPlans", key = "#foodPreferences + '_' + #timeframe + '_' + #planPreference + '_' + #ingredients.hashCode()")
     public String generateMealPlan(String foodPreferences, String timeframe, String planPreference, String ingredients) {
         log.info("Generating meal plan for duration: {}", timeframe);
 
@@ -87,9 +94,9 @@ public class AIService {
             options.setModel(model);
             options.setMaxTokens(Math.max(aiProperties.getOpenai().getMaxTokens(), 2000));
             options.setTemperature(aiProperties.getOpenai().getTemperature());
-            options.setTopP(0.9);
-            options.setFrequencyPenalty(0.2);
-            options.setPresencePenalty(0.1);
+            options.setTopP(aiProperties.getOpenai().getTopP());
+            options.setFrequencyPenalty(aiProperties.getOpenai().getFrequencyPenalty());
+            options.setPresencePenalty(aiProperties.getOpenai().getPresencePenalty());
 
             ChatCompletions completions = client.getChatCompletions(model, options);
             String rawMealPlan = completions.getChoices().get(0).getMessage().getContent();

@@ -1,6 +1,9 @@
 package com.example.sustainance.controller;
 
 
+import com.example.sustainance.models.DTO.DirectRecipeRequest;
+import com.example.sustainance.models.DTO.RecipeGenerationRequest;
+import com.example.sustainance.models.Preference.RecipePreferences;
 import com.example.sustainance.models.ingredients.Ingredient;
 import com.example.sustainance.models.ingredients.MealPlanRequest;
 import com.example.sustainance.models.ingredients.Preference;
@@ -58,19 +61,65 @@ public class RecipeController {
         return ResponseEntity.ok(baseIngredients.BASE_INGREDIENTS);
     }
 
+    // ✅ UPDATED: Keep backward compatibility but add preference support
     @PostMapping("/generate")
-    public ResponseEntity<String> generateRecipe() {
-        log.info("Received generate recipe request");
-        String ingredients = ingredientService.toString();
-        log.info("Ingredients to use: {}", ingredients);
+    public ResponseEntity<String> generateRecipe(@RequestBody(required = false) RecipeGenerationRequest request) {
+        log.info("🍳 Received generate recipe request");
+
         try {
-            String recipe = AIService.generateRecipe(ingredients);
-            log.info("Recipe generated successfully");
+            String ingredients = ingredientService.toString();
+            log.info("📝 Ingredients to use: {}", ingredients);
+
+            // Handle both old and new request formats
+            RecipePreferences preferences = new RecipePreferences();
+
+            if (request != null && request.getPreferences() != null) {
+                // ✅ NEW: Use preferences from frontend
+                preferences = request.getPreferences();
+                log.info("🎯 Using frontend preferences: {}", preferences);
+            } else {
+                // ✅ BACKWARD COMPATIBILITY: Use stored preferences from ingredientService
+                log.info("🔄 Using stored preferences (backward compatibility)");
+                // You can extract preferences from your existing Preference system here if needed
+            }
+
+            String recipe = AIService.generateRecipe(ingredients, preferences);
+            log.info("✅ Recipe generated successfully");
             return ResponseEntity.ok(recipe);
+
         } catch (Exception e) {
-            log.error("Error generating recipe", e);
+            log.error("❌ Error generating recipe", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error generating recipe: " + e.getMessage());
+        }
+    }
+
+    // ✅ NEW: Alternative endpoint for direct ingredient + preference input (for frontend)
+    @PostMapping("/generateWithIngredients")
+    public ResponseEntity<String> generateRecipeWithIngredients(@RequestBody DirectRecipeRequest request) {
+        log.info("🍳 Received direct recipe generation request");
+
+        try {
+            if (request.getIngredients() == null || request.getIngredients().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Ingredients are required");
+            }
+
+            // Use preferences if provided, otherwise use defaults
+            RecipePreferences preferences = request.getPreferences() != null ?
+                    request.getPreferences() : new RecipePreferences();
+
+            log.info("📝 Direct ingredients: {}", request.getIngredients());
+            log.info("🎯 Preferences: {}", preferences);
+
+            String recipe = AIService.generateRecipe(request.getIngredients(), preferences);
+
+            log.info("✅ Recipe generated successfully");
+            return ResponseEntity.ok(recipe);
+
+        } catch (Exception e) {
+            log.error("❌ Error in recipe generation: {}", e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body("Failed to generate recipe: " + e.getMessage());
         }
     }
 
@@ -102,17 +151,6 @@ public class RecipeController {
             log.error("Error generating recipe", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error generating recipe: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/test-api")
-    public ResponseEntity<String> testApi() {
-        try {
-            String testRecipe = AIService.generateRecipe("4 eggs, 2 cups of flour, 1 cup of sugar");
-            return ResponseEntity.ok("API Test Successful: " + testRecipe);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("API Test Failed: " + e.getMessage());
         }
     }
 

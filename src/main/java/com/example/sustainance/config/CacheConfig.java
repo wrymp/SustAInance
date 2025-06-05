@@ -23,8 +23,8 @@ public class CacheConfig {
     private Caffeine<Object, Object> caffeineCacheBuilder() {
         return Caffeine.newBuilder()
                 .initialCapacity(100)
-                .maximumSize(500)
-                .expireAfterWrite(Duration.ofHours(1))
+                .maximumSize(50000)
+                .expireAfterWrite(Duration.ofMinutes(10))
                 .recordStats();
     }
 }
