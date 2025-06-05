@@ -1,0 +1,605 @@
+.home-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Hero Section */
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 90vh;
+    padding: 2rem 5%;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    flex: 1;
+    max-width: 600px;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.highlight {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 3rem;
+    line-height: 1.6;
+}
+
+/* ✨ REMOVED: Old quick-input-container styles */
+/* ✨ NEW: Magic Kitchen Interactive Button Styles */
+.magic-kitchen-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.cooking-scene {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: all 0.5s ease;
+}
+
+.cooking-scene:hover {
+    transform: scale(1.05);
+}
+
+/* Cooking Pot Animation */
+.cooking-pot-main {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
+
+.pot-body {
+    font-size: 4rem;
+    animation: pot-bubble 2s ease-in-out infinite;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+}
+
+.steam-particles {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+}
+
+.steam-bubble {
+    font-size: 1.5rem;
+    animation: steam-rise 2s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+.steam-bubble:nth-child(2) { animation-delay: 0.5s; }
+.steam-bubble:nth-child(3) { animation-delay: 1s; }
+
+.cooking-active .steam-bubble {
+    animation-duration: 1s;
+}
+
+/* Ingredient Orbit Animation */
+.ingredient-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+.orbit-ingredient {
+    position: absolute;
+    font-size: 2rem;
+    animation: orbit 8s linear infinite;
+    animation-delay: var(--delay);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+
+.cooking-active .orbit-ingredient {
+    animation-duration: 4s;
+}
+
+/* Magic Sparkles */
+.sparkles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.sparkle {
+    position: absolute;
+    font-size: 1.2rem;
+    animation: sparkle-twinkle 3s ease-in-out infinite;
+    opacity: 0;
+}
+
+.sparkle:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+.sparkle:nth-child(2) { top: 30%; right: 15%; animation-delay: 0.8s; }
+.sparkle:nth-child(3) { bottom: 25%; left: 15%; animation-delay: 1.6s; }
+.sparkle:nth-child(4) { bottom: 35%; right: 20%; animation-delay: 2.4s; }
+.sparkle:nth-child(5) { top: 50%; left: 10%; animation-delay: 3.2s; }
+
+.cooking-active .sparkle {
+    animation-duration: 1.5s;
+}
+
+/* Magic Button */
+.magic-button {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    border-radius: 50px;
+    padding: 1rem 2rem;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.magic-button:hover {
+    transform: translateX(-50%) translateY(-5px);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.button-icon {
+    font-size: 1.5rem;
+    animation: chef-wave 2s ease-in-out infinite;
+}
+
+.button-text {
+    white-space: nowrap;
+}
+
+.button-arrow {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.magic-button:hover .button-arrow {
+    transform: translateX(5px);
+}
+
+.button-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.magic-button:hover .button-glow {
+    left: 100%;
+}
+
+.magic-hint {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 0;
+}
+
+/* Magic Kitchen Animations */
+@keyframes pot-bubble {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes steam-rise {
+    0% { transform: translateY(0) scale(1); opacity: 0.7; }
+    50% { transform: translateY(-15px) scale(1.1); opacity: 0.4; }
+    100% { transform: translateY(-30px) scale(1.2); opacity: 0; }
+}
+
+@keyframes orbit {
+    0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+}
+
+@keyframes sparkle-twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes chef-wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+}
+
+/* Hero Visual */
+.hero-visual {
+    flex: 1;
+    position: relative;
+    height: 500px;
+}
+
+.floating-ingredients {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.ingredient-bubble {
+    position: absolute;
+    font-size: 3rem;
+    animation: float 6s ease-in-out infinite;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+}
+
+.ingredient-bubble:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+.ingredient-bubble:nth-child(2) { top: 30%; right: 10%; animation-delay: 1s; }
+.ingredient-bubble:nth-child(3) { top: 60%; left: 10%; animation-delay: 2s; }
+.ingredient-bubble:nth-child(4) { bottom: 20%; right: 30%; animation-delay: 3s; }
+.ingredient-bubble:nth-child(5) { top: 20%; left: 50%; animation-delay: 4s; }
+.ingredient-bubble:nth-child(6) { bottom: 40%; left: 40%; animation-delay: 5s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Sections */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin-bottom: 3rem;
+}
+
+/* How It Works */
+.how-it-works {
+    padding: 5rem 0;
+    background: white;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    margin-top: 3rem;
+}
+
+.step {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: transform 0.3s ease;
+}
+
+.step:hover {
+    transform: translateY(-10px);
+}
+
+.step-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+}
+
+.step h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.step p {
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+/* Sample Recipes */
+.sample-recipes {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.recipe-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.recipe-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.recipe-image {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.ingredients-used {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.cook-time {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Features Section */
+.features-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.feature-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.feature-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    opacity: 0.9;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.feature-cta {
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    text-align: center;
+}
+
+.cta-section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.cta-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.cta-button {
+    padding: 1.2rem 3rem;
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    /* ✨ Magic Kitchen Responsive */
+    .magic-kitchen-container {
+        padding: 2rem;
+    }
+
+    .cooking-scene {
+        width: 250px;
+        height: 250px;
+    }
+
+    .pot-body {
+        font-size: 3rem;
+    }
+
+    .orbit-ingredient {
+        font-size: 1.5rem;
+    }
+
+    .ingredient-orbit {
+        width: 150px;
+        height: 150px;
+    }
+
+    .magic-button {
+        padding: 0.8rem 1.5rem;
+    }
+
+    .button-content {
+        font-size: 1rem;
+    }
+
+    .hero-visual {
+        height: 300px;
+        margin-top: 2rem;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* ✨ Magic Kitchen Mobile */
+    .cooking-scene {
+        width: 200px;
+        height: 200px;
+    }
+
+    .pot-body {
+        font-size: 2.5rem;
+    }
+
+    .button-text {
+        font-size: 0.9rem;
+    }
+
+    .recipe-content {
+        padding: 1rem;
+    }
+
+    .ingredients-used,
+    .preferences-applied {
+        padding: 1rem;
+    }
+
+    .success-header {
+        padding: 1rem;
+    }
+
+    .success-title {
+        font-size: 1.8rem;
+    }
+
+    .meta-item {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .recipe-actions,
+    .result-actions,
+    .tips-section {
+        display: none;
+    }
+
+    .recipe-card {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .success-header {
+        background: none;
+        border: none;
+    }
+}

@@ -10,6 +10,24 @@ const api = axios.create({
 export const recipeAPI = {
     getIngredients: () => api.get('/api/recipe/list'),
     addIngredient: (ingredient) => api.post('/api/recipe/add', ingredient),
-    removeIngredient: (name) => api.delete('/api/recipe/remove', { data: { name } }),
-    generateRecipe: () => api.post('/api/recipe/generate'),
-};
+    generateRecipe: (ingredients, preferences = {}) => {
+        const ingredientsString = ingredients.map(ing =>
+            `${ing.name}${ing.quantity ? `: ${ing.quantity}${ing.unit ? ' ' + ing.unit : ''}` : ''}`
+        ).join(', ');
+
+        const requestBody = {
+            ingredients: ingredientsString,
+            preferences: {
+                cuisine: preferences.cuisine || '',
+                dietaryRestrictions: preferences.dietaryRestrictions || [],
+                cookingTime: preferences.cookingTime || '',
+                difficulty: preferences.difficulty || '',
+                mealType: preferences.mealType || ''
+            }
+        };
+
+        return api.post('/api/recipe/generateWithIngredients', requestBody);
+    },
+}
+
+export default api;
