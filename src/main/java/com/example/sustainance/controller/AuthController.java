@@ -1,77 +1,77 @@
-//package com.example.sustainance.controller;
-//
-//import com.example.sustainance.interfaces.UserDAO;
-//import com.example.sustainance.interfaces.TokensDAO;
-//import com.example.sustainance.models.userAuth.*;
-//import lombok.Getter;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.sql.SQLException;
-//import java.util.Map;
-//import java.util.Objects;
-//
-//@RestController
-//@RequestMapping("/api/auth")
-//@Slf4j
-//public class AuthController {
-//    private final UserDAO userDAO;
-//    private final TokensDAO tokensDAO;
-//
-//    public AuthController(UserDAO userDAO, com.example.sustainance.interfaces.TokensDAO tokensDAO) throws SQLException {
-//        this.userDAO = userDAO;
-//        this.tokensDAO = tokensDAO;
-//    }
-//
-//    @PostMapping("/registerUser")
-//    public ResponseEntity<?> registerUser(@RequestBody RegisterUserRequest request) {
-//        if (!this.userDAO.alreadyRegistered(request.getEmail())) {
-//            this.userDAO.registerUser(request);
-//            this.tokensDAO.addNewToken(new createTokenRequest(request.getEmail()));
-//            String token = this.tokensDAO.getToken(new getTokenRequest(request.getEmail())).getToken();
-//            return ResponseEntity.ok(Map.of("message", "User registered successfully.", "token", token));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body("This email already has an associated account.");
-//        }
-//    }
-//
-//    @PostMapping("/attemptLogIn")
-//    public ResponseEntity<?> attemptLogIn(@RequestBody attemptLogInRequest request) {
-//        if (this.userDAO.userExists(request.getEmail())) {
-//            if (this.userDAO.checkCredentials(request)) {
-//
-//                String token = this.tokensDAO.getToken(new getTokenRequest(request.getEmail())).getToken();
-//                if(token.isEmpty()){
-//                    this.tokensDAO.addNewToken(new createTokenRequest(request.getEmail()));
-//                }
-//                token = this.tokensDAO.getToken(new getTokenRequest(request.getEmail())).getToken();
-//                return ResponseEntity.ok(Map.of("message", "User Logged In successfully.", "token", token));
-//            } else {
-//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong Password.");
-//            }
-//        } else {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body("This email has no associated account.");
-//        }
-//    }
-//
-//    @PostMapping("/attemptTokenAuth")
-//    public ResponseEntity<?> attemptTokenAuth(@RequestBody attemptTokenAuthRequest request) {
-//        String email = this.tokensDAO.attemptTokenAuth(request).getEmail();
-//        if (!Objects.equals(email, "")) {
-//            return ResponseEntity.ok(Map.of("message", "User Logged In successfully.", "email", email));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body("This Tokens Expired.");
-//        }
-//    }
-//
-//    @Value("${google.key}")
-//    private String googleKey;
-//
-//    @GetMapping("/getGoogleKey")
-//    public ResponseEntity<?> getGoogleKey() {
-//        return ResponseEntity.ok(Map.of("key", googleKey));
-//    }
-//}
+package com.example.sustainance.controller;
+
+import com.example.sustainance.models.DTO.LoginRequest;
+import com.example.sustainance.models.DTO.RegisterRequest;
+import com.example.sustainance.models.DTO.UserResponse;
+import com.example.sustainance.models.entities.UserInfo;
+import com.example.sustainance.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest request) {
+        try {
+            UserResponse user = userService.registerUser(request);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        try {
+            UserInfo userInfo = userService.authenticateUser(request);
+
+            HttpSession session = httpRequest.getSession(true);
+            session.setAttribute("user", userInfo.getUuid().toString());
+
+            return ResponseEntity.ok(new UserResponse(userInfo));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String userUuidString = (String) session.getAttribute("user");
+        UUID userUuid = UUID.fromString(userUuidString);
+
+        Optional<UserInfo> userInfoOptional = userService.findByUuid(userUuid);
+        if (userInfoOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(new UserResponse(userInfoOptional.get()));
+    }
+}

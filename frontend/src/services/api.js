@@ -28,6 +28,10 @@ export const recipeAPI = {
 
         return api.post('/api/recipe/generateWithIngredients', requestBody);
     },
+    attemptRegister: (registerRequest) => api.post("/api/auth/register", registerRequest),
+    attemptLogIn: (loginRequest, httpRequest) => api.post("/api/auth/login", loginRequest, httpRequest),
+    attemptLogout: (httpServletRequest) => api.post("/api/auth/logout", httpServletRequest),
+    getCurrentUser: (httpServletRequest) => api.get("/api/auth/me", httpServletRequest),
 }
 
 export default api;
