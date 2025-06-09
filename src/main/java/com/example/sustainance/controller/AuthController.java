@@ -9,12 +9,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@RestController
+@Controller
 @RequestMapping("/api/auth")
 public class AuthController {
 

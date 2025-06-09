@@ -19,6 +19,4 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, UUID> {
 
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    boolean registerUser(RegisterRequest request);
-    boolean attemptLogin(LoginRequest request);
 }
