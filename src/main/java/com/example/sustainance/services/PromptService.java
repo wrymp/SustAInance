@@ -55,9 +55,7 @@ public class PromptService {
             
             🚨 CRITICAL INGREDIENT RULES:
             ✅ ALLOWED to add (common kitchen basics):
-            - Salt, black pepper, white pepper
-            - Basic dried herbs (oregano, basil, thyme, rosemary)
-            - Basic spices (garlic powder, onion powder, paprika)
+            - Salt, black pepper, sugar
             - Cooking oil/butter (if cooking requires it)
             - Water for cooking
             

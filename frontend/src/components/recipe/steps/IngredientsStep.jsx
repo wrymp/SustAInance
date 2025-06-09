@@ -41,15 +41,15 @@ const IngredientsStep = ({
             {/* Current Ingredients */}
             {ingredients.length > 0 && (
                 <div className="current-ingredients">
-                    <h3>Your Ingredients ({ingredients.length})</h3>
-                    <div className="ingredients-grid">
+                    <h3 className="current-ingredients__title">Your Ingredients ({ingredients.length})</h3>
+                    <div className="ingredients__grid">
                         {ingredients.map((ingredient) => (
-                            <div key={ingredient.id} className="ingredient-card">
-                                <div className="ingredient-main">
-                                    <span className="ingredient-name">{ingredient.name}</span>
-                                    {ingredient.isCustom && <span className="custom-badge">Custom</span>}
+                            <div key={ingredient.id} className="ingredients__card">
+                                <div className="ingredients__card-main">
+                                    <span className="ingredients__card-name">{ingredient.name}</span>
+                                    {ingredient.isCustom && <span className="ingredients__custom-badge">Custom</span>}
                                     <button
-                                        className="remove-btn"
+                                        className="ingredients__remove-btn"
                                         onClick={() => removeIngredient(ingredient.id)}
                                         title="Remove ingredient"
                                     >
@@ -57,18 +57,18 @@ const IngredientsStep = ({
                                     </button>
                                 </div>
 
-                                <div className="ingredient-details">
+                                <div className="ingredients__card-details">
                                     <input
                                         type="text"
                                         placeholder="Quantity"
                                         value={ingredient.quantity}
                                         onChange={(e) => updateIngredient(ingredient.id, 'quantity', e.target.value)}
-                                        className="quantity-input"
+                                        className="ingredients__quantity-input"
                                     />
                                     <select
                                         value={ingredient.unit}
                                         onChange={(e) => updateIngredient(ingredient.id, 'unit', e.target.value)}
-                                        className="unit-select"
+                                        className="ingredients__unit-select"
                                     >
                                         <option value="">Unit</option>
                                         {ingredient.availableUnits?.map(unit => (
@@ -92,24 +92,24 @@ const IngredientsStep = ({
             )}
 
             {/* Add Ingredients Button */}
-            <div className="add-ingredients-section">
+            <div className="ingredients-step__add-section">
                 <button
-                    className="add-ingredients-btn"
+                    className="ingredients-step__add-btn"
                     onClick={() => setShowModal(true)}
                 >
                     ➕ Add Ingredients
                 </button>
 
                 {ingredients.length === 0 && (
-                    <p className="empty-state">
+                    <p className="ingredients-step__empty-state">
                         Click "Add Ingredients" to get started with your recipe! 🍳
                     </p>
                 )}
             </div>
 
             {/* Pantry Integration */}
-            <div className="pantry-section">
-                <button className="pantry-btn">
+            <div className="ingredients-step__pantry">
+                <button className="ingredients-step__pantry-btn">
                     🏪 Use ingredients from my pantry
                 </button>
             </div>

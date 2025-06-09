@@ -120,12 +120,12 @@ const ResultsStep = ({
         const recipe = parseRecipeContent(content);
 
         return (
-            <div className="parsed-recipe">
+            <div className="results-step__parsed-recipe">
                 {/* Instructions Section */}
                 {recipe.instructions.length > 0 && (
-                    <div className="recipe-section instructions-section">
+                    <div className="results-step__recipe-section results-step__instructions-section">
                         <h3>👨‍🍳 Instructions</h3>
-                        <div className="instructions-list">
+                        <div className="results-step__instructions-list">
                             {recipe.instructions.map((instruction, index) => {
                                 // Clean up the instruction text
                                 const cleanInstruction = instruction
@@ -134,10 +134,10 @@ const ResultsStep = ({
                                     .trim();
 
                                 return (
-                                    <div key={index} className="instruction-step">
-                                        <span className="step-number">{index + 1}</span>
+                                    <div key={index} className="results-step__instruction-step">
+                                        <span className="results-step__step-number">{index + 1}</span>
                                         <span
-                                            className="step-text"
+                                            className="results-step__step-text"
                                             dangerouslySetInnerHTML={{ __html: cleanInstruction }}
                                         ></span>
                                     </div>
@@ -149,25 +149,25 @@ const ResultsStep = ({
 
                 {/* Recipe Details Section */}
                 {(recipe.cookingTime || recipe.serves || recipe.difficulty) && (
-                    <div className="recipe-section metadata-section">
+                    <div className="results-step__recipe-section results-step__metadata-section">
                         <h3>📋 Recipe Details</h3>
-                        <div className="recipe-metadata">
+                        <div className="results-step__recipe-metadata">
                             {recipe.cookingTime && (
-                                <div className="metadata-item">
-                                    <span className="metadata-label">⏰ Cooking Time:</span>
-                                    <span className="metadata-value">{recipe.cookingTime}</span>
+                                <div className="results-step__metadata-item">
+                                    <span className="results-step__metadata-label">⏰ Cooking Time:</span>
+                                    <span className="results-step__metadata-value">{recipe.cookingTime}</span>
                                 </div>
                             )}
                             {recipe.serves && (
-                                <div className="metadata-item">
-                                    <span className="metadata-label">🍽️ Serves:</span>
-                                    <span className="metadata-value">{recipe.serves}</span>
+                                <div className="results-step__metadata-item">
+                                    <span className="results-step__metadata-label">🍽️ Serves:</span>
+                                    <span className="results-step__metadata-value">{recipe.serves}</span>
                                 </div>
                             )}
                             {recipe.difficulty && (
-                                <div className="metadata-item">
-                                    <span className="metadata-label">📊 Difficulty:</span>
-                                    <span className="metadata-value">{recipe.difficulty}</span>
+                                <div className="results-step__metadata-item">
+                                    <span className="results-step__metadata-label">📊 Difficulty:</span>
+                                    <span className="results-step__metadata-value">{recipe.difficulty}</span>
                                 </div>
                             )}
                         </div>
@@ -188,26 +188,32 @@ const ResultsStep = ({
     if (isGenerating) {
         return (
             <div className="step-container">
-                <div className="loading-container">
-                    <div className="cooking-animation">
-                        <div className="chef-hat">👨‍🍳</div>
-                        <div className="cooking-pot">🍲</div>
-                        <div className="steam">
+                <div className="results-step__loading-container">
+                    <div className="results-step__cooking-animation">
+                        <div className="results-step__chef-hat">👨‍🍳</div>
+                        <div className="results-step__cooking-pot">🍲</div>
+                        <div className="results-step__steam">
                             <span>💨</span>
                             <span>💨</span>
                             <span>💨</span>
                         </div>
                     </div>
 
-                    <h2 className="loading-title">Creating Your Perfect Recipe!</h2>
+                    <h2 className="results-step__loading-title">Creating Your Perfect Recipe!</h2>
 
-                    <div className="loading-steps">
+                    <div className="results-step__loading-steps">
                         {loadingMessages.map((message, index) => (
                             <div
                                 key={index}
-                                className={`loading-step ${index === animationStep ? 'active' : index < animationStep ? 'completed' : ''}`}
+                                className={`results-step__loading-step ${
+                                    index === animationStep
+                                        ? 'results-step__loading-step--active'
+                                        : index < animationStep
+                                            ? 'results-step__loading-step--completed'
+                                            : ''
+                                }`}
                             >
-                                <div className="step-indicator">
+                                <div className="results-step__step-indicator">
                                     {index < animationStep ? '✅' : index === animationStep ? '⏳' : '⭕'}
                                 </div>
                                 <span>{message}</span>
@@ -215,11 +221,11 @@ const ResultsStep = ({
                         ))}
                     </div>
 
-                    <div className="progress-bar-loading">
-                        <div className="progress-fill-loading"></div>
+                    <div className="results-step__progress-bar">
+                        <div className="results-step__progress-fill"></div>
                     </div>
 
-                    <p className="loading-subtitle">
+                    <p className="results-step__loading-subtitle">
                         Using your {ingredients.length} ingredients to create something amazing...
                     </p>
                 </div>
@@ -230,8 +236,8 @@ const ResultsStep = ({
     if (!generatedRecipe) {
         return (
             <div className="step-container">
-                <div className="error-container">
-                    <div className="error-icon">😕</div>
+                <div className="results-step__error-container">
+                    <div className="results-step__error-icon">😕</div>
                     <h2>Oops! Something went wrong</h2>
                     <p>We couldn't generate your recipe. Please try again.</p>
                     <button className="btn btn-primary" onClick={onStartOver}>
@@ -243,53 +249,55 @@ const ResultsStep = ({
     }
 
     return (
-        <div className="step-container results-container">
+        <div className="step-container results-step__container">
             {/* Success Header */}
-            <div className="success-header">
-                <div className="success-icon">🎉</div>
-                <h2 className="success-title">Your Recipe is Ready!</h2>
-                <p className="success-subtitle">
+            <div className="results-step__success-header">
+                <div className="results-step__success-icon">🎉</div>
+                <h2 className="results-step__success-title">Your Recipe is Ready!</h2>
+                <p className="results-step__success-subtitle">
                     Created from your {ingredients.length} ingredients with love ❤️
                 </p>
             </div>
 
             {/* Recipe Card */}
-            <div className="recipe-card">
-                <div className="recipe-header">
-                    <div className="recipe-meta">
-                        <div className="meta-item">
-                            <span className="meta-icon">🥘</span>
+            <div className="results-step__recipe-card">
+                <div className="results-step__recipe-header">
+                    <div className="results-step__recipe-meta">
+                        <div className="results-step__meta-item">
+                            <span className="results-step__meta-icon">🥘</span>
                             <span>{ingredients.length} Ingredients</span>
                         </div>
                         {preferences.cookingTime && (
-                            <div className="meta-item">
-                                <span className="meta-icon">⏰</span>
+                            <div className="results-step__meta-item">
+                                <span className="results-step__meta-icon">⏰</span>
                                 <span>{preferences.cookingTime} min</span>
                             </div>
                         )}
                         {preferences.difficulty && (
-                            <div className="meta-item">
-                                <span className="meta-icon">📊</span>
-                                <span className="capitalize">{preferences.difficulty}</span>
+                            <div className="results-step__meta-item">
+                                <span className="results-step__meta-icon">📊</span>
+                                <span className="results-step__capitalize">{preferences.difficulty}</span>
                             </div>
                         )}
                         {preferences.cuisine && (
-                            <div className="meta-item">
-                                <span className="meta-icon">🌍</span>
-                                <span className="capitalize">{preferences.cuisine}</span>
+                            <div className="results-step__meta-item">
+                                <span className="results-step__meta-icon">🌍</span>
+                                <span className="results-step__capitalize">{preferences.cuisine}</span>
                             </div>
                         )}
                     </div>
 
-                    <div className="recipe-actions">
+                    <div className="results-step__recipe-actions">
                         <button
-                            className={`action-btn save-btn ${isSaved ? 'saved' : ''}`}
+                            className={`results-step__action-btn results-step__save-btn ${
+                                isSaved ? 'results-step__save-btn--saved' : ''
+                            }`}
                             onClick={handleSaveRecipe}
                             disabled={isSaving || isSaved}
                         >
                             {isSaving ? (
                                 <>
-                                    <span className="btn-spinner"></span>
+                                    <span className="results-step__btn-spinner"></span>
                                     Saving...
                                 </>
                             ) : isSaved ? (
@@ -303,27 +311,29 @@ const ResultsStep = ({
                             )}
                         </button>
 
-                        <button className="action-btn share-btn" onClick={handleShare}>
+                        <button className="results-step__action-btn results-step__share-btn" onClick={handleShare}>
                             📤 Share
                         </button>
                     </div>
                 </div>
 
                 {/* Recipe Content */}
-                <div className="recipe-content">
+                <div className="results-step__recipe-content">
                     {generatedRecipe.error ? (
-                        <div className="error-message">
+                        <div className="results-step__error-message">
                             <p>⚠️ {generatedRecipe.content}</p>
                         </div>
                     ) : (
-                        <div className={`recipe-text ${showFullRecipe ? 'expanded' : ''}`}>
+                        <div className={`results-step__recipe-text ${
+                            showFullRecipe ? 'results-step__recipe-text--expanded' : ''
+                        }`}>
                             {formatRecipeContent(generatedRecipe.content)}
                         </div>
                     )}
 
                     {!generatedRecipe.error && generatedRecipe.content.length > 500 && (
                         <button
-                            className="expand-btn"
+                            className="results-step__expand-btn"
                             onClick={() => setShowFullRecipe(!showFullRecipe)}
                         >
                             {showFullRecipe ? '📖 Show Less' : '📖 Show Full Recipe'}
@@ -332,37 +342,37 @@ const ResultsStep = ({
                 </div>
 
                 {/* Ingredients Used */}
-                <div className="ingredients-used">
+                <div className="results-step__ingredients-used">
                     <h4>🛒 Ingredients Used:</h4>
-                    <div className="used-ingredients-list">
+                    <div className="results-step__used-ingredients-list">
                         {ingredients.map((ingredient, index) => (
-                            <span key={index} className="used-ingredient">
-                {ingredient.name}
+                            <span key={index} className="results-step__used-ingredient">
+                                {ingredient.name}
                                 {ingredient.quantity && ` (${ingredient.quantity}${ingredient.unit ? ' ' + ingredient.unit : ''})`}
-              </span>
+                            </span>
                         ))}
                     </div>
                 </div>
 
                 {/* Preferences Applied */}
                 {(preferences.cuisine || preferences.dietaryRestrictions.length > 0 || preferences.mealType) && (
-                    <div className="preferences-applied">
+                    <div className="results-step__preferences-applied">
                         <h4>✨ Your Preferences:</h4>
-                        <div className="applied-preferences">
+                        <div className="results-step__applied-preferences">
                             {preferences.cuisine && (
-                                <span className="preference-tag cuisine-tag">
-                  🌍 {preferences.cuisine}
-                </span>
+                                <span className="results-step__preference-tag results-step__cuisine-tag">
+                                    🌍 {preferences.cuisine}
+                                </span>
                             )}
                             {preferences.mealType && (
-                                <span className="preference-tag meal-tag">
-                  🍽️ {preferences.mealType}
-                </span>
+                                <span className="results-step__preference-tag results-step__meal-tag">
+                                    🍽️ {preferences.mealType}
+                                </span>
                             )}
                             {preferences.dietaryRestrictions.map((diet, index) => (
-                                <span key={index} className="preference-tag dietary-tag">
-                  🥗 {diet}
-                </span>
+                                <span key={index} className="results-step__preference-tag results-step__dietary-tag">
+                                    🥗 {diet}
+                                </span>
                             ))}
                         </div>
                     </div>
@@ -370,7 +380,7 @@ const ResultsStep = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="result-actions">
+            <div className="results-step__result-actions">
                 <button className="btn btn-secondary" onClick={onStartOver}>
                     🔄 Create Another Recipe
                 </button>
@@ -381,23 +391,23 @@ const ResultsStep = ({
             </div>
 
             {/* Tips Section */}
-            <div className="tips-section">
+            <div className="results-step__tips-section">
                 <h4>💡 Pro Tips:</h4>
-                <div className="tips-grid">
-                    <div className="tip-item">
-                        <span className="tip-icon">📱</span>
+                <div className="results-step__tips-grid">
+                    <div className="results-step__tip-item">
+                        <span className="results-step__tip-icon">📱</span>
                         <span>Save this recipe to access it anytime</span>
                     </div>
-                    <div className="tip-item">
-                        <span className="tip-icon">👥</span>
+                    <div className="results-step__tip-item">
+                        <span className="results-step__tip-icon">👥</span>
                         <span>Share with friends and family</span>
                     </div>
-                    <div className="tip-item">
-                        <span className="tip-icon">📝</span>
+                    <div className="results-step__tip-item">
+                        <span className="results-step__tip-icon">📝</span>
                         <span>Add your own notes and modifications</span>
                     </div>
-                    <div className="tip-item">
-                        <span className="tip-icon">⭐</span>
+                    <div className="results-step__tip-item">
+                        <span className="results-step__tip-icon">⭐</span>
                         <span>Rate the recipe after cooking</span>
                     </div>
                 </div>

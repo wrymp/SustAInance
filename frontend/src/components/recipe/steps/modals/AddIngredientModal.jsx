@@ -164,32 +164,32 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={handleClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+        <div className="modal__overlay" onClick={handleClose}>
+            <div className="modal__content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__header">
                     <h2>🔍 Add Ingredients</h2>
-                    <button className="close-btn" onClick={handleClose}>×</button>
+                    <button className="modal__close-btn" onClick={handleClose}>×</button>
                 </div>
 
-                <div className="modal-body">
+                <div className="modal__body">
                     {/* Search Bar */}
-                    <div className="search-section">
+                    <div className="search">
                         <input
                             type="text"
                             placeholder="Search ingredients..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
+                            className="search__input"
                         />
                     </div>
 
                     {/* Category Tabs */}
                     {categories.length > 1 && (
-                        <div className="category-tabs">
+                        <div className="category">
                             {categories.map(category => (
                                 <button
                                     key={category}
-                                    className={`category-tab ${activeCategory === category ? 'active' : ''}`}
+                                    className={`category__tab ${activeCategory === category ? 'category__tab--active' : ''}`}
                                     onClick={() => setActiveCategory(category)}
                                 >
                                     {category}
@@ -200,13 +200,13 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
 
                     {/* Selected Ingredients Preview */}
                     {selectedIngredients.length > 0 && (
-                        <div className="selected-preview">
+                        <div className="selected">
                             <h4>Selected ({selectedIngredients.length})</h4>
-                            <div className="selected-chips">
+                            <div className="selected__chips">
                                 {selectedIngredients.map(ingredient => (
-                                    <div key={ingredient.id} className="selected-chip">
+                                    <div key={ingredient.id} className="selected__chip">
                                         <span>{ingredient.name}</span>
-                                        {ingredient.isCustom && <span className="custom-indicator">✨</span>}
+                                        {ingredient.isCustom && <span className="selected__custom-indicator">✨</span>}
                                         <button
                                             onClick={() => setSelectedIngredients(prev =>
                                                 prev.filter(item => item.id !== ingredient.id)
@@ -221,14 +221,14 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                     )}
 
                     {/* Available Ingredients Grid */}
-                    <div className="ingredients-section">
+                    <div className="ingredients">
                         {loading ? (
-                            <div className="loading-state">
-                                <div className="loading-spinner"></div>
+                            <div className="loading">
+                                <div className="loading__spinner"></div>
                                 <p>Loading ingredients...</p>
                             </div>
                         ) : (
-                            <div className="ingredients-grid">
+                            <div className="ingredients__grid">
                                 {filteredIngredients.map(ingredient => {
                                     const isSelected = selectedIngredients.some(
                                         selected => selected.name === ingredient.name
@@ -236,14 +236,14 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                                     return (
                                         <div
                                             key={ingredient.name}
-                                            className={`ingredient-item ${isSelected ? 'selected' : ''}`}
+                                            className={`ingredients__item ${isSelected ? 'ingredients__item--selected' : ''}`}
                                             onClick={() => toggleIngredientSelection(ingredient)}
                                         >
-                                            <div className="ingredient-info">
-                                                <span className="ingredient-name">{ingredient.name}</span>
-                                                <span className="ingredient-category">{ingredient.category}</span>
+                                            <div className="ingredients__info">
+                                                <span className="ingredients__name">{ingredient.name}</span>
+                                                <span className="ingredients__category">{ingredient.category}</span>
                                             </div>
-                                            <div className="ingredient-checkbox">
+                                            <div className="ingredients__checkbox">
                                                 {isSelected && <span>✓</span>}
                                             </div>
                                         </div>
@@ -256,7 +256,7 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                             <div className="no-results">
                                 <p>No ingredients found for "{searchTerm}"</p>
                                 <button
-                                    className="add-custom-btn"
+                                    className="no-results__btn"
                                     onClick={() => {
                                         setCustomIngredient(prev => ({ ...prev, name: searchTerm }));
                                         setShowCustomForm(true);
@@ -275,18 +275,18 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                     </div>
 
                     {/* Custom Ingredient Form */}
-                    <div className="custom-section">
+                    <div className="custom">
                         {!showCustomForm ? (
                             <button
-                                className="show-custom-btn"
+                                className="custom__show-btn"
                                 onClick={() => setShowCustomForm(true)}
                             >
                                 ➕ Add Custom Ingredient
                             </button>
                         ) : (
-                            <div className="custom-form">
+                            <div className="custom__form">
                                 <h4>Add Custom Ingredient</h4>
-                                <div className="custom-inputs">
+                                <div className="custom__inputs">
                                     <input
                                         type="text"
                                         placeholder="Ingredient name"
@@ -295,7 +295,7 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                                             ...prev,
                                             name: e.target.value
                                         }))}
-                                        className="custom-name-input"
+                                        className="custom__name-input"
                                     />
                                     <select
                                         value={customIngredient.category}
@@ -303,7 +303,7 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                                             ...prev,
                                             category: e.target.value
                                         }))}
-                                        className="custom-category-select"
+                                        className="custom__category-select"
                                     >
                                         <option value="Vegetables">Vegetables</option>
                                         <option value="Proteins">Proteins</option>
@@ -320,7 +320,7 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                                             ...prev,
                                             unit: e.target.value
                                         }))}
-                                        className="custom-unit-select"
+                                        className="custom__unit-select"
                                     >
                                         <option value="grams">grams</option>
                                         <option value="pieces">pieces</option>
@@ -330,15 +330,15 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                                         <option value="teaspoons">tsp</option>
                                     </select>
                                 </div>
-                                <div className="custom-actions">
+                                <div className="custom__actions">
                                     <button
-                                        className="cancel-custom-btn"
+                                        className="custom__cancel-btn"
                                         onClick={() => setShowCustomForm(false)}
                                     >
                                         Cancel
                                     </button>
                                     <button
-                                        className="add-custom-confirm-btn"
+                                        className="custom__confirm-btn"
                                         onClick={handleAddCustomIngredient}
                                         disabled={!customIngredient.name.trim()}
                                     >
@@ -350,12 +350,12 @@ const AddIngredientModal = ({ isOpen, onClose, onAddIngredients, existingIngredi
                     </div>
                 </div>
 
-                <div className="modal-footer">
-                    <button className="cancel-btn" onClick={handleClose}>
+                <div className="modal__footer">
+                    <button className="modal__cancel-btn" onClick={handleClose}>
                         Cancel
                     </button>
                     <button
-                        className="add-selected-btn"
+                        className="modal__add-btn"
                         onClick={handleAddSelected}
                         disabled={selectedIngredients.length === 0}
                     >

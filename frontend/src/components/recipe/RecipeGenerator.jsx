@@ -146,32 +146,38 @@ const RecipeGenerator = () => {
     return (
         <div className="recipe-generator">
             {/* Header */}
-            <div className="generator-header">
+            <div className="recipe-generator__header">
                 <button
-                    className="back-button"
+                    className="recipe-generator__back-button"
                     onClick={() => navigate('/')}
                 >
                     ← Back to Home
                 </button>
 
-                <div className="progress-bar">
-                    <div className="progress-steps">
-                        <div className={`step ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-                            <span>1</span>
-                            <label>Ingredients</label>
+                <div className="recipe-generator__progress-bar">
+                    <div className="recipe-generator__progress-steps">
+                        <div className={`recipe-generator__step ${
+                            currentStep >= 1 ? 'recipe-generator__step--active' : ''
+                        } ${currentStep > 1 ? 'recipe-generator__step--completed' : ''}`}>
+                            <span className="recipe-generator__step-number">1</span>
+                            <label className="recipe-generator__step-label">Ingredients</label>
                         </div>
-                        <div className={`step ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-                            <span>2</span>
-                            <label>Preferences</label>
+                        <div className={`recipe-generator__step ${
+                            currentStep >= 2 ? 'recipe-generator__step--active' : ''
+                        } ${currentStep > 2 ? 'recipe-generator__step--completed' : ''}`}>
+                            <span className="recipe-generator__step-number">2</span>
+                            <label className="recipe-generator__step-label">Preferences</label>
                         </div>
-                        <div className={`step ${currentStep >= 3 ? 'active' : ''}`}>
-                            <span>3</span>
-                            <label>Recipe</label>
+                        <div className={`recipe-generator__step ${
+                            currentStep >= 3 ? 'recipe-generator__step--active' : ''
+                        }`}>
+                            <span className="recipe-generator__step-number">3</span>
+                            <label className="recipe-generator__step-label">Recipe</label>
                         </div>
                     </div>
-                    <div className="progress-line">
+                    <div className="recipe-generator__progress-line">
                         <div
-                            className="progress-fill"
+                            className="recipe-generator__progress-fill"
                             style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
                         ></div>
                     </div>
@@ -179,7 +185,7 @@ const RecipeGenerator = () => {
             </div>
 
             {/* Step Content */}
-            <div className="generator-content">
+            <div className="recipe-generator__content">
                 {currentStep === 1 && (
                     <IngredientsStep
                         ingredients={ingredients}

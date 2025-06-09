@@ -1,19 +1,19 @@
 /* Preferences Step Styles */
-.preferences-form {
+.preferences__form {
     max-width: 100%;
 }
 
-.preference-section {
+.preferences__section {
     margin-bottom: 3rem;
     padding-bottom: 2rem;
     border-bottom: 1px solid #f1f3f4;
 }
 
-.preference-section:last-of-type {
+.preferences__section:last-of-type {
     border-bottom: none;
 }
 
-.preference-title {
+.preferences__title {
     font-size: 1.3rem;
     font-weight: 600;
     color: #2c3e50;
@@ -23,7 +23,7 @@
     gap: 0.5rem;
 }
 
-.optional-badge {
+.preferences__optional-badge {
     background: #e9ecef;
     color: #6c757d;
     font-size: 0.7rem;
@@ -34,37 +34,37 @@
     letter-spacing: 0.5px;
 }
 
-.preference-description {
+.preferences__description {
     color: #6c757d;
     margin-bottom: 1.5rem;
     font-size: 1rem;
 }
 
 /* Cuisine Selection */
-.cuisine-selection {
+.preferences__cuisine {
     margin-bottom: 1rem;
 }
 
-.popular-cuisines,
-.other-cuisines {
+.preferences__cuisine-popular,
+.preferences__cuisine-other {
     margin-bottom: 1.5rem;
 }
 
-.popular-cuisines h4,
-.other-cuisines h4 {
+.preferences__cuisine-popular h4,
+.preferences__cuisine-other h4 {
     font-size: 1rem;
     font-weight: 600;
     color: #495057;
     margin-bottom: 0.8rem;
 }
 
-.cuisine-grid {
+.preferences__cuisine-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 0.8rem;
 }
 
-.cuisine-btn {
+.preferences__cuisine-btn {
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
@@ -78,14 +78,14 @@
     overflow: hidden;
 }
 
-.cuisine-btn:hover {
+.preferences__cuisine-btn:hover {
     border-color: #667eea;
     background: #f8f9fa;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
-.cuisine-btn.selected {
+.preferences__cuisine-btn--selected {
     background: linear-gradient(45deg, #667eea, #764ba2);
     color: white;
     border-color: transparent;
@@ -94,13 +94,13 @@
 }
 
 /* Dietary Restrictions */
-.dietary-grid {
+.preferences__dietary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 0.8rem;
 }
 
-.dietary-btn {
+.preferences__dietary-btn {
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
@@ -114,14 +114,14 @@
     text-align: center;
 }
 
-.dietary-btn:hover {
+.preferences__dietary-btn:hover {
     border-color: #28a745;
     background: #f8fff9;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
 }
 
-.dietary-btn.selected {
+.preferences__dietary-btn--selected {
     background: linear-gradient(45deg, #28a745, #20c997);
     color: white;
     border-color: transparent;
@@ -129,23 +129,23 @@
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 
-.dietary-icon {
+.preferences__dietary-icon {
     font-size: 1.5rem;
 }
 
-.dietary-label {
+.preferences__dietary-label {
     font-size: 0.9rem;
     font-weight: 500;
 }
 
 /* Cooking Time */
-.time-grid {
+.preferences__time-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 0.8rem;
 }
 
-.time-btn {
+.preferences__time-btn {
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
@@ -158,14 +158,14 @@
     text-align: left;
 }
 
-.time-btn:hover {
+.preferences__time-btn:hover {
     border-color: #ffc107;
     background: #fffbf0;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
 }
 
-.time-btn.selected {
+.preferences__time-btn--selected {
     background: linear-gradient(45deg, #ffc107, #fd7e14);
     color: white;
     border-color: transparent;
@@ -173,23 +173,23 @@
     box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
 }
 
-.time-icon {
+.preferences__time-icon {
     font-size: 1.5rem;
 }
 
-.time-label {
+.preferences__time-label {
     font-size: 0.95rem;
     font-weight: 500;
 }
 
 /* Difficulty Level */
-.difficulty-grid {
+.preferences__difficulty-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 0.8rem;
 }
 
-.difficulty-btn {
+.preferences__difficulty-btn {
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
@@ -202,14 +202,14 @@
     gap: 0.5rem;
 }
 
-.difficulty-btn:hover {
+.preferences__difficulty-btn:hover {
     border-color: #dc3545;
     background: #fff5f5;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
 }
 
-.difficulty-btn.selected {
+.preferences__difficulty-btn--selected {
     background: linear-gradient(45deg, #dc3545, #c82333);
     color: white;
     border-color: transparent;
@@ -217,24 +217,24 @@
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
-.difficulty-label {
+.preferences__difficulty-label {
     font-size: 1rem;
     font-weight: 600;
 }
 
-.difficulty-description {
+.preferences__difficulty-description {
     font-size: 0.85rem;
     opacity: 0.9;
 }
 
 /* Meal Type */
-.meal-grid {
+.preferences__meal-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.8rem;
 }
 
-.meal-btn {
+.preferences__meal-btn {
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
@@ -248,14 +248,14 @@
     text-align: center;
 }
 
-.meal-btn:hover {
+.preferences__meal-btn:hover {
     border-color: #6f42c1;
     background: #f8f6ff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(111, 66, 193, 0.15);
 }
 
-.meal-btn.selected {
+.preferences__meal-btn--selected {
     background: linear-gradient(45deg, #6f42c1, #6610f2);
     color: white;
     border-color: transparent;
@@ -263,17 +263,17 @@
     box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
 }
 
-.meal-icon {
+.preferences__meal-icon {
     font-size: 1.5rem;
 }
 
-.meal-label {
+.preferences__meal-label {
     font-size: 0.9rem;
     font-weight: 500;
 }
 
 /* Clear Selection Buttons */
-.clear-selection-btn {
+.preferences__clear-btn {
     background: #f8f9fa;
     border: 1px solid #dee2e6;
     color: #6c757d;
@@ -285,12 +285,12 @@
     margin-top: 1rem;
 }
 
-.clear-selection-btn:hover {
+.preferences__clear-btn:hover {
     background: #e9ecef;
     color: #495057;
 }
 
-.selected-dietary {
+.preferences__selected-dietary {
     margin-top: 1rem;
     padding: 1rem;
     background: #f8f9fa;
@@ -300,14 +300,14 @@
     align-items: center;
 }
 
-.selected-dietary p {
+.preferences__selected-dietary p {
     margin: 0;
     color: #495057;
     font-weight: 500;
 }
 
 /* Preferences Summary */
-.preferences-summary {
+.preferences__summary {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 15px;
     padding: 1.5rem;
@@ -315,29 +315,29 @@
     border: 1px solid #dee2e6;
 }
 
-.preferences-summary h4 {
+.preferences__summary h4 {
     margin: 0 0 1rem 0;
     color: #2c3e50;
     font-size: 1.1rem;
 }
 
-.summary-content {
+.preferences__summary-content {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.summary-item {
+.preferences__summary-item {
     color: #495057;
     font-size: 0.95rem;
 }
 
-.summary-item strong {
+.preferences__summary-item strong {
     color: #2c3e50;
     margin-right: 0.5rem;
 }
 
-.no-preferences {
+.preferences__no-preferences {
     color: #6c757d;
     font-style: italic;
     margin: 0;
@@ -346,41 +346,41 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .cuisine-grid,
-    .dietary-grid,
-    .time-grid,
-    .difficulty-grid,
-    .meal-grid {
+    .preferences__cuisine-grid,
+    .preferences__dietary-grid,
+    .preferences__time-grid,
+    .preferences__difficulty-grid,
+    .preferences__meal-grid {
         grid-template-columns: 1fr;
     }
 
-    .time-btn {
+    .preferences__time-btn {
         flex-direction: column;
         text-align: center;
         gap: 0.5rem;
     }
 
-    .selected-dietary {
+    .preferences__selected-dietary {
         flex-direction: column;
         gap: 1rem;
         text-align: center;
     }
 
-    .preference-section {
+    .preferences__section {
         margin-bottom: 2rem;
     }
 }
 
 @media (max-width: 480px) {
-    .cuisine-grid {
+    .preferences__cuisine-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .dietary-grid {
+    .preferences__dietary-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .meal-grid {
+    .preferences__meal-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }

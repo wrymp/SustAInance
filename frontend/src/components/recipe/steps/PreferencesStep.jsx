@@ -110,23 +110,23 @@ const PreferencesStep = ({
                 Tell us your preferences to get the perfect recipe for your {ingredients.length} ingredients
             </p>
 
-            <div className="preferences-form">
+            <div className="preferences__form">
                 {/* Cuisine Type */}
-                <div className="preference-section">
-                    <h3 className="preference-title">
+                <div className="preferences__section">
+                    <h3 className="preferences__title">
                         🌍 Cuisine Type
-                        <span className="optional-badge">Optional</span>
+                        <span className="preferences__optional-badge">Optional</span>
                     </h3>
-                    <p className="preference-description">What flavors are you in the mood for?</p>
+                    <p className="preferences__description">What flavors are you in the mood for?</p>
 
-                    <div className="cuisine-selection">
-                        <div className="popular-cuisines">
+                    <div className="preferences__cuisine">
+                        <div className="preferences__cuisine-popular">
                             <h4>Popular Choices</h4>
-                            <div className="cuisine-grid">
+                            <div className="preferences__cuisine-grid">
                                 {popularCuisines.map(cuisine => (
                                     <button
                                         key={cuisine.value}
-                                        className={`cuisine-btn ${preferences.cuisine === cuisine.value ? 'selected' : ''}`}
+                                        className={`preferences__cuisine-btn ${preferences.cuisine === cuisine.value ? 'preferences__cuisine-btn--selected' : ''}`}
                                         onClick={() => updatePreference('cuisine', cuisine.value)}
                                     >
                                         {cuisine.label}
@@ -135,13 +135,13 @@ const PreferencesStep = ({
                             </div>
                         </div>
 
-                        <div className="other-cuisines">
+                        <div className="preferences__cuisine-other">
                             <h4>More Options</h4>
-                            <div className="cuisine-grid">
+                            <div className="preferences__cuisine-grid">
                                 {otherCuisines.map(cuisine => (
                                     <button
                                         key={cuisine.value}
-                                        className={`cuisine-btn ${preferences.cuisine === cuisine.value ? 'selected' : ''}`}
+                                        className={`preferences__cuisine-btn ${preferences.cuisine === cuisine.value ? 'preferences__cuisine-btn--selected' : ''}`}
                                         onClick={() => updatePreference('cuisine', cuisine.value)}
                                     >
                                         {cuisine.label}
@@ -152,7 +152,7 @@ const PreferencesStep = ({
 
                         {preferences.cuisine && (
                             <button
-                                className="clear-selection-btn"
+                                className="preferences__clear-btn"
                                 onClick={() => updatePreference('cuisine', '')}
                             >
                                 ✕ Clear Selection
@@ -162,31 +162,31 @@ const PreferencesStep = ({
                 </div>
 
                 {/* Dietary Restrictions */}
-                <div className="preference-section">
-                    <h3 className="preference-title">
+                <div className="preferences__section">
+                    <h3 className="preferences__title">
                         🥗 Dietary Preferences
-                        <span className="optional-badge">Optional</span>
+                        <span className="preferences__optional-badge">Optional</span>
                     </h3>
-                    <p className="preference-description">Select any dietary restrictions or preferences</p>
+                    <p className="preferences__description">Select any dietary restrictions or preferences</p>
 
-                    <div className="dietary-grid">
+                    <div className="preferences__dietary-grid">
                         {dietaryRestrictions.map(diet => (
                             <button
                                 key={diet.value}
-                                className={`dietary-btn ${preferences.dietaryRestrictions.includes(diet.value) ? 'selected' : ''}`}
+                                className={`preferences__dietary-btn ${preferences.dietaryRestrictions.includes(diet.value) ? 'preferences__dietary-btn--selected' : ''}`}
                                 onClick={() => toggleDietaryRestriction(diet.value)}
                             >
-                                <span className="dietary-icon">{diet.icon}</span>
-                                <span className="dietary-label">{diet.label.replace(/🥬|🌱|🌾|🥛|🥑|🥩|🥗|☪️|✡️/g, '').trim()}</span>
+                                <span className="preferences__dietary-icon">{diet.icon}</span>
+                                <span className="preferences__dietary-label">{diet.label.replace(/🥬|🌱|🌾|🥛|🥑|🥩|🥗|☪️|✡️/g, '').trim()}</span>
                             </button>
                         ))}
                     </div>
 
                     {preferences.dietaryRestrictions.length > 0 && (
-                        <div className="selected-dietary">
+                        <div className="preferences__selected-dietary">
                             <p>Selected: {preferences.dietaryRestrictions.length} restriction(s)</p>
                             <button
-                                className="clear-selection-btn"
+                                className="preferences__clear-btn"
                                 onClick={() => updatePreference('dietaryRestrictions', [])}
                             >
                                 ✕ Clear All
@@ -196,29 +196,29 @@ const PreferencesStep = ({
                 </div>
 
                 {/* Cooking Time */}
-                <div className="preference-section">
-                    <h3 className="preference-title">
+                <div className="preferences__section">
+                    <h3 className="preferences__title">
                         ⏰ Cooking Time
-                        <span className="optional-badge">Optional</span>
+                        <span className="preferences__optional-badge">Optional</span>
                     </h3>
-                    <p className="preference-description">How much time do you have?</p>
+                    <p className="preferences__description">How much time do you have?</p>
 
-                    <div className="time-grid">
+                    <div className="preferences__time-grid">
                         {cookingTimes.map(time => (
                             <button
                                 key={time.value}
-                                className={`time-btn ${preferences.cookingTime === time.value ? 'selected' : ''}`}
+                                className={`preferences__time-btn ${preferences.cookingTime === time.value ? 'preferences__time-btn--selected' : ''}`}
                                 onClick={() => updatePreference('cookingTime', time.value)}
                             >
-                                <span className="time-icon">{time.icon}</span>
-                                <span className="time-label">{time.label.replace(/⚡|🕐|🕑|🍲/g, '').trim()}</span>
+                                <span className="preferences__time-icon">{time.icon}</span>
+                                <span className="preferences__time-label">{time.label.replace(/⚡|🕐|🕑|🍲/g, '').trim()}</span>
                             </button>
                         ))}
                     </div>
 
                     {preferences.cookingTime && (
                         <button
-                            className="clear-selection-btn"
+                            className="preferences__clear-btn"
                             onClick={() => updatePreference('cookingTime', '')}
                         >
                             ✕ Clear Selection
@@ -227,29 +227,29 @@ const PreferencesStep = ({
                 </div>
 
                 {/* Difficulty Level */}
-                <div className="preference-section">
-                    <h3 className="preference-title">
+                <div className="preferences__section">
+                    <h3 className="preferences__title">
                         📊 Difficulty Level
-                        <span className="optional-badge">Optional</span>
+                        <span className="preferences__optional-badge">Optional</span>
                     </h3>
-                    <p className="preference-description">What's your cooking experience?</p>
+                    <p className="preferences__description">What's your cooking experience?</p>
 
-                    <div className="difficulty-grid">
+                    <div className="preferences__difficulty-grid">
                         {difficultyLevels.map(level => (
                             <button
                                 key={level.value}
-                                className={`difficulty-btn ${preferences.difficulty === level.value ? 'selected' : ''}`}
+                                className={`preferences__difficulty-btn ${preferences.difficulty === level.value ? 'preferences__difficulty-btn--selected' : ''}`}
                                 onClick={() => updatePreference('difficulty', level.value)}
                             >
-                                <span className="difficulty-label">{level.label}</span>
-                                <span className="difficulty-description">{level.description}</span>
+                                <span className="preferences__difficulty-label">{level.label}</span>
+                                <span className="preferences__difficulty-description">{level.description}</span>
                             </button>
                         ))}
                     </div>
 
                     {preferences.difficulty && (
                         <button
-                            className="clear-selection-btn"
+                            className="preferences__clear-btn"
                             onClick={() => updatePreference('difficulty', '')}
                         >
                             ✕ Clear Selection
@@ -258,29 +258,29 @@ const PreferencesStep = ({
                 </div>
 
                 {/* Meal Type */}
-                <div className="preference-section">
-                    <h3 className="preference-title">
+                <div className="preferences__section">
+                    <h3 className="preferences__title">
                         🍽️ Meal Type
-                        <span className="optional-badge">Optional</span>
+                        <span className="preferences__optional-badge">Optional</span>
                     </h3>
-                    <p className="preference-description">What kind of meal are you making?</p>
+                    <p className="preferences__description">What kind of meal are you making?</p>
 
-                    <div className="meal-grid">
+                    <div className="preferences__meal-grid">
                         {mealTypes.map(meal => (
                             <button
                                 key={meal.value}
-                                className={`meal-btn ${preferences.mealType === meal.value ? 'selected' : ''}`}
+                                className={`preferences__meal-btn ${preferences.mealType === meal.value ? 'preferences__meal-btn--selected' : ''}`}
                                 onClick={() => updatePreference('mealType', meal.value)}
                             >
-                                <span className="meal-icon">{meal.icon}</span>
-                                <span className="meal-label">{meal.label.replace(/🌅|☀️|🌙|🍿|🍰|🥗/g, '').trim()}</span>
+                                <span className="preferences__meal-icon">{meal.icon}</span>
+                                <span className="preferences__meal-label">{meal.label.replace(/🌅|☀️|🌙|🍿|🍰|🥗/g, '').trim()}</span>
                             </button>
                         ))}
                     </div>
 
                     {preferences.mealType && (
                         <button
-                            className="clear-selection-btn"
+                            className="preferences__clear-btn"
                             onClick={() => updatePreference('mealType', '')}
                         >
                             ✕ Clear Selection
@@ -289,37 +289,37 @@ const PreferencesStep = ({
                 </div>
 
                 {/* Summary */}
-                <div className="preferences-summary">
+                <div className="preferences__summary">
                     <h4>📋 Your Preferences Summary</h4>
-                    <div className="summary-content">
+                    <div className="preferences__summary-content">
                         {preferences.cuisine && (
-                            <div className="summary-item">
+                            <div className="preferences__summary-item">
                                 <strong>Cuisine:</strong> {cuisineTypes.find(c => c.value === preferences.cuisine)?.label}
                             </div>
                         )}
                         {preferences.dietaryRestrictions.length > 0 && (
-                            <div className="summary-item">
+                            <div className="preferences__summary-item">
                                 <strong>Dietary:</strong> {preferences.dietaryRestrictions.join(', ')}
                             </div>
                         )}
                         {preferences.cookingTime && (
-                            <div className="summary-item">
+                            <div className="preferences__summary-item">
                                 <strong>Time:</strong> {cookingTimes.find(t => t.value === preferences.cookingTime)?.label}
                             </div>
                         )}
                         {preferences.difficulty && (
-                            <div className="summary-item">
+                            <div className="preferences__summary-item">
                                 <strong>Difficulty:</strong> {difficultyLevels.find(d => d.value === preferences.difficulty)?.label}
                             </div>
                         )}
                         {preferences.mealType && (
-                            <div className="summary-item">
+                            <div className="preferences__summary-item">
                                 <strong>Meal:</strong> {mealTypes.find(m => m.value === preferences.mealType)?.label}
                             </div>
                         )}
 
                         {!preferences.cuisine && !preferences.dietaryRestrictions.length && !preferences.cookingTime && !preferences.difficulty && !preferences.mealType && (
-                            <p className="no-preferences">No preferences selected - we'll create a surprise recipe! 🎲</p>
+                            <p className="preferences__no-preferences">No preferences selected - we'll create a surprise recipe! 🎲</p>
                         )}
                     </div>
                 </div>

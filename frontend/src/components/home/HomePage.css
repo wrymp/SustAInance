@@ -1,10 +1,10 @@
-.home-page {
+.home {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Hero Section */
-.hero-section {
+.hero {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -14,13 +14,13 @@
     overflow: hidden;
 }
 
-.hero-content {
+.hero__content {
     flex: 1;
     max-width: 600px;
     z-index: 2;
 }
 
-.hero-title {
+.hero__title {
     font-size: 3.5rem;
     font-weight: 800;
     color: white;
@@ -35,7 +35,7 @@
     background-clip: text;
 }
 
-.hero-subtitle {
+.hero__subtitle {
     font-size: 1.3rem;
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 3rem;
@@ -44,7 +44,7 @@
 
 /* ✨ REMOVED: Old quick-input-container styles */
 /* ✨ NEW: Magic Kitchen Interactive Button Styles */
-.magic-kitchen-container {
+.magic-kitchen {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border-radius: 30px;
@@ -54,7 +54,7 @@
     overflow: hidden;
 }
 
-.cooking-scene {
+.magic-kitchen__scene {
     position: relative;
     width: 300px;
     height: 300px;
@@ -63,12 +63,12 @@
     transition: all 0.5s ease;
 }
 
-.cooking-scene:hover {
+.magic-kitchen__scene:hover {
     transform: scale(1.05);
 }
 
 /* Cooking Pot Animation */
-.cooking-pot-main {
+.magic-kitchen__pot {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -76,13 +76,13 @@
     z-index: 5;
 }
 
-.pot-body {
+.magic-kitchen__pot-body {
     font-size: 4rem;
     animation: pot-bubble 2s ease-in-out infinite;
     filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
 }
 
-.steam-particles {
+.magic-kitchen__steam {
     position: absolute;
     top: -20px;
     left: 50%;
@@ -91,21 +91,21 @@
     gap: 5px;
 }
 
-.steam-bubble {
+.magic-kitchen__steam-bubble {
     font-size: 1.5rem;
     animation: steam-rise 2s ease-in-out infinite;
     opacity: 0.7;
 }
 
-.steam-bubble:nth-child(2) { animation-delay: 0.5s; }
-.steam-bubble:nth-child(3) { animation-delay: 1s; }
+.magic-kitchen__steam-bubble:nth-child(2) { animation-delay: 0.5s; }
+.magic-kitchen__steam-bubble:nth-child(3) { animation-delay: 1s; }
 
-.cooking-active .steam-bubble {
+.magic-kitchen__scene--active .magic-kitchen__steam-bubble {
     animation-duration: 1s;
 }
 
 /* Ingredient Orbit Animation */
-.ingredient-orbit {
+.magic-kitchen__orbit {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -115,7 +115,7 @@
     border-radius: 50%;
 }
 
-.orbit-ingredient {
+.magic-kitchen__ingredient {
     position: absolute;
     font-size: 2rem;
     animation: orbit 8s linear infinite;
@@ -123,12 +123,12 @@
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
 
-.cooking-active .orbit-ingredient {
+.magic-kitchen__scene--active .magic-kitchen__ingredient {
     animation-duration: 4s;
 }
 
 /* Magic Sparkles */
-.sparkles {
+.magic-kitchen__sparkles {
     position: absolute;
     top: 0;
     left: 0;
@@ -137,25 +137,25 @@
     pointer-events: none;
 }
 
-.sparkle {
+.magic-kitchen__sparkle {
     position: absolute;
     font-size: 1.2rem;
     animation: sparkle-twinkle 3s ease-in-out infinite;
     opacity: 0;
 }
 
-.sparkle:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
-.sparkle:nth-child(2) { top: 30%; right: 15%; animation-delay: 0.8s; }
-.sparkle:nth-child(3) { bottom: 25%; left: 15%; animation-delay: 1.6s; }
-.sparkle:nth-child(4) { bottom: 35%; right: 20%; animation-delay: 2.4s; }
-.sparkle:nth-child(5) { top: 50%; left: 10%; animation-delay: 3.2s; }
+.magic-kitchen__sparkle:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+.magic-kitchen__sparkle:nth-child(2) { top: 30%; right: 15%; animation-delay: 0.8s; }
+.magic-kitchen__sparkle:nth-child(3) { bottom: 25%; left: 15%; animation-delay: 1.6s; }
+.magic-kitchen__sparkle:nth-child(4) { bottom: 35%; right: 20%; animation-delay: 2.4s; }
+.magic-kitchen__sparkle:nth-child(5) { top: 50%; left: 10%; animation-delay: 3.2s; }
 
-.cooking-active .sparkle {
+.magic-kitchen__scene--active .magic-kitchen__sparkle {
     animation-duration: 1.5s;
 }
 
 /* Magic Button */
-.magic-button {
+.magic-kitchen__button {
     position: absolute;
     bottom: -20px;
     left: 50%;
@@ -168,12 +168,12 @@
     overflow: hidden;
 }
 
-.magic-button:hover {
+.magic-kitchen__button:hover {
     transform: translateX(-50%) translateY(-5px);
     box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
 }
 
-.button-content {
+.magic-kitchen__button-content {
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -184,25 +184,25 @@
     z-index: 2;
 }
 
-.button-icon {
+.magic-kitchen__button-icon {
     font-size: 1.5rem;
     animation: chef-wave 2s ease-in-out infinite;
 }
 
-.button-text {
+.magic-kitchen__button-text {
     white-space: nowrap;
 }
 
-.button-arrow {
+.magic-kitchen__button-arrow {
     font-size: 1.2rem;
     transition: transform 0.3s ease;
 }
 
-.magic-button:hover .button-arrow {
+.magic-kitchen__button:hover .magic-kitchen__button-arrow {
     transform: translateX(5px);
 }
 
-.button-glow {
+.magic-kitchen__button-glow {
     position: absolute;
     top: 0;
     left: -100%;
@@ -212,11 +212,11 @@
     transition: left 0.5s ease;
 }
 
-.magic-button:hover .button-glow {
+.magic-kitchen__button:hover .magic-kitchen__button-glow {
     left: 100%;
 }
 
-.magic-hint {
+.magic-kitchen__hint {
     color: rgba(255, 255, 255, 0.9);
     font-size: 1rem;
     text-align: center;
@@ -253,31 +253,31 @@
 }
 
 /* Hero Visual */
-.hero-visual {
+.hero__visual {
     flex: 1;
     position: relative;
     height: 500px;
 }
 
-.floating-ingredients {
+.hero__ingredients {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.ingredient-bubble {
+.hero__ingredient-bubble {
     position: absolute;
     font-size: 3rem;
     animation: float 6s ease-in-out infinite;
     filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
 }
 
-.ingredient-bubble:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
-.ingredient-bubble:nth-child(2) { top: 30%; right: 10%; animation-delay: 1s; }
-.ingredient-bubble:nth-child(3) { top: 60%; left: 10%; animation-delay: 2s; }
-.ingredient-bubble:nth-child(4) { bottom: 20%; right: 30%; animation-delay: 3s; }
-.ingredient-bubble:nth-child(5) { top: 20%; left: 50%; animation-delay: 4s; }
-.ingredient-bubble:nth-child(6) { bottom: 40%; left: 40%; animation-delay: 5s; }
+.hero__ingredient-bubble:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+.hero__ingredient-bubble:nth-child(2) { top: 30%; right: 10%; animation-delay: 1s; }
+.hero__ingredient-bubble:nth-child(3) { top: 60%; left: 10%; animation-delay: 2s; }
+.hero__ingredient-bubble:nth-child(4) { bottom: 20%; right: 30%; animation-delay: 3s; }
+.hero__ingredient-bubble:nth-child(5) { top: 20%; left: 50%; animation-delay: 4s; }
+.hero__ingredient-bubble:nth-child(6) { bottom: 40%; left: 40%; animation-delay: 5s; }
 
 @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -291,7 +291,7 @@
     padding: 0 2rem;
 }
 
-.section-title {
+.section__title {
     font-size: 2.5rem;
     font-weight: 700;
     text-align: center;
@@ -299,7 +299,7 @@
     color: #2c3e50;
 }
 
-.section-subtitle {
+.section__subtitle {
     text-align: center;
     font-size: 1.2rem;
     color: #7f8c8d;
@@ -312,14 +312,14 @@
     background: white;
 }
 
-.steps-grid {
+.how-it-works__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 3rem;
     margin-top: 3rem;
 }
 
-.step {
+.how-it-works__step {
     text-align: center;
     padding: 2rem;
     border-radius: 20px;
@@ -327,23 +327,23 @@
     transition: transform 0.3s ease;
 }
 
-.step:hover {
+.how-it-works__step:hover {
     transform: translateY(-10px);
 }
 
-.step-icon {
+.how-it-works__step-icon {
     font-size: 4rem;
     margin-bottom: 1.5rem;
 }
 
-.step h3 {
+.how-it-works__step h3 {
     font-size: 1.5rem;
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 1rem;
 }
 
-.step p {
+.how-it-works__step p {
     color: #7f8c8d;
     line-height: 1.6;
 }
@@ -354,14 +354,14 @@
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
-.recipes-grid {
+.sample-recipes__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
     margin-top: 3rem;
 }
 
-.recipe-card {
+.sample-recipes__card {
     background: white;
     border-radius: 20px;
     padding: 2rem;
@@ -371,30 +371,30 @@
     cursor: pointer;
 }
 
-.recipe-card:hover {
+.sample-recipes__card:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.recipe-image {
+.sample-recipes__image {
     font-size: 4rem;
     margin-bottom: 1.5rem;
 }
 
-.recipe-card h3 {
+.sample-recipes__card h3 {
     font-size: 1.3rem;
     font-weight: 600;
     color: #2c3e50;
     margin-bottom: 0.5rem;
 }
 
-.ingredients-used {
+.sample-recipes__ingredients {
     color: #7f8c8d;
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
 
-.cook-time {
+.sample-recipes__time {
     background: linear-gradient(45deg, #ff6b6b, #feca57);
     color: white;
     padding: 0.5rem 1rem;
@@ -404,19 +404,19 @@
 }
 
 /* Features Section */
-.features-section {
+.features {
     padding: 5rem 0;
     background: white;
 }
 
-.features-grid {
+.features__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     margin-top: 3rem;
 }
 
-.feature-card {
+.features__card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 2.5rem;
@@ -426,54 +426,54 @@
     transition: all 0.3s ease;
 }
 
-.feature-card:hover {
+.features__card:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
 }
 
-.feature-icon {
+.features__icon {
     font-size: 3rem;
     margin-bottom: 1.5rem;
 }
 
-.feature-card h3 {
+.features__card h3 {
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1rem;
 }
 
-.feature-card p {
+.features__card p {
     opacity: 0.9;
     line-height: 1.6;
     margin-bottom: 1.5rem;
 }
 
-.feature-cta {
+.features__cta {
     font-weight: 600;
     opacity: 0.8;
 }
 
 /* CTA Section */
-.cta-section {
+.cta {
     padding: 5rem 0;
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
     text-align: center;
 }
 
-.cta-section h2 {
+.cta h2 {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 1rem;
 }
 
-.cta-section p {
+.cta p {
     font-size: 1.2rem;
     opacity: 0.9;
     margin-bottom: 2rem;
 }
 
-.cta-button {
+.cta__button {
     padding: 1.2rem 3rem;
     background: linear-gradient(45deg, #ff6b6b, #feca57);
     color: white;
@@ -485,55 +485,55 @@
     transition: all 0.3s ease;
 }
 
-.cta-button:hover {
+.cta__button:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .hero-section {
+    .hero {
         flex-direction: column;
         text-align: center;
         padding: 2rem 1rem;
     }
 
-    .hero-title {
+    .hero__title {
         font-size: 2.5rem;
     }
 
     /* ✨ Magic Kitchen Responsive */
-    .magic-kitchen-container {
+    .magic-kitchen {
         padding: 2rem;
     }
 
-    .cooking-scene {
+    .magic-kitchen__scene {
         width: 250px;
         height: 250px;
     }
 
-    .pot-body {
+    .magic-kitchen__pot-body {
         font-size: 3rem;
     }
 
-    .orbit-ingredient {
+    .magic-kitchen__ingredient {
         font-size: 1.5rem;
     }
 
-    .ingredient-orbit {
+    .magic-kitchen__orbit {
         width: 150px;
         height: 150px;
     }
 
-    .magic-button {
+    .magic-kitchen__button {
         padding: 0.8rem 1.5rem;
     }
 
-    .button-content {
+    .magic-kitchen__button-content {
         font-size: 1rem;
     }
 
-    .hero-visual {
+    .hero__visual {
         height: 300px;
         margin-top: 2rem;
     }
@@ -542,23 +542,23 @@
         padding: 0 1rem;
     }
 
-    .section-title {
+    .section__title {
         font-size: 2rem;
     }
 }
 
 @media (max-width: 480px) {
     /* ✨ Magic Kitchen Mobile */
-    .cooking-scene {
+    .magic-kitchen__scene {
         width: 200px;
         height: 200px;
     }
 
-    .pot-body {
+    .magic-kitchen__pot-body {
         font-size: 2.5rem;
     }
 
-    .button-text {
+    .magic-kitchen__button-text {
         font-size: 0.9rem;
     }
 
@@ -593,7 +593,7 @@
         display: none;
     }
 
-    .recipe-card {
+    .sample-recipes__card {
         box-shadow: none;
         border: 1px solid #000;
     }
