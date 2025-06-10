@@ -1,13 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 const HomePage = () => {
     const [isHovered, setIsHovered] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        checkAuthStatus();
+    }, []);
+
+    const checkAuthStatus = async () => {
+        try {
+            console.log("Starting auth check...");
+            const response = await fetch('/api/auth/me', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            console.log("Response status:", response.status);
+            console.log("Response ok:", response.ok);
+
+            if (response.ok) {
+                const userData = await response.json(); // Need to await this!
+                console.log("User data:", userData); // This will show you WHO is logged in
+                setIsAuthenticated(true);
+            } else {
+                console.log("Not authenticated, status:", response.status);
+                setIsAuthenticated(false);
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            setIsAuthenticated(false);
+        } finally {
+            setIsCheckingAuth(false);
+        }
+    };
+
     const handleStartCooking = () => {
-        navigate('/recipe-generator'); // Navigate to recipe generator (step 1)
+        if (isCheckingAuth) {
+            console.log("wait for auth in handlestartcooking");
+            return; // Don't do anything while checking
+        }
+
+        if (isAuthenticated) {
+            console.log("TO GEN1");
+            navigate('/recipe-generator');
+        } else {
+            console.log("TO LOG1");
+            navigate('/login');
+        }
+    };
+
+    const handleFeatureClick = (path) => {
+        if (isAuthenticated) {
+            console.log("TO GEN2");
+            navigate(path);
+        } else {
+            console.log("TO LOG2");
+            navigate('/login');
+        }
     };
 
     return (
@@ -24,7 +78,7 @@ const HomePage = () => {
                         No more wondering "what can I cook with this?"
                     </p>
 
-                    {/* ✨ Magic Kitchen Interactive Button (Replaces old input) */}
+                    {/* ✨ Magic Kitchen Interactive Button */}
                     <div className="magic-kitchen">
                         <div
                             className={`magic-kitchen__scene ${isHovered ? 'magic-kitchen__scene--active' : ''}`}
@@ -65,7 +119,10 @@ const HomePage = () => {
                             <div className="magic-kitchen__button">
                                 <div className="magic-kitchen__button-content">
                                     <span className="magic-kitchen__button-icon">👨‍🍳</span>
-                                    <span className="magic-kitchen__button-text">Start Cooking Magic</span>
+                                    <span className="magic-kitchen__button-text">
+                                        {isCheckingAuth ? 'Loading...' :
+                                            isAuthenticated ? 'Start Cooking Magic' : 'Sign In to Cook'}
+                                    </span>
                                     <span className="magic-kitchen__button-arrow">→</span>
                                 </div>
                                 <div className="magic-kitchen__button-glow"></div>
@@ -73,7 +130,7 @@ const HomePage = () => {
                         </div>
 
                         <p className="magic-kitchen__hint">
-                            ✨ Click to begin your culinary adventure!
+                            ✨ {isAuthenticated ? 'Click to begin your culinary adventure!' : 'Sign in to start cooking!'}
                         </p>
                     </div>
                 </div>
@@ -150,21 +207,21 @@ const HomePage = () => {
                 <div className="container">
                     <h2 className="section__title">More Than Just Recipes</h2>
                     <div className="features__grid">
-                        <div className="features__card" onClick={() => navigate('/pantry')}>
+                        <div className="features__card" onClick={() => handleFeatureClick('/pantry')}>
                             <div className="features__icon">🏪</div>
                             <h3>Smart Pantry</h3>
                             <p>Keep track of your ingredients and get suggestions on what to cook next.</p>
                             <span className="features__cta">Manage Pantry →</span>
                         </div>
 
-                        <div className="features__card" onClick={() => navigate('/meal-planning')}>
+                        <div className="features__card" onClick={() => handleFeatureClick('/meal-planning')}>
                             <div className="features__icon">📅</div>
                             <h3>Meal Planning</h3>
                             <p>Plan your weekly meals based on your preferences and available ingredients.</p>
                             <span className="features__cta">Plan Meals →</span>
                         </div>
 
-                        <div className="features__card" onClick={() => navigate('/recipes')}>
+                        <div className="features__card" onClick={() => handleFeatureClick('/recipes')}>
                             <div className="features__icon">📖</div>
                             <h3>Recipe Collection</h3>
                             <p>Save and organize all your generated recipes in one place.</p>
@@ -181,9 +238,9 @@ const HomePage = () => {
                     <p>Join thousands of home cooks who never run out of meal ideas</p>
                     <button
                         className="cta__button"
-                        onClick={() => navigate('/recipe-generator')}
+                        onClick={handleStartCooking}
                     >
-                        Start Cooking Smarter 🚀
+                        {isAuthenticated ? 'Start Cooking Smarter 🚀' : 'Sign In to Get Started 🚀'}
                     </button>
                 </div>
             </section>
