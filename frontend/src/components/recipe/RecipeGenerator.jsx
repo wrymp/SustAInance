@@ -149,7 +149,7 @@ const RecipeGenerator = () => {
             <div className="recipe-generator__header">
                 <button
                     className="recipe-generator__back-button"
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/home')}
                 >
                     ← Back to Home
                 </button>

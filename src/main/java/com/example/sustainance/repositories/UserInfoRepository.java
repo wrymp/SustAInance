@@ -1,4 +1,4 @@
-package com.example.sustainance.models.repositories;
+package com.example.sustainance.repositories;
 
 import com.example.sustainance.models.DTO.LoginRequest;
 import com.example.sustainance.models.DTO.RegisterRequest;
@@ -14,7 +14,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, UUID> {
 
     Optional<UserInfo> findByUsername(String username);
     Optional<UserInfo> findByEmail(String email);
-    Optional<UserInfo> findByUsernameOrEmail(String username, String email);
     Optional<UserInfo> findByUuid(UUID uuid);
 
     boolean existsByUsername(String username);

@@ -1,19 +1,30 @@
 package com.example.sustainance.config;
 
+import com.example.sustainance.config.authConfig.AuthenticationInterceptor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Web configuration that registers the authentication interceptor.
+ */
 @Configuration
-@EnableWebMvc
 public class WebConfig implements WebMvcConfigurer {
+    
+    private final AuthenticationInterceptor authenticationInterceptor;
+    
+    public WebConfig(AuthenticationInterceptor authenticationInterceptor) {
+        this.authenticationInterceptor = authenticationInterceptor;
+    }
+    
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authenticationInterceptor)
+                .addPathPatterns("/api/**") // Apply to all API endpoints
+                .excludePathPatterns(
+                    "/api/auth/login",     // Allow login
+                    "/api/auth/register",  // Allow registration
+                    "/api/auth/logout"     // Allow logout (though session validation would work here too)
+                );
     }
 }

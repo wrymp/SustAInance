@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import { recipeAPI } from '../../services/api';
 import './Auth.css';
 
 const LoginPage = () => {
@@ -10,6 +12,11 @@ const LoginPage = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const { login } = useContext(AuthContext);
+
+    const urlParams = new URLSearchParams(location.search);
+    const message = urlParams.get('message');
 
     const handleChange = (e) => {
         setFormData({
@@ -24,23 +31,29 @@ const LoginPage = () => {
         setError('');
 
         try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData),
-            });
+            const response = await recipeAPI.attemptLogIn(formData);
 
-            if (response.ok) {
-                navigate('/recipe-generator');
-            } else {
-                setError('Invalid username or password');
-            }
+            login(response.data);
+            navigate('/home');
         } catch (error) {
-            console.error('Login error:', error);
-            setError('Something went wrong. Please try again.');
+            if (error.response) {
+                if (error.response.status === 400) {
+                    setError('Please fill in all required fields.');
+                } else if (error.response.status === 404) {
+
+                    setError('Username not found. Please check your username or register for a new account.');
+                } else if (error.response.status === 401) {
+                    setError('Incorrect password. Please try again.');
+                } else if (error.response.status === 500) {
+                    setError('Server error. Please try again later.');
+                } else {
+                    setError('Login failed. Please try again.');
+                }
+            } else if (error.request) {
+                setError('Network error. Please check your connection.');
+            } else {
+                setError('Something went wrong. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -61,6 +74,7 @@ const LoginPage = () => {
                     </div>
 
                     <form className="auth-form" onSubmit={handleSubmit}>
+                        {message && <div className="auth-success">{message}</div>}
                         {error && <div className="auth-error">{error}</div>}
 
                         <div className="auth-field">
@@ -104,7 +118,6 @@ const LoginPage = () => {
 
                     <div className="auth-footer">
                         <p>Don't have an account? <Link to="/register">Sign up here</Link></p>
-                        <p><Link to="/">← Back to Home</Link></p>
                     </div>
                 </div>
 

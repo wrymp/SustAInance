@@ -5,17 +5,17 @@ import com.example.sustainance.models.DTO.RegisterRequest;
 import com.example.sustainance.models.DTO.UserResponse;
 import com.example.sustainance.models.entities.UserInfo;
 import com.example.sustainance.services.UserService;
+import com.example.sustainance.excpetions.InvalidRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -26,27 +26,40 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest request) {
-        try {
-            UserResponse user = userService.registerUser(request);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new InvalidRequestException("Username is required");
         }
+        
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new InvalidRequestException("Email is required");
+        }
+        
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new InvalidRequestException("Password is required");
+        }
+
+        UserResponse user = userService.registerUser(request);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        try {
-            UserInfo userInfo = userService.authenticateUser(request);
-
-            HttpSession session = httpRequest.getSession(true);
-            session.setAttribute("user", userInfo.getUuid().toString());
-
-            return ResponseEntity.ok(new UserResponse(userInfo));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new InvalidRequestException("Username is required");
         }
+        
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new InvalidRequestException("Password is required");
+        }
+
+        UserInfo userInfo = userService.authenticateUser(request);
+
+        HttpSession session = httpRequest.getSession(true);
+        session.setAttribute("user", userInfo.getUuid().toString());
+        System.out.println("SUCCESS: Session created with ID: " + session.getId());
+
+        return ResponseEntity.ok(new UserResponse(userInfo));
     }
 
     @PostMapping("/logout")

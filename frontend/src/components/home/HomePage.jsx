@@ -1,71 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import LogoutButton from '../auth/logout_button';
 import './HomePage.css';
 
 const HomePage = () => {
     const [isHovered, setIsHovered] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const { isAuthenticated, isLoading, user } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        checkAuthStatus();
-    }, []);
-
-    const checkAuthStatus = async () => {
-        try {
-            console.log("Starting auth check...");
-            const response = await fetch('/api/auth/me', {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            console.log("Response status:", response.status);
-            console.log("Response ok:", response.ok);
-
-            if (response.ok) {
-                const userData = await response.json(); // Need to await this!
-                console.log("User data:", userData); // This will show you WHO is logged in
-                setIsAuthenticated(true);
-            } else {
-                console.log("Not authenticated, status:", response.status);
-                setIsAuthenticated(false);
-            }
-        } catch (error) {
-            console.error('Auth check failed:', error);
-            setIsAuthenticated(false);
-        } finally {
-            setIsCheckingAuth(false);
-        }
-    };
-
     const handleStartCooking = () => {
-        if (isCheckingAuth) {
-            console.log("wait for auth in handlestartcooking");
-            return; // Don't do anything while checking
+        if (isLoading) {
+            return;
         }
 
         if (isAuthenticated) {
-            console.log("TO GEN1");
             navigate('/recipe-generator');
         } else {
-            console.log("TO LOG1");
             navigate('/login');
         }
     };
 
     const handleFeatureClick = (path) => {
         if (isAuthenticated) {
-            console.log("TO GEN2");
             navigate(path);
         } else {
-            console.log("TO LOG2");
             navigate('/login');
         }
     };
 
     return (
         <div className="home">
+            {/* Header with logout button for authenticated users */}
+            {isAuthenticated && (
+                <header className="home-header">
+                    <div className="home-header__content">
+                        <div className="home-header__welcome">
+                            <span>Welcome back{user?.username ? `, ${user.username}` : ''}! 👋</span>
+                        </div>
+                        <LogoutButton className="home-header__logout" />
+                    </div>
+                </header>
+            )}
+
             {/* Hero Section */}
             <section className="hero">
                 <div className="hero__content">
@@ -120,7 +97,7 @@ const HomePage = () => {
                                 <div className="magic-kitchen__button-content">
                                     <span className="magic-kitchen__button-icon">👨‍🍳</span>
                                     <span className="magic-kitchen__button-text">
-                                        {isCheckingAuth ? 'Loading...' :
+                                        {isLoading ? 'Loading...' :
                                             isAuthenticated ? 'Start Cooking Magic' : 'Sign In to Cook'}
                                     </span>
                                     <span className="magic-kitchen__button-arrow">→</span>
@@ -221,27 +198,13 @@ const HomePage = () => {
                             <span className="features__cta">Plan Meals →</span>
                         </div>
 
-                        <div className="features__card" onClick={() => handleFeatureClick('/recipes')}>
-                            <div className="features__icon">📖</div>
-                            <h3>Recipe Collection</h3>
-                            <p>Save and organize all your generated recipes in one place.</p>
-                            <span className="features__cta">View Recipes →</span>
+                        <div className="features__card" onClick={() => handleFeatureClick('/saved-recipes')}>
+                            <div className="features__icon">❤️</div>
+                            <h3>Saved Recipes</h3>
+                            <p>Keep all your favorite recipes in one place for easy access anytime.</p>
+                            <span className="features__cta">View Saved →</span>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="cta">
-                <div className="container">
-                    <h2>Ready to Transform Your Cooking?</h2>
-                    <p>Join thousands of home cooks who never run out of meal ideas</p>
-                    <button
-                        className="cta__button"
-                        onClick={handleStartCooking}
-                    >
-                        {isAuthenticated ? 'Start Cooking Smarter 🚀' : 'Sign In to Get Started 🚀'}
-                    </button>
                 </div>
             </section>
         </div>

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import { recipeAPI } from '../../services/api';
 import './Auth.css';
 
 const RegisterPage = () => {
@@ -11,6 +13,7 @@ const RegisterPage = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useContext(AuthContext);
 
     const handleChange = (e) => {
         setFormData({
@@ -25,39 +28,50 @@ const RegisterPage = () => {
         setError('');
 
         try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData),
-            });
+            // Step 1: Register user
+            const registerResponse = await recipeAPI.attemptRegister(formData);
 
-            if (response.ok) {
-                const loginResponse = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
+            if (registerResponse.status === 200) {
+                try {
+                    // Step 2: Auto-login after successful registration
+                    const loginResponse = await recipeAPI.attemptLogIn({
                         username: formData.username,
                         password: formData.password
-                    }),
-                });
+                    });
 
-                if (loginResponse.ok) {
-                    navigate('/recipe-generator');
-                } else {
-                    navigate('/login');
+                    if (loginResponse.status === 200) {
+                        // Pass user data (not token) to login function
+                        login(loginResponse.data);
+                        navigate('/home');
+                    } else {
+                        navigate('/login?message=Registration successful! Please log in.');
+                    }
+                } catch (loginError) {
+                    // Registration worked, but login failed - still a success
+                    navigate('/login?message=Registration successful! Please log in.');
                 }
             } else {
                 setError('Registration failed. Username or email might already be taken.');
             }
         } catch (error) {
-            console.error('Registration error:', error);
-            setError('Something went wrong. Please try again.');
+
+            // Better error handling
+            if (error.response) {
+                const errorData = error.response.data;
+                if (error.response.status === 409) {
+                    setError('Username or email already exists.');
+                } else if (typeof errorData === 'object' && errorData.error) {
+                    setError(errorData.error);
+                } else if (typeof errorData === 'string') {
+                    setError(errorData);
+                } else {
+                    setError(`Registration failed: ${error.response.status}`);
+                }
+            } else if (error.request) {
+                setError('Network error. Please check your connection.');
+            } else {
+                setError('Something went wrong. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -134,7 +148,6 @@ const RegisterPage = () => {
 
                     <div className="auth-footer">
                         <p>Already have an account? <Link to="/login">Sign in here</Link></p>
-                        <p><Link to="/">← Back to Home</Link></p>
                     </div>
                 </div>
 
