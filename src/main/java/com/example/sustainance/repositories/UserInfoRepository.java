@@ -1,7 +1,5 @@
 package com.example.sustainance.repositories;
 
-import com.example.sustainance.models.DTO.LoginRequest;
-import com.example.sustainance.models.DTO.RegisterRequest;
 import com.example.sustainance.models.entities.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

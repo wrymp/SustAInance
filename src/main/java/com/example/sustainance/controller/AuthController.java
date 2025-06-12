@@ -82,10 +82,7 @@ public class AuthController {
         UUID userUuid = UUID.fromString(userUuidString);
 
         Optional<UserInfo> userInfoOptional = userService.findByUuid(userUuid);
-        if (userInfoOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return userInfoOptional.map(userInfo -> ResponseEntity.ok(new UserResponse(userInfo))).orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 
-        return ResponseEntity.ok(new UserResponse(userInfoOptional.get()));
     }
 }

@@ -1,4 +1,4 @@
-package com.example.sustainance.config;
+package com.example.sustainance.config.authConfig;
 
 import com.example.sustainance.models.entities.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
