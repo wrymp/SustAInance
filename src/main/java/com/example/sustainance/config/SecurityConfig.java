@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/pantry/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/recipeSaver/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
