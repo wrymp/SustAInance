@@ -1,6 +1,6 @@
 package com.example.sustainance.controller;
 
-import com.example.sustainance.config.AuthenticationUtil;
+import com.example.sustainance.config.authConfig.AuthenticationUtil;
 import com.example.sustainance.config.authConfig.RequireAuthentication;
 import com.example.sustainance.models.DTO.DirectRecipeRequest;
 import com.example.sustainance.models.DTO.RecipeGenerationRequest;
