@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import './ResultsStep.css';
 
 const ResultsStep = ({
@@ -79,6 +79,22 @@ const ResultsStep = ({
         }
     };
 
+    // Extract recipe title from content - NEW ADDITION
+    const extractRecipeTitle = (content) => {
+        if (!content) return { title: 'Generated Recipe', contentWithoutTitle: content };
+        
+        // Look for pattern: === [Recipe Name] ===
+        const titleMatch = content.match(/^===\s*(.+?)\s*===$/m);
+        if (titleMatch) {
+            const title = titleMatch[1].trim();
+            // Remove the title line from content
+            const contentWithoutTitle = content.replace(/^===\s*.+?\s*===\s*\n?/m, '').trim();
+            return { title, contentWithoutTitle };
+        }
+        
+        return { title: 'Generated Recipe', contentWithoutTitle: content };
+    };
+
     const formatRecipeContent = (content) => {
         if (!content) return '';
 
@@ -97,12 +113,10 @@ const ResultsStep = ({
                 const instructionsText = instructionsMatch[1];
 
                 // Split by numbered steps
-                const steps = instructionsText
+                result.instructions = instructionsText
                     .split(/(?=\d+\.\s\*\*)/)
                     .filter(step => step.trim() && step.match(/^\d+\./))
                     .map(step => step.trim());
-
-                result.instructions = steps;
             }
 
             // Extract metadata
@@ -248,6 +262,9 @@ const ResultsStep = ({
         );
     }
 
+    // Extract title and content - NEW ADDITION
+    const { title } = extractRecipeTitle(generatedRecipe.content);
+
     return (
         <div className="step-container results-step__container">
             {/* Success Header */}
@@ -258,6 +275,7 @@ const ResultsStep = ({
                     Created from your {ingredients.length} ingredients with love ❤️
                 </p>
             </div>
+            <h1 className="results-step__recipe-title">{title}</h1>
 
             {/* Recipe Card */}
             <div className="results-step__recipe-card">
@@ -285,16 +303,16 @@ const ResultsStep = ({
                                 <span className="results-step__capitalize">{preferences.cuisine}</span>
                             </div>
                         )}
-                    </div>
+                </div>
 
                     <div className="results-step__recipe-actions">
-                        <button
+                    <button
                             className={`results-step__action-btn results-step__save-btn ${
                                 isSaved ? 'results-step__save-btn--saved' : ''
                             }`}
-                            onClick={handleSaveRecipe}
+                        onClick={handleSaveRecipe}
                             disabled={isSaving || isSaved}
-                        >
+                    >
                             {isSaving ? (
                                 <>
                                     <span className="results-step__btn-spinner"></span>
@@ -309,12 +327,12 @@ const ResultsStep = ({
                                     💾 Save Recipe
                                 </>
                             )}
-                        </button>
+                    </button>
 
                         <button className="results-step__action-btn results-step__share-btn" onClick={handleShare}>
                             📤 Share
-                        </button>
-                    </div>
+                    </button>
+                </div>
                 </div>
 
                 {/* Recipe Content */}
@@ -332,10 +350,10 @@ const ResultsStep = ({
                     )}
 
                     {!generatedRecipe.error && generatedRecipe.content.length > 500 && (
-                        <button
+                    <button
                             className="results-step__expand-btn"
                             onClick={() => setShowFullRecipe(!showFullRecipe)}
-                        >
+                    >
                             {showFullRecipe ? '📖 Show Less' : '📖 Show Full Recipe'}
                         </button>
                     )}
@@ -387,8 +405,8 @@ const ResultsStep = ({
 
                 <button className="btn btn-success" onClick={() => window.print()}>
                     🖨️ Print Recipe
-                </button>
-            </div>
+                    </button>
+                </div>
 
             {/* Tips Section */}
             <div className="results-step__tips-section">

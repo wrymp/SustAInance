@@ -115,13 +115,25 @@ public class AIService {
             return "No recipe generated. Please try again.";
         }
 
+        // Extract and preserve the title before cleaning
+        String title = "";
+        String titleMatch = rawRecipe.replaceAll("(?s).*?===\\s*(.+?)\\s*===.*", "$1");
+        if (!titleMatch.equals(rawRecipe)) {
+            title = "=== " + titleMatch.trim() + " ===\n\n";
+        }
+
         String cleanedRecipe = rawRecipe
                 .replaceAll("(?m)^\\s*$[\n\r]{1,}", "\n")
-                .replaceAll("===", "")
+                .replaceAll("===.*?===", "") // Remove the title from the content since we extracted it
                 .trim();
 
         String[] sections = cleanedRecipe.split("(?====|Ingredients:|Instructions:|Cooking Time:|Note:)");
         StringBuilder formatted = new StringBuilder();
+
+        // Add the title back at the beginning
+        if (!title.isEmpty()) {
+            formatted.append(title);
+        }
 
         for (String section : sections) {
             section = section.trim();
