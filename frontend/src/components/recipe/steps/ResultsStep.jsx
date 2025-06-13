@@ -45,6 +45,87 @@ const ResultsStep = ({
         }
     }, [isGenerating]);
 
+    // ✨ Extract used ingredients from AI response
+    const extractUsedIngredients = (content) => {
+        if (!content) return [];
+        
+        console.log('🔍 Extracting used ingredients from content...');
+        
+        // Look for the JSON section at the end: USED_INGREDIENTS_JSON:[...]
+        const jsonMatch = content.match(/USED_INGREDIENTS_JSON:(\[.*?])/s);
+        if (jsonMatch) {
+            try {
+                const usedIngredients = JSON.parse(jsonMatch[1]);
+                console.log('✅ Successfully parsed used ingredients:', usedIngredients);
+                return usedIngredients;
+            } catch (error) {
+                console.error('❌ Error parsing used ingredients JSON:', error);
+            }
+        } else {
+            console.log('⚠️ No USED_INGREDIENTS_JSON found in response');
+        }
+        
+        // ✨ FALLBACK: Try to parse from the "Ingredients:" section in the recipe
+        const ingredientsMatch = content.match(/Ingredients:\s*(.*?)(?=Instructions:|$)/s);
+        if (ingredientsMatch) {
+            const ingredientsText = ingredientsMatch[1];
+            const parsedIngredients = [];
+            
+            const lines = ingredientsText.split('\n');
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
+                    // Parse line like "• Rice: 2 cups" or "• Black pepper: 1 tsp"
+                    const ingredient = trimmedLine.substring(1).trim();
+                    const colonIndex = ingredient.indexOf(':');
+                    
+                    if (colonIndex !== -1) {
+                        const name = ingredient.substring(0, colonIndex).trim();
+                        const quantityAndUnit = ingredient.substring(colonIndex + 1).trim();
+                        
+                        // Split quantity and unit (e.g., "2 cups" -> quantity="2", unit="cups")
+                        const qtyMatch = quantityAndUnit.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
+                        if (qtyMatch) {
+                            parsedIngredients.push({
+                                name: name,
+                                quantity: qtyMatch[1],
+                                unit: qtyMatch[2]
+                            });
+                        } else {
+                            // If no quantity match, just add the name
+                            parsedIngredients.push({
+                                name: name,
+                                quantity: '',
+                                unit: quantityAndUnit
+                            });
+                        }
+                    }
+                }
+            }
+            
+            if (parsedIngredients.length > 0) {
+                console.log('✅ Fallback: Parsed ingredients from recipe content:', parsedIngredients);
+                return parsedIngredients;
+            }
+        }
+        
+        // ✨ LAST FALLBACK: Return original provided ingredients
+        console.log('⚠️ Using original provided ingredients as fallback');
+        return ingredients.map(ing => ({
+            name: ing.name,
+            quantity: ing.quantity?.toString() || '',
+            unit: ing.unit || ''
+        }));
+    };
+
+    // ✨ Clean the recipe content by removing the JSON section
+    const cleanRecipeContent = (content) => {
+        if (!content) return '';
+        
+        // Remove the USED_INGREDIENTS_JSON section
+        return content.replace(/\n\nUSED_INGREDIENTS_JSON:\[.*?]/s, '').trim();
+    };
+
     const handleSaveRecipe = async () => {
         setIsSaving(true);
         try {
@@ -52,7 +133,7 @@ const ResultsStep = ({
                 await onSaveRecipe(generatedRecipe);
             }
             setIsSaved(true);
-            setTimeout(() => setIsSaved(false), 3000); // Reset after 3 seconds
+            setTimeout(() => setIsSaved(false), 3000);
         } catch (error) {
             console.error('Error saving recipe:', error);
         } finally {
@@ -72,31 +153,35 @@ const ResultsStep = ({
                 console.log('Error sharing:', error);
             }
         } else {
-            console.log('Raw AI response:', generatedRecipe.content);
-            const recipeText = `${generatedRecipe.content}\n\nGenerated with: ${ingredients.map(ing => ing.name).join(', ')}`;
+            const cleanContent = cleanRecipeContent(generatedRecipe.content);
+            const recipeText = `${cleanContent}\n\nGenerated with: ${ingredients.map(ing => ing.name).join(', ')}`;
             navigator.clipboard.writeText(recipeText);
             alert('Recipe copied to clipboard!');
         }
     };
 
-    // Extract recipe title from content - NEW ADDITION
+    // Extract recipe title from content
     const extractRecipeTitle = (content) => {
         if (!content) return { title: 'Generated Recipe', contentWithoutTitle: content };
         
+        const cleanContent = cleanRecipeContent(content);
+        
         // Look for pattern: === [Recipe Name] ===
-        const titleMatch = content.match(/^===\s*(.+?)\s*===$/m);
+        const titleMatch = cleanContent.match(/^===\s*(.+?)\s*===$/m);
         if (titleMatch) {
             const title = titleMatch[1].trim();
             // Remove the title line from content
-            const contentWithoutTitle = content.replace(/^===\s*.+?\s*===\s*\n?/m, '').trim();
+            const contentWithoutTitle = cleanContent.replace(/^===\s*.+?\s*===\s*\n?/m, '').trim();
             return { title, contentWithoutTitle };
         }
         
-        return { title: 'Generated Recipe', contentWithoutTitle: content };
+        return { title: 'Generated Recipe', contentWithoutTitle: cleanContent };
     };
 
     const formatRecipeContent = (content) => {
         if (!content) return '';
+
+        const cleanContent = cleanRecipeContent(content);
 
         // ✨ Parse the AI response
         const parseRecipeContent = (text) => {
@@ -108,7 +193,7 @@ const ResultsStep = ({
             };
 
             // Extract Instructions section
-            const instructionsMatch = text.match(/Instructions:\s*(.*?)(?=Cooking Time:|$)/s);
+            const instructionsMatch = text.match(/Instructions:\s*(.*?)(?=Cooking Time:|Chef's Tips:|$)/s);
             if (instructionsMatch) {
                 const instructionsText = instructionsMatch[1];
 
@@ -131,7 +216,7 @@ const ResultsStep = ({
             return result;
         };
 
-        const recipe = parseRecipeContent(content);
+        const recipe = parseRecipeContent(cleanContent);
 
         return (
             <div className="results-step__parsed-recipe">
@@ -262,8 +347,9 @@ const ResultsStep = ({
         );
     }
 
-    // Extract title and content - NEW ADDITION
+    // ✨ Extract both title and used ingredients
     const { title } = extractRecipeTitle(generatedRecipe.content);
+    const usedIngredients = extractUsedIngredients(generatedRecipe.content);
 
     return (
         <div className="step-container results-step__container">
@@ -283,7 +369,7 @@ const ResultsStep = ({
                     <div className="results-step__recipe-meta">
                         <div className="results-step__meta-item">
                             <span className="results-step__meta-icon">🥘</span>
-                            <span>{ingredients.length} Ingredients</span>
+                            <span>{usedIngredients.length} Ingredients Used</span>
                         </div>
                         {preferences.cookingTime && (
                             <div className="results-step__meta-item">
@@ -303,16 +389,16 @@ const ResultsStep = ({
                                 <span className="results-step__capitalize">{preferences.cuisine}</span>
                             </div>
                         )}
-                </div>
+                    </div>
 
                     <div className="results-step__recipe-actions">
-                    <button
+                        <button
                             className={`results-step__action-btn results-step__save-btn ${
                                 isSaved ? 'results-step__save-btn--saved' : ''
                             }`}
-                        onClick={handleSaveRecipe}
+                            onClick={handleSaveRecipe}
                             disabled={isSaving || isSaved}
-                    >
+                        >
                             {isSaving ? (
                                 <>
                                     <span className="results-step__btn-spinner"></span>
@@ -327,12 +413,12 @@ const ResultsStep = ({
                                     💾 Save Recipe
                                 </>
                             )}
-                    </button>
+                        </button>
 
                         <button className="results-step__action-btn results-step__share-btn" onClick={handleShare}>
                             📤 Share
-                    </button>
-                </div>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Recipe Content */}
@@ -349,24 +435,26 @@ const ResultsStep = ({
                         </div>
                     )}
 
-                    {!generatedRecipe.error && generatedRecipe.content.length > 500 && (
-                    <button
+                    {!generatedRecipe.error && cleanRecipeContent(generatedRecipe.content).length > 500 && (
+                        <button
                             className="results-step__expand-btn"
                             onClick={() => setShowFullRecipe(!showFullRecipe)}
-                    >
+                        >
                             {showFullRecipe ? '📖 Show Less' : '📖 Show Full Recipe'}
                         </button>
                     )}
                 </div>
 
-                {/* Ingredients Used */}
+                {/* ✨ UPDATED: Ingredients Actually Used - NO LEFTOVERS */}
                 <div className="results-step__ingredients-used">
-                    <h4>🛒 Ingredients Used:</h4>
+                    <h4>🛒 Ingredients Actually Used:</h4>
                     <div className="results-step__used-ingredients-list">
-                        {ingredients.map((ingredient, index) => (
+                        {usedIngredients.map((ingredient, index) => (
                             <span key={index} className="results-step__used-ingredient">
                                 {ingredient.name}
-                                {ingredient.quantity && ` (${ingredient.quantity}${ingredient.unit ? ' ' + ingredient.unit : ''})`}
+                                {ingredient.quantity && ingredient.quantity !== '' && (
+                                    ` (${ingredient.quantity}${ingredient.unit ? ' ' + ingredient.unit : ''})`
+                                )}
                             </span>
                         ))}
                     </div>
@@ -405,8 +493,8 @@ const ResultsStep = ({
 
                 <button className="btn btn-success" onClick={() => window.print()}>
                     🖨️ Print Recipe
-                    </button>
-                </div>
+                </button>
+            </div>
 
             {/* Tips Section */}
             <div className="results-step__tips-section">

@@ -124,21 +124,6 @@ const RecipeGenerator = () => {
         setIsGenerating(false);
         // Keep ingredients and preferences for easier iteration
     };
-
-    const handleStartOver = () => {
-        setCurrentStep(1);
-        setIngredients([]);
-        setPreferences({
-            cuisine: '',
-            dietaryRestrictions: [],
-            cookingTime: '',
-            difficulty: '',
-            mealType: ''
-        });
-        setGeneratedRecipe(null);
-        setIsGenerating(false);
-    };
-
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [currentStep]);
@@ -211,18 +196,7 @@ const RecipeGenerator = () => {
                         isGenerating={isGenerating}
                         ingredients={ingredients}
                         preferences={preferences}
-                        onStartOver={() => {
-                            setCurrentStep(1);
-                            setIngredients([]);
-                            setPreferences({
-                                cuisine: '',
-                                dietaryRestrictions: [],
-                                cookingTime: '',
-                                difficulty: '',
-                                mealType: ''
-                            });
-                            setGeneratedRecipe(null);
-                        }}
+                        onStartOver={handleGenerateAnother}
                         onSaveRecipe={async (recipe) => {
                             // Implement save functionality
                             console.log('Saving recipe:', recipe);

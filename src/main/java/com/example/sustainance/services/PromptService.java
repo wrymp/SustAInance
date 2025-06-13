@@ -79,6 +79,12 @@ public class PromptService {
             
             === [Creative Recipe Name] ===
             
+            USED_INGREDIENTS_START
+            • [ingredient name]: [actual amount used] [unit]
+            • [ingredient name]: [actual amount used] [unit]
+            • [basic seasoning]: [actual amount used] [unit]
+            USED_INGREDIENTS_END
+            
             Ingredients:
             • [main ingredient]: [exact amount from input]
             • [main ingredient]: [exact amount from input]
