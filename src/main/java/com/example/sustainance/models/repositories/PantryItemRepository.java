@@ -15,6 +15,8 @@ import java.util.UUID;
 public interface PantryItemRepository extends JpaRepository<PantryItem, UUID> {
 
     Optional<PantryItem> findByUsersIdAndIngredientName(UUID usersId, String ingredientName);
+    Optional<PantryItem> findByUsersIdAndId(UUID usersId, UUID id);
+    void removePantryItemByUsersIdAndId(UUID usersId, UUID id);
 
     List<PantryItem> findByUsersId(UUID usersId);
 
