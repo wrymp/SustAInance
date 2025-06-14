@@ -1,4 +1,5 @@
 package com.example.sustainance.models.DTO;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class TakeIngredientRequest {
+public class UpdateIngredientRequest {
 
     @NotNull
     private UUID usersId;
@@ -19,11 +20,15 @@ public class TakeIngredientRequest {
     @NotBlank
     private String count;
 
-    public TakeIngredientRequest() {}
+    @NotBlank
+    private String unit;
 
-    public TakeIngredientRequest(UUID usersId, String ingredientName, String count) {
+    public UpdateIngredientRequest() {}
+
+    public UpdateIngredientRequest(UUID usersId, String ingredientName, String count, String unit) {
         this.usersId = usersId;
         this.ingredientName = ingredientName;
         this.count = count;
+        this.unit = unit;
     }
 }

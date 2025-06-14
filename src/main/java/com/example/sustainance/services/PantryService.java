@@ -1,7 +1,7 @@
 package com.example.sustainance.services;
 
-import com.example.sustainance.models.DTO.AddIngredientRequest;
-import com.example.sustainance.models.DTO.TakeIngredientRequest;
+import com.example.sustainance.models.DTO.RemoveIngredientRequest;
+import com.example.sustainance.models.DTO.UpdateIngredientRequest;
 import com.example.sustainance.models.entities.PantryItem;
 import com.example.sustainance.models.repositories.PantryItemRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class PantryService {
     }
 
 
-    public PantryItem addIngredient(AddIngredientRequest request) {
+    public PantryItem addIngredient(UpdateIngredientRequest request) {
         Optional<PantryItem> existingItem = pantryItemRepository
                 .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());
 
@@ -41,16 +41,31 @@ public class PantryService {
         }
     }
 
-    public PantryItem takeIngredient(TakeIngredientRequest request) {
+
+    public void removeIngredient(RemoveIngredientRequest request) {
+        Optional<PantryItem> existingItem = pantryItemRepository
+                .findByUsersIdAndId(request.getUsersId(), request.getId());
+
+        if (existingItem.isPresent()) {
+            pantryItemRepository.removePantryItemByUsersIdAndId(request.getUsersId(), request.getId());
+        }
+    }
+
+    public PantryItem takeIngredient(UpdateIngredientRequest request) {
         Optional<PantryItem> existingItem = pantryItemRepository
                 .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());
 
         if (existingItem.isPresent()) {
             PantryItem item = existingItem.get();
+
+            if(!item.getUnit().equals(request.getUnit())){
+                throw new RuntimeException("Ingredient Unit mismatch " + item.getUnit() + " " + request.getUnit());
+            }
+
             String newCount = subtractCounts(item.getCount(), request.getCount());
 
             if (isCountZeroOrNegative(newCount)) {
-                pantryItemRepository.delete(item);
+                pantryItemRepository.removePantryItemByUsersIdAndId(request.getUsersId(), item.getId());
                 return null;
             } else {
                 item.setCount(newCount);
