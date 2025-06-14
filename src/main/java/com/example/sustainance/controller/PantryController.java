@@ -1,5 +1,6 @@
 package com.example.sustainance.controller;
 
+import com.example.sustainance.config.authConfig.RequireAuthentication;
 import com.example.sustainance.models.DTO.AddIngredientRequest;
 import com.example.sustainance.models.DTO.TakeIngredientRequest;
 import com.example.sustainance.models.entities.PantryItem;
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Controller
+@RestController
+@RequireAuthentication
 @RequestMapping("/api/pantry")
 public class PantryController {
 
