@@ -1,13 +1,14 @@
 package com.example.sustainance.controller;
 
 import com.example.sustainance.config.authConfig.RequireAuthentication;
-import com.example.sustainance.models.DTO.AddIngredientRequest;
-import com.example.sustainance.models.DTO.TakeIngredientRequest;
+import com.example.sustainance.models.DTO.RemoveIngredientRequest;
+import com.example.sustainance.models.DTO.UpdateIngredientRequest;
+import com.example.sustainance.models.DTO.getFromPantryByIdRequest;
 import com.example.sustainance.models.entities.PantryItem;
-import com.example.sustainance.models.repositories.PantryItemRepository;
 import com.example.sustainance.services.PantryService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -28,7 +29,7 @@ public class PantryController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<PantryItem> addIngredient(@Valid @RequestBody AddIngredientRequest request) {
+    public ResponseEntity<PantryItem> addIngredient(@Valid @RequestBody UpdateIngredientRequest request) {
         try {
             PantryItem result = pantryService.addIngredient(request);
             return ResponseEntity.ok(result);
@@ -37,8 +38,20 @@ public class PantryController {
         }
     }
 
+    @PostMapping("/remove")
+    public ResponseEntity<String> removeIngredient(@Valid @RequestBody RemoveIngredientRequest request) {
+        try {
+            pantryService.removeIngredient(request);
+            return ResponseEntity.ok("Ingredient removed uhh... successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing request");
+        }
+    }
+
     @PostMapping("/take")
-    public ResponseEntity<String> takeIngredient(@Valid @RequestBody TakeIngredientRequest request) {
+    public ResponseEntity<String> takeIngredient(@Valid @RequestBody UpdateIngredientRequest request) {
         try {
             PantryItem result = pantryService.takeIngredient(request);
             if (result == null) {
@@ -53,20 +66,25 @@ public class PantryController {
         }
     }
 
-    @GetMapping("/user/{usersId}")
-    public ResponseEntity<List<PantryItem>> getUserPantry(@PathVariable UUID usersId) {
+    @GetMapping("/usersPantry")
+    public ResponseEntity<List<PantryItem>> getUserPantry(@Valid @RequestBody getFromPantryByIdRequest request, HttpServletRequest httpRequest) {
         try {
-            List<PantryItem> pantryItems = pantryService.getUserPantry(usersId);
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            List<PantryItem> pantryItems = pantryService.getUserPantry(request.getId());
             return ResponseEntity.ok(pantryItems);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PantryItem> getPantryItemById(@PathVariable UUID id) {
+    @GetMapping("/getItemWithId")
+    public ResponseEntity<PantryItem> getPantryItemById(@Valid @RequestBody getFromPantryByIdRequest request) {
         try {
-            Optional<PantryItem> pantryItem = pantryService.getPantryItemById(id);
+            Optional<PantryItem> pantryItem = pantryService.getPantryItemById(request.getId());
             return pantryItem.map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
