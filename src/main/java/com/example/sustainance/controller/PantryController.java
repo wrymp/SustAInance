@@ -29,8 +29,13 @@ public class PantryController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<PantryItem> addIngredient(@Valid @RequestBody UpdateIngredientRequest request) {
+    public ResponseEntity<PantryItem> addIngredient(@Valid @RequestBody UpdateIngredientRequest request, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getUsersId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             PantryItem result = pantryService.addIngredient(request);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -39,8 +44,12 @@ public class PantryController {
     }
 
     @PostMapping("/remove")
-    public ResponseEntity<String> removeIngredient(@Valid @RequestBody RemoveIngredientRequest request) {
+    public ResponseEntity<String> removeIngredient(@Valid @RequestBody RemoveIngredientRequest request, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
             pantryService.removeIngredient(request);
             return ResponseEntity.ok("Ingredient removed uhh... successfully");
         } catch (RuntimeException e) {
@@ -51,8 +60,12 @@ public class PantryController {
     }
 
     @PostMapping("/take")
-    public ResponseEntity<String> takeIngredient(@Valid @RequestBody UpdateIngredientRequest request) {
+    public ResponseEntity<String> takeIngredient(@Valid @RequestBody UpdateIngredientRequest request, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getUsersId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
             PantryItem result = pantryService.takeIngredient(request);
             if (result == null) {
                 return ResponseEntity.ok("Ingredient removed from pantry (count reached zero)");
@@ -82,8 +95,12 @@ public class PantryController {
     }
 
     @GetMapping("/getItemWithId")
-    public ResponseEntity<PantryItem> getPantryItemById(@Valid @RequestBody getFromPantryByIdRequest request) {
+    public ResponseEntity<PantryItem> getPantryItemById(@Valid @RequestBody getFromPantryByIdRequest request, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
             Optional<PantryItem> pantryItem = pantryService.getPantryItemById(request.getId());
             return pantryItem.map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
