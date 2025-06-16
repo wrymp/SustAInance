@@ -7,6 +7,7 @@ import com.example.sustainance.models.DTO.getFromPantryByIdRequest;
 import com.example.sustainance.models.entities.PantryItem;
 import com.example.sustainance.services.PantryService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,10 +45,11 @@ public class PantryController {
     }
 
     @PostMapping("/remove")
+    @Transactional
     public ResponseEntity<String> removeIngredient(@Valid @RequestBody RemoveIngredientRequest request, HttpServletRequest httpRequest) {
         try {
             UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
-            if (!authenticatedUserId.equals(request.getId())) {
+            if (!authenticatedUserId.equals(request.getUsersId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             pantryService.removeIngredient(request);
@@ -80,14 +82,11 @@ public class PantryController {
     }
 
     @GetMapping("/usersPantry")
-    public ResponseEntity<List<PantryItem>> getUserPantry(@Valid @RequestBody getFromPantryByIdRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<List<PantryItem>> getUserPantry(HttpServletRequest httpRequest) {
         try {
             UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
-            if (!authenticatedUserId.equals(request.getId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
 
-            List<PantryItem> pantryItems = pantryService.getUserPantry(request.getId());
+            List<PantryItem> pantryItems = pantryService.getUserPantry(authenticatedUserId);
             return ResponseEntity.ok(pantryItems);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
