@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext, useCallback} from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import './PantryPage.css';
@@ -98,7 +98,7 @@ const PantryPage = () => {
         }
     }, []);
 
-    // Delete pantry item - Enhanced debugging and error handling
+    // Delete pantry item
     const handleDeleteItem = async (itemId) => {
         if (!currentUser?.uuid) {
             setError('User not authenticated');
@@ -114,7 +114,6 @@ const PantryPage = () => {
             };
 
             console.log('Request body:', requestBody);
-            console.log('Request body JSON:', JSON.stringify(requestBody));
 
             const response = await fetch('http://localhost:9097/api/pantry/remove', {
                 method: 'POST',
@@ -126,18 +125,13 @@ const PantryPage = () => {
             });
 
             console.log('Response status:', response.status);
-            console.log('Response headers:', [...response.headers.entries()]);
 
-            // Get response as text first
             const responseText = await response.text();
             console.log('Raw response text:', responseText);
-            console.log('Response text length:', responseText.length);
 
             if (response.ok) {
                 console.log('✅ DELETE SUCCESS');
-                console.log('Success response:', responseText);
 
-                // Remove item from state
                 setPantryItems(prevItems => {
                     const newItems = prevItems.filter(item => item.id !== itemId);
                     console.log('Items before filter:', prevItems.length);
@@ -148,10 +142,7 @@ const PantryPage = () => {
                 setError('');
             } else {
                 console.log('❌ DELETE FAILED');
-                console.log('Error status:', response.status);
-                console.log('Error response text:', responseText);
 
-                // Better error parsing
                 let errorMessage = 'Unknown error';
 
                 if (responseText) {
@@ -171,7 +162,7 @@ const PantryPage = () => {
                         }
                     } catch (parseError) {
                         console.log('Failed to parse error JSON:', parseError);
-                        errorMessage = responseText.substring(0, 200); // Show first 200 chars
+                        errorMessage = responseText.substring(0, 200);
                     }
                 }
 
@@ -193,7 +184,6 @@ const PantryPage = () => {
     // Combined function to fetch user and then pantry
     const initializePage = useCallback(async () => {
         console.log('Initializing pantry page...');
-
         const user = await fetchCurrentUser();
         if (user && user.uuid) {
             await fetchPantryItems();
@@ -256,76 +246,108 @@ const PantryPage = () => {
 
     // Show loading for auth context
     if (isLoading) {
-        return <div className="loading">Authenticating...</div>;
+        return (
+            <div className="pantry-loading">
+                <div className="loading-spinner">🧑‍🍳</div>
+                <p>Authenticating...</p>
+            </div>
+        );
     }
 
     if (!isAuthenticated) {
-        return <div className="loading">Redirecting to login...</div>;
+        return (
+            <div className="pantry-loading">
+                <div className="loading-spinner">🔄</div>
+                <p>Redirecting to login...</p>
+            </div>
+        );
     }
 
     return (
-        <div className="pantry-container">
-            <div className="pantry-header">
+        <div className="pantry">
+            {/* Header */}
+            <header className="pantry__header">
                 <button
                     onClick={() => navigate('/home')}
-                    className="back-button"
+                    className="pantry__back-btn"
                 >
-                    ← Back to Home
+                    <span className="pantry__back-icon">←</span>
+                    Back to Home
                 </button>
-                <h1 className="pantry-title">My Pantry</h1>
+
+                <h1 className="pantry__title">
+                    <span className="pantry__title-icon">🏺</span>
+                    My Pantry
+                </h1>
+
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className="add-button"
+                    className={`pantry__add-btn ${showAddForm ? 'pantry__add-btn--active' : ''}`}
                 >
-                    {showAddForm ? 'Cancel' : '+ Add Item'}
+                    <span className="pantry__add-icon">{showAddForm ? '✕' : '+'}</span>
+                    {showAddForm ? 'Cancel' : 'Add Item'}
                 </button>
-            </div>
+            </header>
 
+            {/* Error Message */}
             {error && (
-                <div className="error-message">
-                    {error}
-                    <button
-                        onClick={() => setError('')}
-                        style={{ marginLeft: '10px', background: 'transparent', border: 'none', cursor: 'pointer' }}
-                    >
-                        ✕
-                    </button>
+                <div className="pantry__error">
+                    <div className="pantry__error-content">
+                        <span className="pantry__error-icon">⚠️</span>
+                        <span className="pantry__error-text">{error}</span>
+                        <button
+                            onClick={() => setError('')}
+                            className="pantry__error-close"
+                            aria-label="Close error"
+                        >
+                            ✕
+                        </button>
+                    </div>
                 </div>
             )}
 
+            {/* Add Form */}
             {showAddForm && currentUser && (
-                <div className="add-form">
-                    <h3 className="form-title">Add New Ingredient</h3>
-                    <form onSubmit={handleAddItem} className="ingredient-form">
-                        <div className="form-group">
-                            <label className="form-label">Ingredient Name:</label>
+                <div className="pantry__add-form">
+                    <div className="pantry__form-header">
+                        <h3 className="pantry__form-title">
+                            <span className="pantry__form-icon">✨</span>
+                            Add New Ingredient
+                        </h3>
+                    </div>
+
+                    <form onSubmit={handleAddItem} className="pantry__form">
+                        <div className="pantry__form-group pantry__form-group--full">
+                            <label className="pantry__form-label">Ingredient Name</label>
                             <input
                                 type="text"
                                 value={newItem.ingredientName}
                                 onChange={(e) => setNewItem({...newItem, ingredientName: e.target.value})}
-                                className="form-input"
+                                className="pantry__form-input"
                                 required
                                 placeholder="e.g., Tomatoes, Rice, Chicken"
                             />
                         </div>
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label className="form-label">Count:</label>
+
+                        <div className="pantry__form-row">
+                            <div className="pantry__form-group">
+                                <label className="pantry__form-label">Count</label>
                                 <input
                                     type="text"
                                     value={newItem.count}
                                     onChange={(e) => setNewItem({...newItem, count: e.target.value})}
-                                    className="form-input"
+                                    className="pantry__form-input"
                                     required
                                     placeholder="e.g., 2, 1.5, 500"
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Unit:</label>
+
+                            <div className="pantry__form-group">
+                                <label className="pantry__form-label">Unit</label>
                                 <select
                                     value={newItem.unit}
                                     onChange={(e) => setNewItem({...newItem, unit: e.target.value})}
-                                    className="form-select"
+                                    className="pantry__form-select"
                                     required
                                 >
                                     <option value="">Select unit</option>
@@ -344,59 +366,74 @@ const PantryPage = () => {
                                 </select>
                             </div>
                         </div>
+
                         <button
                             type="submit"
                             disabled={addingItem}
-                            className="submit-button"
+                            className="pantry__form-submit"
                         >
+                            <span className="pantry__form-submit-icon">
+                                {addingItem ? '⏳' : '🥄'}
+                            </span>
                             {addingItem ? 'Adding...' : 'Add to Pantry'}
                         </button>
                     </form>
                 </div>
             )}
 
-            <div className="pantry-grid">
+            {/* Pantry Grid */}
+            <main className="pantry__main">
                 {loading ? (
-                    <div className="loading-text">
-                        Loading your pantry...
-                        <br/>
-                        <small>User: {currentUser?.username || 'Loading user...'}</small>
+                    <div className="pantry__loading-state">
+                        <div className="pantry__loading-spinner">🔄</div>
+                        <h3>Loading your pantry...</h3>
+                        <p>User: {currentUser?.username || 'Loading user...'}</p>
                     </div>
                 ) : pantryItems.length === 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-icon">📦</div>
-                        <h3>Your pantry is empty!</h3>
-                        <p>Start by adding some ingredients to track your inventory.</p>
+                    <div className="pantry__empty-state">
+                        <div className="pantry__empty-icon">📦</div>
+                        <h3 className="pantry__empty-title">Your pantry is empty!</h3>
+                        <p className="pantry__empty-text">
+                            Start by adding some ingredients to track your inventory.
+                        </p>
                         <button
                             onClick={() => setShowAddForm(true)}
-                            className="add-button"
-                            style={{ marginTop: '1rem' }}
+                            className="pantry__empty-cta"
                         >
+                            <span className="pantry__empty-cta-icon">✨</span>
                             Add Your First Item
                         </button>
                     </div>
                 ) : (
-                    pantryItems.map((item) => (
-                        <div key={item.id} className="pantry-item">
-                            <div className="item-header">
-                                <h3 className="item-name">{item.ingredientName}</h3>
-                                <button
-                                    onClick={() => handleDeleteItem(item.id)}
-                                    disabled={deletingItems.has(item.id)}
-                                    className="delete-button"
-                                    title="Delete this item"
-                                >
-                                    {deletingItems.has(item.id) ? '⏳' : '✕'}
-                                </button>
+                    <div className="pantry__grid">
+                        {pantryItems.map((item) => (
+                            <div key={item.id} className="pantry__item">
+                                <div className="pantry__item-header">
+                                    <h3 className="pantry__item-name">{item.ingredientName}</h3>
+                                    <button
+                                        onClick={() => handleDeleteItem(item.id)}
+                                        disabled={deletingItems.has(item.id)}
+                                        className="pantry__item-delete"
+                                        title="Delete this item"
+                                    >
+                                        {deletingItems.has(item.id) ? '⏳' : '✕'}
+                                    </button>
+                                </div>
+
+                                <div className="pantry__item-details">
+                                    <div className="pantry__item-quantity">
+                                        <span className="pantry__item-count">{item.count}</span>
+                                        <span className="pantry__item-unit">{item.unit}</span>
+                                    </div>
+                                    <div className="pantry__item-badge">
+                                        🥫
+                                    </div>
+                                </div>
                             </div>
-                            <div className="item-details">
-                                <span className="item-count">{item.count}</span>
-                                <span className="item-unit">{item.unit}</span>
-                            </div>
-                        </div>
-                    ))
+                        ))}
+                    </div>
                 )}
-            </div>
+            </main>
         </div>
     );
 };

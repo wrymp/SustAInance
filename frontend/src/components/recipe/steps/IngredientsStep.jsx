@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import AddIngredientModal from "./modals/AddIngredientModal";
+import PantrySelectionModal from "./modals/PantrySelectionModal";
+import { AuthContext } from '../../../contexts/AuthContext';
 import './IngredientsStep.css';
 
 const IngredientsStep = ({
@@ -9,6 +11,12 @@ const IngredientsStep = ({
                              hasPrefilledIngredients
                          }) => {
     const [showModal, setShowModal] = useState(false);
+    const [showPantryModal, setShowPantryModal] = useState(false);
+    const [pantryItems, setPantryItems] = useState([]);
+    const [loadingPantry, setLoadingPantry] = useState(false);
+    const [pantryError, setPantryError] = useState('');
+
+    const { isAuthenticated } = useContext(AuthContext);
 
     const removeIngredient = (id) => {
         setIngredients(ingredients.filter(ing => ing.id !== id));
@@ -22,6 +30,72 @@ const IngredientsStep = ({
 
     const handleAddIngredients = (newIngredients) => {
         setIngredients(prev => [...prev, ...newIngredients]);
+    };
+
+    // Fetch pantry items
+    const fetchPantryItems = async () => {
+        if (!isAuthenticated) {
+            setPantryError('Please log in to access your pantry');
+            return;
+        }
+
+        setLoadingPantry(true);
+        setPantryError('');
+
+        try {
+            const response = await fetch('http://localhost:9097/api/pantry/usersPantry', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const items = await response.json();
+                setPantryItems(items);
+                setShowPantryModal(true);
+            } else {
+                const errorText = await response.text();
+                setPantryError(`Failed to fetch pantry: ${response.status} - ${errorText}`);
+            }
+        } catch (err) {
+            console.error('Pantry fetch error:', err);
+            setPantryError(`Network error: ${err.message}`);
+        } finally {
+            setLoadingPantry(false);
+        }
+    };
+
+    // Convert pantry items to ingredient format and add to current ingredients
+    const handleAddFromPantry = (selectedPantryItems) => {
+        const newIngredients = selectedPantryItems.map(pantryItem => ({
+            id: `pantry-${pantryItem.id}-${Date.now()}`, // Unique ID for ingredient
+            name: pantryItem.ingredientName,
+            quantity: pantryItem.count.toString(),
+            unit: pantryItem.unit,
+            isFromPantry: true,
+            pantryId: pantryItem.id,
+            availableUnits: [
+                pantryItem.unit,
+                'grams', 'cups', 'pieces', 'tablespoons', 'teaspoons', 'ml', 'kg', 'lbs', 'oz'
+            ].filter((unit, index, arr) => arr.indexOf(unit) === index) // Remove duplicates
+        }));
+
+        // Filter out ingredients that are already added
+        const existingNames = ingredients.map(ing => ing.name.toLowerCase());
+        const filteredNewIngredients = newIngredients.filter(
+            newIng => !existingNames.includes(newIng.name.toLowerCase())
+        );
+
+        if (filteredNewIngredients.length < newIngredients.length) {
+            // Some ingredients were already present
+            const skippedCount = newIngredients.length - filteredNewIngredients.length;
+            console.log(`Skipped ${skippedCount} ingredients that were already added`);
+        }
+
+        setIngredients(prev => [...prev, ...filteredNewIngredients]);
+        setShowPantryModal(false);
     };
 
     const canProceed = ingredients.length > 0;
@@ -38,6 +112,20 @@ const IngredientsStep = ({
                 }
             </p>
 
+            {/* Error Display */}
+            {pantryError && (
+                <div className="ingredients-step__error">
+                    <span className="ingredients-step__error-icon">⚠️</span>
+                    <span className="ingredients-step__error-text">{pantryError}</span>
+                    <button
+                        onClick={() => setPantryError('')}
+                        className="ingredients-step__error-close"
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
+
             {/* Current Ingredients */}
             {ingredients.length > 0 && (
                 <div className="current-ingredients">
@@ -47,7 +135,14 @@ const IngredientsStep = ({
                             <div key={ingredient.id} className="ingredients__card">
                                 <div className="ingredients__card-main">
                                     <span className="ingredients__card-name">{ingredient.name}</span>
-                                    {ingredient.isCustom && <span className="ingredients__custom-badge">Custom</span>}
+                                    <div className="ingredients__card-badges">
+                                        {ingredient.isCustom && (
+                                            <span className="ingredients__custom-badge">Custom</span>
+                                        )}
+                                        {ingredient.isFromPantry && (
+                                            <span className="ingredients__pantry-badge">From Pantry</span>
+                                        )}
+                                    </div>
                                     <button
                                         className="ingredients__remove-btn"
                                         onClick={() => removeIngredient(ingredient.id)}
@@ -91,27 +186,42 @@ const IngredientsStep = ({
                 </div>
             )}
 
-            {/* Add Ingredients Button */}
+            {/* Add Ingredients Section */}
             <div className="ingredients-step__add-section">
-                <button
-                    className="ingredients-step__add-btn"
-                    onClick={() => setShowModal(true)}
-                >
-                    ➕ Add Ingredients
-                </button>
+                <div className="ingredients-step__add-buttons">
+                    <button
+                        className="ingredients-step__add-btn ingredients-step__add-btn--primary"
+                        onClick={() => setShowModal(true)}
+                    >
+                        <span className="ingredients-step__btn-icon">➕</span>
+                        Add Ingredients
+                    </button>
+
+                    {/* Pantry Integration */}
+                    <button
+                        className="ingredients-step__pantry-btn"
+                        onClick={fetchPantryItems}
+                        disabled={loadingPantry || !isAuthenticated}
+                        title={!isAuthenticated ? "Please log in to access your pantry" : "Load ingredients from your pantry"}
+                    >
+                        <span className="ingredients-step__btn-icon">
+                            {loadingPantry ? '⏳' : '🏺'}
+                        </span>
+                        {loadingPantry ? 'Loading Pantry...' : 'Use My Pantry'}
+                    </button>
+                </div>
+
+                {!isAuthenticated && (
+                    <p className="ingredients-step__auth-hint">
+                        💡 Log in to access ingredients from your pantry
+                    </p>
+                )}
 
                 {ingredients.length === 0 && (
                     <p className="ingredients-step__empty-state">
-                        Click "Add Ingredients" to get started with your recipe! 🍳
+                        Click "Add Ingredients" or "Use My Pantry" to get started with your recipe! 🍳
                     </p>
                 )}
-            </div>
-
-            {/* Pantry Integration */}
-            <div className="ingredients-step__pantry">
-                <button className="ingredients-step__pantry-btn">
-                    🏪 Use ingredients from my pantry
-                </button>
             </div>
 
             {/* Navigation */}
@@ -137,6 +247,15 @@ const IngredientsStep = ({
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 onAddIngredients={handleAddIngredients}
+                existingIngredients={ingredients}
+            />
+
+            {/* Pantry Selection Modal */}
+            <PantrySelectionModal
+                isOpen={showPantryModal}
+                onClose={() => setShowPantryModal(false)}
+                pantryItems={pantryItems}
+                onAddIngredients={handleAddFromPantry}
                 existingIngredients={ingredients}
             />
         </div>
