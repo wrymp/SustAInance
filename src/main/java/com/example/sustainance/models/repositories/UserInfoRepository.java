@@ -1,4 +1,4 @@
-package com.example.sustainance.repositories;
+package com.example.sustainance.models.repositories;
 
 import com.example.sustainance.models.entities.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;

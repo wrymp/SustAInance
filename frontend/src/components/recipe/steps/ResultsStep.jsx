@@ -14,6 +14,9 @@ const ResultsStep = ({
     const [showFullRecipe, setShowFullRecipe] = useState(false);
     const [animationStep, setAnimationStep] = useState(0);
 
+    // API Base URL
+    const API_BASE_URL = 'http://localhost:9097/api';
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -45,12 +48,100 @@ const ResultsStep = ({
         }
     }, [isGenerating]);
 
+    // Get current user from session
+    const getCurrentUser = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const user = await response.json();
+                return user.uuid;
+            }
+        } catch (error) {
+            console.error('Error getting current user:', error);
+        }
+        return null;
+    };
+
+    // Extract prep time from AI response or preferences
+    const extractPrepTime = (content, preferences) => {
+        if (!content) return preferences.cookingTime ? `${preferences.cookingTime} min` : '30 min';
+
+        // Look for prep time in the content
+        const prepTimeMatch = content.match(/(?:Prep Time|Cooking Time|Total Time):\s*([^\n]+)/i);
+        if (prepTimeMatch) {
+            return prepTimeMatch[1].trim();
+        }
+
+        // Fallback to preferences
+        return preferences.cookingTime ? `${preferences.cookingTime} min` : '30 min';
+    };
+
+    // Extract difficulty from AI response or preferences
+    const extractDifficulty = (content, preferences) => {
+        if (!content) return preferences.difficulty || 'Medium';
+
+        // Look for difficulty in the content
+        const difficultyMatch = content.match(/Difficulty:\s*([^\n]+)/i);
+        if (difficultyMatch) {
+            return difficultyMatch[1].trim();
+        }
+
+        // Fallback to preferences
+        return preferences.difficulty || 'Medium';
+    };
+
+    // Save recipe to backend API
+    const saveRecipeToAPI = async (recipeData) => {
+        console.log('👤 Getting current user...');
+        const userId = await getCurrentUser();
+
+        if (!userId) {
+            console.error('❌ No user ID found');
+            throw new Error('User not authenticated');
+        }
+
+        console.log('✅ User ID:', userId);
+
+        const payload = {
+            ...recipeData,
+            userId: userId
+        };
+
+        console.log('📤 Sending payload to API:', payload);
+        console.log('🔗 API URL:', `${API_BASE_URL}/recipeSaver/save`);
+
+        const response = await fetch(`${API_BASE_URL}/recipeSaver/save`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload),
+        });
+
+        console.log('📥 API Response status:', response.status);
+        console.log('📥 API Response headers:', response.headers);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ API Error response:', errorText);
+            throw new Error(`Failed to save recipe: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ API Success response:', result);
+        return result;
+    };
+
     // ✨ Extract used ingredients from AI response
     const extractUsedIngredients = (content) => {
         if (!content) return [];
-        
+
         console.log('🔍 Extracting used ingredients from content...');
-        
+
         // Look for the JSON section at the end: USED_INGREDIENTS_JSON:[...]
         const jsonMatch = content.match(/USED_INGREDIENTS_JSON:(\[.*?])/s);
         if (jsonMatch) {
@@ -64,13 +155,13 @@ const ResultsStep = ({
         } else {
             console.log('⚠️ No USED_INGREDIENTS_JSON found in response');
         }
-        
+
         // ✨ FALLBACK: Try to parse from the "Ingredients:" section in the recipe
         const ingredientsMatch = content.match(/Ingredients:\s*(.*?)(?=Instructions:|$)/s);
         if (ingredientsMatch) {
             const ingredientsText = ingredientsMatch[1];
             const parsedIngredients = [];
-            
+
             const lines = ingredientsText.split('\n');
             for (const line of lines) {
                 const trimmedLine = line.trim();
@@ -78,11 +169,11 @@ const ResultsStep = ({
                     // Parse line like "• Rice: 2 cups" or "• Black pepper: 1 tsp"
                     const ingredient = trimmedLine.substring(1).trim();
                     const colonIndex = ingredient.indexOf(':');
-                    
+
                     if (colonIndex !== -1) {
                         const name = ingredient.substring(0, colonIndex).trim();
                         const quantityAndUnit = ingredient.substring(colonIndex + 1).trim();
-                        
+
                         // Split quantity and unit (e.g., "2 cups" -> quantity="2", unit="cups")
                         const qtyMatch = quantityAndUnit.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
                         if (qtyMatch) {
@@ -102,13 +193,13 @@ const ResultsStep = ({
                     }
                 }
             }
-            
+
             if (parsedIngredients.length > 0) {
                 console.log('✅ Fallback: Parsed ingredients from recipe content:', parsedIngredients);
                 return parsedIngredients;
             }
         }
-        
+
         // ✨ LAST FALLBACK: Return original provided ingredients
         console.log('⚠️ Using original provided ingredients as fallback');
         return ingredients.map(ing => ({
@@ -121,21 +212,127 @@ const ResultsStep = ({
     // ✨ Clean the recipe content by removing the JSON section
     const cleanRecipeContent = (content) => {
         if (!content) return '';
-        
+
         // Remove the USED_INGREDIENTS_JSON section
         return content.replace(/\n\nUSED_INGREDIENTS_JSON:\[.*?]/s, '').trim();
     };
 
+    // Extract recipe title from content
+    const extractRecipeTitle = (content) => {
+        if (!content) return { title: 'Generated Recipe', contentWithoutTitle: content };
+
+        const cleanContent = cleanRecipeContent(content);
+
+        // Look for pattern: === [Recipe Name] ===
+        const titleMatch = cleanContent.match(/^===\s*(.+?)\s*===$/m);
+        if (titleMatch) {
+            const title = titleMatch[1].trim();
+            // Remove the title line from content
+            const contentWithoutTitle = cleanContent.replace(/^===\s*.+?\s*===\s*\n?/m, '').trim();
+            return { title, contentWithoutTitle };
+        }
+
+        return { title: 'Generated Recipe', contentWithoutTitle: cleanContent };
+    };
+
+    // Generate tags from preferences and ingredients
+    const generateTagsFromPreferences = () => {
+        const tags = [];
+
+        if (preferences.cuisine) {
+            tags.push(preferences.cuisine.toLowerCase());
+        }
+
+        if (preferences.mealType) {
+            tags.push(preferences.mealType.toLowerCase());
+        }
+
+        if (preferences.difficulty) {
+            tags.push(preferences.difficulty.toLowerCase());
+        }
+
+        if (preferences.dietaryRestrictions && preferences.dietaryRestrictions.length > 0) {
+            preferences.dietaryRestrictions.forEach(diet => {
+                tags.push(diet.toLowerCase());
+            });
+        }
+
+        // Add some ingredient-based tags
+        const usedIngredients = extractUsedIngredients(generatedRecipe?.content);
+        usedIngredients.slice(0, 3).forEach(ingredient => {
+            tags.push(ingredient.name.toLowerCase());
+        });
+
+        // Add some general tags
+        tags.push('ai-generated');
+        if (preferences.cookingTime && preferences.cookingTime <= 30) {
+            tags.push('quick');
+        }
+
+        return [...new Set(tags)]; // Remove duplicates
+    };
+
     const handleSaveRecipe = async () => {
+        console.log('🔄 Starting recipe save process...');
         setIsSaving(true);
+
         try {
-            if (onSaveRecipe) {
-                await onSaveRecipe(generatedRecipe);
+            // Extract recipe data first
+            const { title, contentWithoutTitle } = extractRecipeTitle(generatedRecipe.content);
+            const tagsArray = generateTagsFromPreferences();
+
+            // Create recipe description from preferences
+            let description = 'AI-generated recipe';
+            if (preferences.cuisine && preferences.mealType) {
+                description = `${preferences.cuisine} ${preferences.mealType.toLowerCase()}`;
+            } else if (preferences.cuisine) {
+                description = `${preferences.cuisine} cuisine`;
+            } else if (preferences.mealType) {
+                description = `Perfect for ${preferences.mealType.toLowerCase()}`;
             }
-            setIsSaved(true);
-            setTimeout(() => setIsSaved(false), 3000);
+
+            if (preferences.dietaryRestrictions && preferences.dietaryRestrictions.length > 0) {
+                description += ` (${preferences.dietaryRestrictions.join(', ')})`;
+            }
+
+            const recipeData = {
+                recipeName: title,
+                recipeDesc: description,
+                recipeText: contentWithoutTitle || cleanRecipeContent(generatedRecipe.content),
+                tags: tagsArray.join(', '),
+                prepTime: extractPrepTime(generatedRecipe.content, preferences), // 🔥 Add prepTime
+                difficulty: extractDifficulty(generatedRecipe.content, preferences) // 🔥 Add difficulty
+            };
+
+            console.log('📝 Recipe data to save:', recipeData);
+
+            // Always try API first
+            try {
+                console.log('🌐 Attempting API save...');
+                const result = await saveRecipeToAPI(recipeData);
+                console.log('✅ API save successful:', result);
+
+                setIsSaved(true);
+                setTimeout(() => setIsSaved(false), 3000);
+                return; // Exit early on success
+
+            } catch (apiError) {
+                console.error('❌ API save failed:', apiError);
+
+                // Only try prop callback as fallback if API fails
+                if (onSaveRecipe) {
+                    console.log('🔄 Falling back to prop callback...');
+                    await onSaveRecipe(generatedRecipe);
+                    setIsSaved(true);
+                    setTimeout(() => setIsSaved(false), 3000);
+                } else {
+                    throw apiError; // Re-throw if no fallback
+                }
+            }
+
         } catch (error) {
-            console.error('Error saving recipe:', error);
+            console.error('💥 Error saving recipe:', error);
+            alert(`Failed to save recipe: ${error.message}`);
         } finally {
             setIsSaving(false);
         }
@@ -158,24 +355,6 @@ const ResultsStep = ({
             navigator.clipboard.writeText(recipeText);
             alert('Recipe copied to clipboard!');
         }
-    };
-
-    // Extract recipe title from content
-    const extractRecipeTitle = (content) => {
-        if (!content) return { title: 'Generated Recipe', contentWithoutTitle: content };
-        
-        const cleanContent = cleanRecipeContent(content);
-        
-        // Look for pattern: === [Recipe Name] ===
-        const titleMatch = cleanContent.match(/^===\s*(.+?)\s*===$/m);
-        if (titleMatch) {
-            const title = titleMatch[1].trim();
-            // Remove the title line from content
-            const contentWithoutTitle = cleanContent.replace(/^===\s*.+?\s*===\s*\n?/m, '').trim();
-            return { title, contentWithoutTitle };
-        }
-        
-        return { title: 'Generated Recipe', contentWithoutTitle: cleanContent };
     };
 
     const formatRecipeContent = (content) => {
@@ -253,7 +432,7 @@ const ResultsStep = ({
                         <div className="results-step__recipe-metadata">
                             {recipe.cookingTime && (
                                 <div className="results-step__metadata-item">
-                                    <span className="results-step__metadata-label">⏰ Cooking Time:</span>
+                                    <span className="results-step__metadata-label">⏰ Prep Time:</span>
                                     <span className="results-step__metadata-value">{recipe.cookingTime}</span>
                                 </div>
                             )}
@@ -511,10 +690,6 @@ const ResultsStep = ({
                     <div className="results-step__tip-item">
                         <span className="results-step__tip-icon">📝</span>
                         <span>Add your own notes and modifications</span>
-                    </div>
-                    <div className="results-step__tip-item">
-                        <span className="results-step__tip-icon">⭐</span>
-                        <span>Rate the recipe after cooking</span>
                     </div>
                 </div>
             </div>

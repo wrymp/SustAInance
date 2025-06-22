@@ -6,7 +6,6 @@ import java.util.List;
 
 public class baseIngredients {
     public static final List<Ingredient> BASE_INGREDIENTS = List.of(
-            // Grains & Carbs (weight-based)
             new Ingredient("All-purpose flour", 0, "grams", "Grains & Carbs",
                     Arrays.asList("grams", "kg", "cups")),
             new Ingredient("Rice", 0, "grams", "Grains & Carbs",
@@ -18,7 +17,6 @@ public class baseIngredients {
             new Ingredient("Oats (rolled)", 0, "grams", "Grains & Carbs",
                     Arrays.asList("grams", "kg", "cups")),
 
-            // Vegetables (count or weight)
             new Ingredient("Onion", 0, "piece", "Vegetables",
                     Arrays.asList("piece", "count", "grams")),
             new Ingredient("Garlic", 0, "clove", "Vegetables",
@@ -36,7 +34,6 @@ public class baseIngredients {
             new Ingredient("Broccoli", 0, "grams", "Vegetables",
                     Arrays.asList("grams", "kg", "piece")),
 
-            // Meat & Fish (weight-based)
             new Ingredient("Chicken breast", 0, "grams", "Meat & Fish",
                     Arrays.asList("grams", "kg", "piece")),
             new Ingredient("Ground beef", 0, "grams", "Meat & Fish",
@@ -48,7 +45,6 @@ public class baseIngredients {
             new Ingredient("Bacon", 0, "grams", "Meat & Fish",
                     Arrays.asList("grams", "slices")),
 
-            // Dairy (volume or weight)
             new Ingredient("Milk", 0, "ml", "Dairy",
                     Arrays.asList("ml", "l", "cups")),
             new Ingredient("Cheese (cheddar)", 0, "grams", "Dairy",
@@ -60,7 +56,6 @@ public class baseIngredients {
             new Ingredient("Cream", 0, "ml", "Dairy",
                     Arrays.asList("ml", "l", "cups")),
 
-            // Spices & Herbs (small measurements)
             new Ingredient("Salt", 0, "tsp", "Spices & Herbs",
                     Arrays.asList("tsp", "tbsp", "grams")),
             new Ingredient("Black pepper", 0, "tsp", "Spices & Herbs",
@@ -74,7 +69,6 @@ public class baseIngredients {
             new Ingredient("Basil", 0, "tsp", "Spices & Herbs",
                     Arrays.asList("tsp", "tbsp", "grams", "leaves")),
 
-            // Liquids & Oils (volume-based)
             new Ingredient("Olive oil", 0, "tbsp", "Others",
                     Arrays.asList("tbsp", "tsp", "ml", "l", "cups")),
             new Ingredient("Vegetable oil", 0, "tbsp", "Others",
@@ -88,7 +82,6 @@ public class baseIngredients {
             new Ingredient("Honey", 0, "tbsp", "Others",
                     Arrays.asList("tbsp", "tsp", "ml", "grams")),
 
-            // Fruits (count or weight)
             new Ingredient("Apple", 0, "piece", "Fruits",
                     Arrays.asList("piece", "count", "grams")),
             new Ingredient("Banana", 0, "piece", "Fruits",
@@ -98,7 +91,6 @@ public class baseIngredients {
             new Ingredient("Strawberry", 0, "grams", "Fruits",
                     Arrays.asList("grams", "kg", "cups", "piece")),
 
-            // Flours & Bases
             new Ingredient("Whole wheat flour", 0, "grams", "Baking & Sweets",
                     Arrays.asList("grams", "cups")),
             new Ingredient("Bread flour", 0, "grams", "Baking & Sweets",
@@ -108,7 +100,6 @@ public class baseIngredients {
             new Ingredient("Self-raising flour", 0, "grams", "Baking & Sweets",
                     Arrays.asList("grams", "cups")),
 
-            // Sugars & Sweeteners
             new Ingredient("White sugar", 0, "grams", "Baking & Sweets",
                     Arrays.asList("grams", "cups", "tablespoons")),
             new Ingredient("Brown sugar", 0, "grams", "Baking & Sweets",
@@ -120,7 +111,6 @@ public class baseIngredients {
             new Ingredient("Vanilla extract", 0, "ml", "Baking & Sweets",
                     Arrays.asList("ml", "teaspoons")),
 
-            // Chocolate & Cocoa
             new Ingredient("Dark chocolate", 0, "grams", "Baking & Sweets",
                     Arrays.asList("grams", "ounces", "squares")),
             new Ingredient("Milk chocolate", 0, "grams", "Baking & Sweets",
@@ -132,7 +122,6 @@ public class baseIngredients {
             new Ingredient("Chocolate chips", 0, "grams", "Baking & Sweets",
                     Arrays.asList("grams", "cups")),
 
-            // Dried Legumes
             new Ingredient("Black beans", 0, "grams", "Legumes & Nuts",
                     Arrays.asList("grams", "cups", "cans")),
             new Ingredient("Kidney beans", 0, "grams", "Legumes & Nuts",
@@ -156,7 +145,6 @@ public class baseIngredients {
             new Ingredient("Lima beans", 0, "grams", "Legumes & Nuts",
                     Arrays.asList("grams", "cups", "cans")),
 
-            // Tree Nuts
             new Ingredient("Almonds", 0, "grams", "Legumes & Nuts",
                     Arrays.asList("grams", "cups", "pieces")),
             new Ingredient("Walnuts", 0, "grams", "Legumes & Nuts",
