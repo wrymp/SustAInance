@@ -1,5 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import "./SavedRecipesPage.css";
+
+const StarRating = ({ rating, readOnly = true, size = 'small' }) => {
+    const starSize = size === 'small' ? '14px' : size === 'large' ? '24px' : '18px';
+
+    return (
+        <div className={`star-rating star-rating--${size}`} style={{ fontSize: starSize }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                    key={star}
+                    className={`star-rating__star ${
+                        star <= rating ? 'star-rating__star--filled' : 'star-rating__star--empty'
+                    }`}
+                >
+                    ⭐
+                </span>
+            ))}
+        </div>
+    );
+};
 
 const RecipeCard = ({
                         recipe,
@@ -8,6 +27,47 @@ const RecipeCard = ({
                         onToggleFavorite,
                         onRecipeAction
                     }) => {
+    const [averageRating, setAverageRating] = useState(0);
+    const [isLoadingRating, setIsLoadingRating] = useState(true);
+
+    const API_BASE_URL = 'http://localhost:9097/api';
+
+    // Get average rating for recipe
+    const getAverageRating = async (recipeId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ratings/average/${recipeId}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                return await response.json();
+            }
+            return 0;
+        } catch (error) {
+            console.error('Error getting average rating:', error);
+            return 0;
+        }
+    };
+
+    // Load rating when component mounts
+    useEffect(() => {
+        const loadRating = async () => {
+            try {
+                const rating = await getAverageRating(recipe.id);
+                setAverageRating(rating || 0);
+            } catch (error) {
+                console.error('Error loading rating:', error);
+                setAverageRating(0);
+            } finally {
+                setIsLoadingRating(false);
+            }
+        };
+
+        if (recipe?.id) {
+            loadRating();
+        }
+    }, [recipe?.id]);
+
     const getDifficultyColor = (difficulty) => {
         if (!difficulty) return 'text-gray-600';
         switch (difficulty.toLowerCase()) {
@@ -47,7 +107,7 @@ const RecipeCard = ({
         if (!recipe.tags) return [];
 
         // Handle both string and array cases
-        if (Array.isArray(recipe. tags)) {
+        if (Array.isArray(recipe.tags)) {
             return recipe.tags.slice(0, 3);
         } else if (typeof recipe.tags === 'string') {
             return recipe.tags.split(',').map(tag => tag.trim()).slice(0, 3);
@@ -108,6 +168,20 @@ const RecipeCard = ({
             <div className="saved-recipes-page__card-content">
                 <h3 className="saved-recipes-page__recipe-title">{recipe.recipeName || recipe.title}</h3>
                 <p className="saved-recipes-page__recipe-description">{recipe.recipeDesc || recipe.description}</p>
+
+                {/* Rating Display */}
+                <div className="saved-recipes-page__recipe-rating">
+                    {isLoadingRating ? (
+                        <div className="saved-recipes-page__rating-loading">...</div>
+                    ) : (
+                        <div className="saved-recipes-page__rating-display">
+                            <StarRating rating={Math.round(averageRating)} size="small" />
+                            <span className="saved-recipes-page__rating-value">
+                                {averageRating > 0 ? averageRating.toFixed(1) : 'No ratings'}
+                            </span>
+                        </div>
+                    )}
+                </div>
 
                 <div className="saved-recipes-page__recipe-meta">
                     <div className="saved-recipes-page__meta-item">

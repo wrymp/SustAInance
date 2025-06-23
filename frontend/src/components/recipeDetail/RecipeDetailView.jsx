@@ -1,5 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './RecipeDetailView.css';
+
+const StarRating = ({ rating, onRatingChange, readOnly = false, size = 'medium' }) => {
+    const [hover, setHover] = useState(0);
+
+    const handleClick = (value) => {
+        if (!readOnly && onRatingChange) {
+            onRatingChange(value);
+        }
+    };
+
+    const starSize = size === 'small' ? '16px' : size === 'large' ? '32px' : '24px';
+
+    return (
+        <div className={`star-rating star-rating--${size}`} style={{ fontSize: starSize }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                    key={star}
+                    type="button"
+                    className={`star-rating__star ${
+                        star <= (hover || rating) ? 'star-rating__star--filled' : 'star-rating__star--empty'
+                    }`}
+                    onClick={() => handleClick(star)}
+                    onMouseEnter={() => !readOnly && setHover(star)}
+                    onMouseLeave={() => !readOnly && setHover(0)}
+                    disabled={readOnly}
+                    style={{ cursor: readOnly ? 'default' : 'pointer' }}
+                >
+                    ⭐
+                </button>
+            ))}
+        </div>
+    );
+};
 
 const RecipeDetailView = ({
                               recipe,
@@ -8,6 +41,166 @@ const RecipeDetailView = ({
                               onShare
                           }) => {
     const [showFullContent, setShowFullContent] = useState(false);
+    const [averageRating, setAverageRating] = useState(0);
+    const [userRating, setUserRating] = useState(0);
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [isLoadingRating, setIsLoadingRating] = useState(true);
+
+    const API_BASE_URL = 'http://localhost:9097/api';
+
+    // Get current user
+    const getCurrentUser = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const user = await response.json();
+                return user.uuid;
+            }
+        } catch (error) {
+            console.error('Error getting current user:', error);
+        }
+        return null;
+    };
+
+    // Get average rating for recipe
+    const getAverageRating = async (recipeId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ratings/average/${recipeId}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                return await response.json();
+            }
+            return 0;
+        } catch (error) {
+            console.error('Error getting average rating:', error);
+            return 0;
+        }
+    };
+
+    // Get user's specific rating for recipe
+    const getUserRating = async (recipeId, userId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ratings/user?recipeId=${recipeId}&userId=${userId}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const rating = await response.json();
+                return rating || 0;
+            }
+            return 0;
+        } catch (error) {
+            console.error('Error getting user rating:', error);
+            return 0;
+        }
+    };
+
+    const addOrUpdateRating = async (recipeId, userId, rating) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ratings/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    recipeId,
+                    userId,
+                    rating
+                }),
+            });
+            return response.ok;
+        } catch (error) {
+            console.error('Error adding rating:', error);
+            return false;
+        }
+    };
+
+    // Delete user's rating
+    const deleteRating = async (recipeId, userId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ratings/delete?recipeId=${recipeId}&userId=${userId}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+            return response.ok;
+        } catch (error) {
+            console.error('Error deleting rating:', error);
+            return false;
+        }
+    };
+
+    // Load ratings on component mount
+    useEffect(() => {
+        const loadRatings = async () => {
+            setIsLoadingRating(true);
+            try {
+                const userId = await getCurrentUser();
+                setCurrentUserId(userId);
+
+                if (userId) {
+                    // Get both average rating and user's specific rating
+                    const [avgRating, myRating] = await Promise.all([
+                        getAverageRating(recipe.id),
+                        getUserRating(recipe.id, userId)
+                    ]);
+
+                    setAverageRating(avgRating || 0);
+                    setUserRating(myRating || 0);
+                } else {
+                    // If no user, just get average rating
+                    const avgRating = await getAverageRating(recipe.id);
+                    setAverageRating(avgRating || 0);
+                    setUserRating(0);
+                }
+            } catch (error) {
+                console.error('Error loading ratings:', error);
+            } finally {
+                setIsLoadingRating(false);
+            }
+        };
+
+        if (recipe?.id) {
+            loadRatings();
+        }
+    }, [recipe?.id]);
+
+    const handleUserRating = async (rating) => {
+        if (!currentUserId) return;
+
+        try {
+            const success = await addOrUpdateRating(recipe.id, currentUserId, rating);
+            if (success) {
+                setUserRating(rating);
+                // Refresh average rating after user rates
+                const newAvgRating = await getAverageRating(recipe.id);
+                setAverageRating(newAvgRating || 0);
+            }
+        } catch (error) {
+            console.error('Error submitting rating:', error);
+        }
+    };
+
+    const handleRemoveRating = async () => {
+        if (!currentUserId || userRating === 0) return;
+
+        try {
+            const success = await deleteRating(recipe.id, currentUserId);
+            if (success) {
+                setUserRating(0);
+                // Refresh average rating after removing user's rating
+                const newAvgRating = await getAverageRating(recipe.id);
+                setAverageRating(newAvgRating || 0);
+            }
+        } catch (error) {
+            console.error('Error removing rating:', error);
+        }
+    };
 
     // Parse recipe content if it's formatted text
     const parseRecipeContent = (content) => {
@@ -90,6 +283,51 @@ const RecipeDetailView = ({
                 <div className="recipe-detail-view__title-section">
                     <h1 className="recipe-detail-view__title">{recipe.recipeName}</h1>
                     <p className="recipe-detail-view__description">{recipe.recipeDesc}</p>
+
+                    {/* Rating Section */}
+                    <div className="recipe-detail-view__rating-section">
+                        <div className="recipe-detail-view__average-rating">
+                            <h3>📊 Recipe Rating</h3>
+                            {isLoadingRating ? (
+                                <div className="recipe-detail-view__rating-loading">Loading ratings...</div>
+                            ) : (
+                                <div className="recipe-detail-view__rating-display">
+                                    <StarRating rating={Math.round(averageRating)} readOnly size="large" />
+                                    <span className="recipe-detail-view__rating-value">
+                                        {averageRating.toFixed(1)} / 5.0
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {currentUserId && (
+                            <div className="recipe-detail-view__user-rating">
+                                <h4>
+                                    {userRating > 0 ? `Your rating: ${userRating}/5` : 'Rate this recipe:'}
+                                </h4>
+                                <div className="recipe-detail-view__user-rating-controls">
+                                    <StarRating
+                                        rating={userRating}
+                                        onRatingChange={handleUserRating}
+                                        size="medium"
+                                    />
+                                    {userRating > 0 && (
+                                        <button
+                                            className="recipe-detail-view__remove-rating-btn"
+                                            onClick={handleRemoveRating}
+                                        >
+                                            Remove Rating
+                                        </button>
+                                    )}
+                                </div>
+                                {userRating > 0 && (
+                                    <p className="recipe-detail-view__rating-help-text">
+                                        Click on stars to update your rating
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Recipe Card */}
