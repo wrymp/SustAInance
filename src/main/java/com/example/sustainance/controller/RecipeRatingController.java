@@ -3,7 +3,9 @@ package com.example.sustainance.controller;
 import com.example.sustainance.config.authConfig.RequireAuthentication;
 import com.example.sustainance.models.DTO.RateRecipeRequest;
 import com.example.sustainance.services.RecipeRatingService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +21,13 @@ public class RecipeRatingController {
     private RecipeRatingService ratingService;
 
     @GetMapping("/user")
-    public ResponseEntity<Integer> getUserRating(@RequestParam UUID recipeId, @RequestParam UUID userId) {
+    public ResponseEntity<Integer> getUserRating(@RequestParam UUID recipeId, @RequestParam UUID userId, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             Integer rating = ratingService.getUserRating(recipeId, userId);
             return ResponseEntity.ok(rating);
         } catch (Exception e) {
@@ -30,8 +37,13 @@ public class RecipeRatingController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addOrUpdateRating(@Valid @RequestBody RateRecipeRequest request) {
+    public ResponseEntity<String> addOrUpdateRating(@Valid @RequestBody RateRecipeRequest request, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             ratingService.addOrUpdateRating(request.getRecipeId(), request.getUserId(), request.getRating());
             return ResponseEntity.ok("Rating saved successfully");
         } catch (Exception e) {
@@ -41,8 +53,13 @@ public class RecipeRatingController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteRating(@RequestParam UUID recipeId, @RequestParam UUID userId) {
+    public ResponseEntity<String> deleteRating(@RequestParam UUID recipeId, @RequestParam UUID userId, HttpServletRequest httpRequest) {
         try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             boolean deleted = ratingService.deleteRating(recipeId, userId);
             if (deleted) {
                 return ResponseEntity.ok("Rating deleted successfully");

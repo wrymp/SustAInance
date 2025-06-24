@@ -28,7 +28,6 @@ public class RecipeRatingService {
     @Transactional
     public void addOrUpdateRating(UUID recipeId, UUID userId, Integer rating) {
         try {
-            // Check if rating already exists
             Optional<RecipeRating> existingRating = repository.findByRecipeIdAndUserId(recipeId, userId);
 
             if (existingRating.isPresent()) {
