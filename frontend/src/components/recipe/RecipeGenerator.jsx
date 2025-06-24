@@ -12,12 +12,10 @@ const RecipeGenerator = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useContext(AuthContext);
 
-    // Wizard state
     const [currentStep, setCurrentStep] = useState(1);
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Recipe data
     const [ingredients, setIngredients] = useState([]);
     const [preferences, setPreferences] = useState({
         cuisine: '',
