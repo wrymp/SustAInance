@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PreferencesStep.css';
 
 const PreferencesStep = ({
@@ -6,8 +7,10 @@ const PreferencesStep = ({
                              setPreferences,
                              onNext,
                              onPrev,
-                             ingredients
+                             ingredients,
+                             fromPantry = false
                          }) => {
+    const navigate = useNavigate();
     const [errors, setErrors] = useState({});
 
     const cuisineTypes = [
@@ -84,13 +87,8 @@ const PreferencesStep = ({
     };
 
     const handleNext = () => {
-        // Optional validation - you can skip this if you want all preferences to be optional
+        // Optional validation
         const newErrors = {};
-
-        // Example: Make meal type required
-        // if (!preferences.mealType) {
-        //   newErrors.mealType = 'Please select a meal type';
-        // }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -98,6 +96,16 @@ const PreferencesStep = ({
         }
 
         onNext();
+    };
+
+    const handlePrev = () => {
+        if (fromPantry) {
+            // Go back to pantry page instead of ingredients step
+            navigate('/pantry');
+        } else {
+            // Normal flow - go back to ingredients step
+            onPrev();
+        }
     };
 
     const popularCuisines = cuisineTypes.filter(c => c.popular);
@@ -108,7 +116,27 @@ const PreferencesStep = ({
             <h2 className="step-title">Let's customize your recipe!</h2>
             <p className="step-subtitle">
                 Tell us your preferences to get the perfect recipe for your {ingredients.length} ingredients
+                {fromPantry && <span className="preferences__pantry-badge">🏺 From Pantry</span>}
             </p>
+
+            {/* Selected Ingredients Summary */}
+            {fromPantry && (
+                <div className="preferences__ingredients-summary">
+                    <h3 className="preferences__ingredients-title">
+                        🥫 Selected Pantry Ingredients ({ingredients.length})
+                    </h3>
+                    <div className="preferences__ingredients-list">
+                        {ingredients.map((ingredient, index) => (
+                            <div key={index} className="preferences__ingredient-item">
+                                <span className="preferences__ingredient-name">{ingredient.name}</span>
+                                <span className="preferences__ingredient-amount">
+                                    {ingredient.quantity} {ingredient.unit}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="preferences__form">
                 {/* Cuisine Type */}
@@ -177,7 +205,7 @@ const PreferencesStep = ({
                                 onClick={() => toggleDietaryRestriction(diet.value)}
                             >
                                 <span className="preferences__dietary-icon">{diet.icon}</span>
-                                <span className="preferences__dietary-label">{diet.label.replace(/🥬|🌱|🌾|🥛|🥑|🥩|🥗|☪️|✡️/g, '').trim()}</span>
+                                <span className="preferences__dietary-label">{diet.label.replace(/🥬|🌱|🌾|🥛|🥑|🥩|🥗|☪️|✡️|🚫/g, '').trim()}</span>
                             </button>
                         ))}
                     </div>
@@ -327,8 +355,8 @@ const PreferencesStep = ({
 
             {/* Navigation */}
             <div className="step-buttons">
-                <button className="btn btn-secondary" onClick={onPrev}>
-                    ← Back to Ingredients
+                <button className="btn btn-secondary" onClick={handlePrev}>
+                    {fromPantry ? '← Back to Pantry' : '← Back to Ingredients'}
                 </button>
                 <button className="btn btn-primary" onClick={handleNext}>
                     Generate My Recipe! 🚀

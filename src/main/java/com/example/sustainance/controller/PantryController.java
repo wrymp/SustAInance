@@ -24,7 +24,6 @@ public class PantryController {
 
     private final PantryService pantryService;
 
-
     public PantryController(PantryService pantryService) {
         this.pantryService = pantryService;
     }
@@ -39,6 +38,25 @@ public class PantryController {
 
             PantryItem result = pantryService.addIngredient(request);
             return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<PantryItem> updateIngredient(@Valid @RequestBody UpdateIngredientRequest request, HttpServletRequest httpRequest) {
+        try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+            if (!authenticatedUserId.equals(request.getUsersId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            PantryItem result = pantryService.updateIngredient(request);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

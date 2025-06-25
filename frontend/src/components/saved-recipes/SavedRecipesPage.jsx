@@ -413,7 +413,13 @@ const SavedRecipesPage = () => {
                     setSelectedRecipe(detailRecipe);
                     break;
                 case 'delete':
-                    if (window.confirm(`Are you sure you want to delete "${recipe.recipeName || recipe.title}"?`)) {
+                    // ✅ Enhanced confirmation dialog (keep this one)
+                    const recipeName = recipe.recipeName || recipe.title || 'this recipe';
+                    const confirmed = window.confirm(
+                        `🗑️ Delete Recipe?\n\nAre you sure you want to permanently delete "${recipeName}"?\n\nThis action cannot be undone and will remove the recipe from your saved collection.`
+                    );
+
+                    if (confirmed) {
                         await deleteRecipe(recipe.id);
 
                         if (selectedRecipe && selectedRecipe.id === recipe.id) {
@@ -425,6 +431,9 @@ const SavedRecipesPage = () => {
                         setAllRecipes(updatedRecipes);
                         setOriginalRecipes(prev => prev.filter(r => r.id !== recipe.id));
                         setCategories(generateCategoriesFromRecipes(updatedRecipes));
+
+                        // ✅ Optional: Show success message
+                        console.log(`✅ "${recipeName}" has been deleted successfully`);
                     }
                     break;
                 case 'edit':

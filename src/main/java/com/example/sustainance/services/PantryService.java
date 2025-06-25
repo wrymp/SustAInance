@@ -15,11 +15,9 @@ public class PantryService {
 
     private final PantryItemRepository pantryItemRepository;
 
-
     public PantryService(PantryItemRepository pantryItemRepository) {
         this.pantryItemRepository = pantryItemRepository;
     }
-
 
     public PantryItem addIngredient(UpdateIngredientRequest request) {
         Optional<PantryItem> existingItem = pantryItemRepository
@@ -27,6 +25,13 @@ public class PantryService {
 
         if (existingItem.isPresent()) {
             PantryItem item = existingItem.get();
+
+            // Check if units match
+            if (!item.getUnit().equals(request.getUnit())) {
+                throw new RuntimeException("Unit mismatch: existing item has unit '" + item.getUnit() +
+                        "' but you're trying to add with unit '" + request.getUnit() + "'");
+            }
+
             String newCount = addCounts(item.getCount(), request.getCount());
             item.setCount(newCount);
             return pantryItemRepository.save(item);
@@ -41,6 +46,31 @@ public class PantryService {
         }
     }
 
+    // Add new method for updating existing items
+    public PantryItem updateIngredient(UpdateIngredientRequest request) {
+        Optional<PantryItem> existingItem = pantryItemRepository
+                .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());
+
+        if (existingItem.isPresent()) {
+            PantryItem item = existingItem.get();
+
+            // If ingredient name is being changed, check for conflicts
+            if (!item.getIngredientName().equals(request.getIngredientName())) {
+                Optional<PantryItem> conflictItem = pantryItemRepository
+                        .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());
+                if (conflictItem.isPresent() && !conflictItem.get().getId().equals(item.getId())) {
+                    throw new RuntimeException("An ingredient with name '" + request.getIngredientName() + "' already exists");
+                }
+            }
+
+            item.setIngredientName(request.getIngredientName());
+            item.setCount(request.getCount());
+            item.setUnit(request.getUnit());
+            return pantryItemRepository.save(item);
+        } else {
+            throw new RuntimeException("Pantry item not found");
+        }
+    }
 
     public void removeIngredient(RemoveIngredientRequest request) {
         Optional<PantryItem> existingItem = pantryItemRepository

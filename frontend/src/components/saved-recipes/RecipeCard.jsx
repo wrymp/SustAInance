@@ -29,6 +29,7 @@ const RecipeCard = ({
                     }) => {
     const [averageRating, setAverageRating] = useState(0);
     const [isLoadingRating, setIsLoadingRating] = useState(true);
+    const [isDeleting, setIsDeleting] = useState(false); // ✅ Add delete loading state
 
     const API_BASE_URL = 'http://localhost:9097/api';
 
@@ -67,6 +68,25 @@ const RecipeCard = ({
             loadRating();
         }
     }, [recipe?.id]);
+
+    const handleDeleteClick = async () => {
+        try {
+            setIsDeleting(true);
+            console.log('🗑️ Deleting recipe:', recipe.id);
+
+            // Call the parent's delete handler (parent will handle confirmation)
+            await onRecipeAction('delete', recipe);
+
+            // Show success message
+            console.log('✅ Recipe deleted successfully');
+
+        } catch (error) {
+            console.error('❌ Error deleting recipe:', error);
+            alert(`Failed to delete recipe: ${error.message}`);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     const getDifficultyColor = (difficulty) => {
         if (!difficulty) return 'text-gray-600';
@@ -120,7 +140,7 @@ const RecipeCard = ({
 
     return (
         <div
-            className={`saved-recipes-page__recipe-card ${isFavorite ? 'is-favorite' : ''}`}
+            className={`saved-recipes-page__recipe-card ${isFavorite ? 'is-favorite' : ''} ${isDeleting ? 'is-deleting' : ''}`}
             style={{
                 '--card-gradient': recipe.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 '--card-color': recipe.color || '#667eea',
@@ -132,6 +152,16 @@ const RecipeCard = ({
                 <div className="saved-recipes-page__favorite-badge">
                     <span className="saved-recipes-page__badge-icon">💖</span>
                     <span className="saved-recipes-page__badge-text">Favorite</span>
+                </div>
+            )}
+
+            {/* ✅ Deleting Overlay */}
+            {isDeleting && (
+                <div className="saved-recipes-page__deleting-overlay">
+                    <div className="saved-recipes-page__deleting-content">
+                        <div className="saved-recipes-page__deleting-spinner">🗑️</div>
+                        <div className="saved-recipes-page__deleting-text">Deleting...</div>
+                    </div>
                 </div>
             )}
 
@@ -152,6 +182,7 @@ const RecipeCard = ({
                 <button
                     className={`saved-recipes-page__favorite-btn ${isFavorite ? 'active' : ''}`}
                     onClick={() => onToggleFavorite(recipe.id)}
+                    disabled={isDeleting}
                 >
                     <span className="saved-recipes-page__heart-icon">
                         {isFavorite ? '💖' : '🤍'}
@@ -207,17 +238,28 @@ const RecipeCard = ({
 
             <div className="saved-recipes-page__card-footer">
                 <div className="saved-recipes-page__action-buttons">
+                    {/* ✅ Enhanced Delete Button */}
                     <button
-                        className="saved-recipes-page__action-btn saved-recipes-page__remove-btn"
-                        data-tooltip="Remove from Saved"
-                        onClick={() => onRecipeAction('remove', recipe)}
+                        className={`saved-recipes-page__action-btn saved-recipes-page__delete-btn ${isDeleting ? 'deleting' : ''}`}
+                        data-tooltip={isDeleting ? "Deleting..." : "Delete Recipe"}
+                        onClick={handleDeleteClick}
+                        disabled={isDeleting}
                     >
-                        <span className="saved-recipes-page__btn-icon">🗑️</span>
+                        <span className="saved-recipes-page__btn-icon">
+                            {isDeleting ? '⏳' : '🗑️'}
+                        </span>
+                        {isDeleting && (
+                            <div className="saved-recipes-page__delete-ripple">
+                                <span className="saved-recipes-page__ripple-effect"></span>
+                            </div>
+                        )}
                     </button>
+
                     <button
                         className="saved-recipes-page__action-btn saved-recipes-page__share-btn"
                         data-tooltip="Share Recipe"
                         onClick={() => onRecipeAction('share', recipe)}
+                        disabled={isDeleting}
                     >
                         <span className="saved-recipes-page__btn-icon">📤</span>
                     </button>
@@ -226,6 +268,7 @@ const RecipeCard = ({
                 <button
                     className="saved-recipes-page__view-recipe-btn"
                     onClick={() => onRecipeAction('view', recipe)}
+                    disabled={isDeleting}
                 >
                     <span className="saved-recipes-page__btn-glow"></span>
                     <span className="saved-recipes-page__btn-text">👁️ View Recipe</span>

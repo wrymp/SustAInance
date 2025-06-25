@@ -2325,3 +2325,204 @@
     color: rgba(255, 255, 255, 0.6);
     font-style: italic;
 }
+/* ✅ Enhanced Delete Button Styles */
+.saved-recipes-page__delete-btn {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    color: #dc2626 !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.saved-recipes-page__delete-btn:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.saved-recipes-page__delete-btn.deleting {
+    background: rgba(239, 68, 68, 0.3) !important;
+    color: #b91c1c !important;
+    animation: deleteButtonPulse 1.5s ease-in-out infinite;
+}
+
+.saved-recipes-page__delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Delete Button Pulse Animation */
+@keyframes deleteButtonPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+}
+
+/* Delete Ripple Effect */
+.saved-recipes-page__delete-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.saved-recipes-page__ripple-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #dc2626;
+    border-radius: 50%;
+    animation: rippleExpand 1.5s ease-out infinite;
+}
+
+@keyframes rippleExpand {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+    }
+    100% {
+        width: 60px;
+        height: 60px;
+        opacity: 0;
+    }
+}
+
+/* ✅ Deleting Overlay */
+.saved-recipes-page__deleting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(239, 68, 68, 0.1);
+    backdrop-filter: blur(4px);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    animation: fadeInOverlay 0.3s ease-out;
+}
+
+.saved-recipes-page__deleting-content {
+    text-align: center;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.saved-recipes-page__deleting-spinner {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    animation: deletingSpinner 1s ease-in-out infinite;
+}
+
+.saved-recipes-page__deleting-text {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@keyframes deletingSpinner {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+    75% {
+        transform: scale(0.9) rotate(5deg);
+    }
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+}
+
+/* ✅ Card Deleting State */
+.saved-recipes-page__recipe-card.is-deleting {
+    pointer-events: none;
+    opacity: 0.7;
+    transform: scale(0.98);
+    transition: all 0.3s ease;
+}
+
+/* ✅ Enhanced Tooltips for Delete Button */
+.saved-recipes-page__action-btn[data-tooltip]:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 8px;
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.saved-recipes-page__action-btn[data-tooltip]:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid rgba(0, 0, 0, 0.9);
+    margin-bottom: 2px;
+    z-index: 1000;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-2px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ✅ Responsive Improvements */
+@media (max-width: 768px) {
+    .saved-recipes-page__deleting-overlay {
+        backdrop-filter: blur(2px);
+    }
+
+    .saved-recipes-page__deleting-spinner {
+        font-size: 1.5rem;
+    }
+
+    .saved-recipes-page__deleting-text {
+        font-size: 0.875rem;
+    }
+}
