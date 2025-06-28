@@ -81,135 +81,156 @@ const RecipeGenerator = () => {
         }
     }, [location.state]);
 
-    // ✅ IMPROVED: Extract used ingredients with better fallback logic
+    // ✅ MUCH IMPROVED: Extract used ingredients with multiple fallback strategies
     const extractUsedIngredients = (content) => {
         if (!content) return [];
 
-        console.log('🔍 Extracting used ingredients from AI response...');
-        console.log('📝 Full AI response:', content.substring(0, 500) + '...');
+        console.log('🔍 DEBUGGING: Extracting used ingredients from AI response...');
+        console.log('📝 First 800 chars of AI response:', content.substring(0, 800));
 
-        // Look for the JSON section at the end: USED_INGREDIENTS_JSON:[...]
+        // Strategy 1: Look for JSON section at the end
         const jsonMatch = content.match(/USED_INGREDIENTS_JSON:(\[.*?])/s);
         if (jsonMatch) {
             try {
                 const usedIngredients = JSON.parse(jsonMatch[1]);
-                console.log('✅ Successfully parsed used ingredients from JSON:', usedIngredients);
+                console.log('✅ SUCCESS: Found used ingredients in JSON format:', usedIngredients);
                 return usedIngredients;
             } catch (error) {
-                console.error('❌ Error parsing used ingredients JSON:', error);
+                console.error('❌ Error parsing JSON ingredients:', error);
             }
         } else {
             console.log('⚠️ No USED_INGREDIENTS_JSON found in response');
         }
 
-        // FALLBACK 1: Try to parse from the "Ingredients:" section in the recipe
-        const ingredientsMatch = content.match(/Ingredients:\s*(.*?)(?=Instructions:|Directions:|Method:|$)/si);
-        if (ingredientsMatch) {
-            const ingredientsText = ingredientsMatch[1];
-            console.log('📋 Found ingredients section:', ingredientsText.substring(0, 200) + '...');
+        // Strategy 2: Parse ingredients section with better regex
+        const ingredientsSectionMatch = content.match(/(?:Ingredients|INGREDIENTS):\s*(.*?)(?:\n\s*(?:Instructions|Directions|Method|Steps|INSTRUCTIONS|DIRECTIONS|METHOD|STEPS):|$)/si);
+
+        if (ingredientsSectionMatch) {
+            const ingredientsText = ingredientsSectionMatch[1];
+            console.log('📋 Found ingredients section:', ingredientsText);
 
             const parsedIngredients = [];
             const lines = ingredientsText.split('\n');
 
             for (const line of lines) {
                 const trimmedLine = line.trim();
-                if (trimmedLine && (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*'))) {
-                    let ingredient = trimmedLine.substring(1).trim();
+                if (trimmedLine && (trimmedLine.match(/^[\*\-\•\d]/))) {
+                    let ingredient = trimmedLine.replace(/^[\*\-\•\s]*/, '').trim();
 
-                    // Remove any markdown formatting
+                    // Remove markdown formatting
                     ingredient = ingredient.replace(/\*\*/g, '').replace(/\*/g, '');
 
-                    // Try to extract quantity and unit from ingredient line
-                    // Examples: "2 cups flour", "1 tablespoon olive oil", "500g chicken"
-                    const quantityMatch = ingredient.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*([a-zA-Z]+)?\s+(.+)$/);
+                    // Enhanced quantity extraction patterns
+                    const patterns = [
+                        // "2 cups flour" or "1.5 cups flour"
+                        /^(\d+(?:\.\d+)?(?:\/\d+)?)\s+(cups?|cup|tbsp|tablespoons?|tsp|teaspoons?|oz|ounces?|lbs?|pounds?|g|grams?|kg|ml|l|liters?)\s+(.+)$/i,
+                        // "2 large eggs" or "3 medium onions"
+                        /^(\d+(?:\.\d+)?)\s+(large|medium|small)?\s*(.+)$/i,
+                        // "1/2 of a large onion"
+                        /^(\d+\/\d+)\s+(?:of\s+a\s+)?(.+)$/i,
+                    ];
 
-                    if (quantityMatch) {
-                        const [, qty, unit, name] = quantityMatch;
-                        parsedIngredients.push({
-                            name: name.trim(),
-                            quantity: qty,
-                            unit: unit || ''
-                        });
-                    } else {
-                        // If no quantity found, try to match ingredient names with original ingredients
-                        const ingredientName = ingredient.toLowerCase();
-                        const matchedOriginal = ingredients.find(orig =>
-                            ingredientName.includes(orig.name.toLowerCase()) ||
-                            orig.name.toLowerCase().includes(ingredientName)
-                        );
+                    let matched = false;
+                    for (const pattern of patterns) {
+                        const match = ingredient.match(pattern);
+                        if (match) {
+                            const qty = match[1];
+                            let unit = match[2] || '';
+                            let name = match[3] || match[2];
 
-                        if (matchedOriginal) {
+                            // Clean up the name
+                            name = name.replace(/^(large|medium|small)\s+/i, '').trim();
+
                             parsedIngredients.push({
-                                name: matchedOriginal.name,
-                                quantity: matchedOriginal.quantity || '1',
-                                unit: matchedOriginal.unit || ''
+                                name: name,
+                                quantity: qty,
+                                unit: unit
                             });
-                        } else {
-                            // Add with default quantity
-                            parsedIngredients.push({
-                                name: ingredient,
-                                quantity: '1',
-                                unit: ''
-                            });
+                            matched = true;
+                            break;
                         }
+                    }
+
+                    if (!matched && ingredient.length > 2) {
+                        // Fallback: just use the ingredient name with default quantity
+                        parsedIngredients.push({
+                            name: ingredient,
+                            quantity: '1',
+                            unit: 'portion'
+                        });
                     }
                 }
             }
 
             if (parsedIngredients.length > 0) {
-                console.log('✅ Fallback 1: Parsed ingredients from recipe content:', parsedIngredients);
+                console.log('✅ SUCCESS: Parsed ingredients from recipe content:', parsedIngredients);
                 return parsedIngredients;
             }
         }
 
-        // FALLBACK 2: Use intelligent matching with original ingredients
-        console.log('⚠️ Using intelligent matching with original ingredients');
-        const intelligentMatching = ingredients.map(originalIng => {
-            // For pantry ingredients, use a reasonable portion of what's available
-            if (originalIng.isFromPantry) {
-                const availableQty = parseFloat(originalIng.quantity) || 1;
-                // Use between 25% to 100% of available ingredient, depending on type
-                let usageRatio = 0.5; // Default 50%
+        // Strategy 3: Intelligent matching with original ingredients (ENHANCED)
+        console.log('🧠 Using intelligent matching with original ingredients');
+        console.log('🏺 Original ingredients available:', ingredients.map(ing => `${ing.name} (${ing.quantity} ${ing.unit})`));
 
-                // Adjust usage ratio based on ingredient type and unit
-                if (originalIng.unit.toLowerCase().includes('piece') ||
-                    originalIng.unit.toLowerCase().includes('item')) {
-                    usageRatio = Math.min(1, Math.ceil(availableQty * 0.3)); // Use whole pieces
-                } else if (originalIng.unit.toLowerCase().includes('cup') ||
-                    originalIng.unit.toLowerCase().includes('gram') ||
-                    originalIng.unit.toLowerCase().includes('ml')) {
-                    usageRatio = 0.4; // Use 40% of measured ingredients
+        const intelligentMatching = ingredients
+            .filter(ing => ing.isFromPantry) // Only process pantry ingredients
+            .map(originalIng => {
+                const availableQty = parseFloat(originalIng.quantity) || 1;
+
+                // Determine usage based on ingredient type and typical cooking portions
+                let usageRatio = 0.3; // Default 30%
+                let usedQuantity;
+
+                const name = originalIng.name.toLowerCase();
+                const unit = originalIng.unit.toLowerCase();
+
+                // Adjust usage based on ingredient type
+                if (unit.includes('piece') || unit.includes('item') || unit.includes('whole')) {
+                    // For whole items, use 1 unless we have very few
+                    usedQuantity = Math.min(1, Math.ceil(availableQty * 0.5));
+                } else if (name.includes('spice') || name.includes('herb') || name.includes('salt') || name.includes('pepper')) {
+                    // Spices and herbs - use very little
+                    usedQuantity = Math.max(0.1, availableQty * 0.1);
+                } else if (name.includes('oil') || name.includes('butter') || name.includes('vinegar')) {
+                    // Cooking oils and fats - moderate usage
+                    usedQuantity = Math.max(0.25, availableQty * 0.2);
+                } else if (name.includes('flour') || name.includes('sugar') || name.includes('rice')) {
+                    // Staples - moderate usage
+                    usedQuantity = Math.max(0.5, availableQty * 0.4);
+                } else if (name.includes('meat') || name.includes('chicken') || name.includes('beef') || name.includes('fish')) {
+                    // Proteins - substantial portion
+                    usedQuantity = Math.max(0.3, availableQty * 0.6);
+                } else if (name.includes('vegetable') || name.includes('onion') || name.includes('carrot') || name.includes('potato')) {
+                    // Vegetables - moderate to substantial
+                    usedQuantity = Math.max(0.2, availableQty * 0.4);
+                } else {
+                    // Default case
+                    usedQuantity = Math.max(0.1, availableQty * usageRatio);
                 }
 
-                const usedQuantity = Math.max(0.1, availableQty * usageRatio);
+                // Round to reasonable precision
+                usedQuantity = Math.round(usedQuantity * 100) / 100;
+
+                console.log(`🥘 Will use ${usedQuantity} ${originalIng.unit} of ${originalIng.name} (available: ${availableQty} ${originalIng.unit})`);
 
                 return {
                     name: originalIng.name,
                     quantity: usedQuantity.toString(),
                     unit: originalIng.unit
                 };
-            } else {
-                // For manually added ingredients, use what was specified or a default
-                return {
-                    name: originalIng.name,
-                    quantity: originalIng.quantity || '1',
-                    unit: originalIng.unit || ''
-                };
-            }
-        });
+            });
 
-        console.log('🧠 Intelligent matching result:', intelligentMatching);
+        console.log('🧠 Final intelligent matching result:', intelligentMatching);
         return intelligentMatching;
     };
 
-    // ✅ ENHANCED: Function to deduct actual used amounts from pantry
+    // ✅ FIXED: Convert count to string for backend DTO
     const takePantryIngredients = async (originalIngredients, usedIngredients, user) => {
         if (!user?.uuid) {
             console.log('❌ No authenticated user for pantry deduction');
             return { success: false, error: 'User not authenticated' };
         }
 
-        // Filter original ingredients that came from pantry
         const pantryIngredients = originalIngredients.filter(ing => ing.isFromPantry && ing.pantryId);
 
         if (pantryIngredients.length === 0) {
@@ -217,160 +238,102 @@ const RecipeGenerator = () => {
             return { success: true, deducted: [], totalProcessed: 0 };
         }
 
+        console.log(`\n🏺 ======= PANTRY DEDUCTION PROCESS =======`);
         console.log(`🏺 Processing ${pantryIngredients.length} pantry ingredients for deduction`);
-        console.log('📋 Pantry ingredients to process:', pantryIngredients.map(ing => ({
-            name: ing.name,
-            available: `${ing.quantity} ${ing.unit}`,
-            pantryId: ing.pantryId
-        })));
-        console.log('📋 Used ingredients from recipe:', usedIngredients);
 
         const results = [];
         const errors = [];
 
-        // Process each pantry ingredient
         for (const pantryIngredient of pantryIngredients) {
             try {
-                console.log(`\n🔍 Processing pantry ingredient: ${pantryIngredient.name}`);
+                console.log(`\n🔍 ===== Processing: ${pantryIngredient.name} =====`);
 
-                // ✅ FIND THE ACTUAL AMOUNT USED IN THE RECIPE (flexible matching)
+                // Find matching used ingredient
                 const usedIngredient = usedIngredients.find(used => {
                     const usedName = used.name.toLowerCase().trim();
                     const pantryName = pantryIngredient.name.toLowerCase().trim();
 
-                    return usedName === pantryName ||
-                        usedName.includes(pantryName) ||
-                        pantryName.includes(usedName);
+                    const exactMatch = usedName === pantryName;
+                    const containsMatch = usedName.includes(pantryName) || pantryName.includes(usedName);
+                    const wordMatch = usedName.split(' ').some(word =>
+                        pantryName.split(' ').some(pantryWord =>
+                            word === pantryWord && word.length > 2
+                        )
+                    );
+
+                    return exactMatch || containsMatch || wordMatch;
                 });
 
-                if (!usedIngredient) {
-                    console.log(`⚠️ Pantry ingredient "${pantryIngredient.name}" not found in used ingredients - using default portion`);
+                let quantityToUse;
+                let unitToUse = pantryIngredient.unit;
 
-                    // Use a reasonable default portion (e.g., 30% of available)
+                if (usedIngredient) {
+                    quantityToUse = parseFloat(usedIngredient.quantity) || 0;
+                    unitToUse = usedIngredient.unit || pantryIngredient.unit;
+                    console.log(`✅ Found matching used ingredient: ${quantityToUse} ${unitToUse}`);
+                } else {
                     const availableQty = parseFloat(pantryIngredient.quantity) || 1;
-                    const defaultUsage = Math.max(0.1, availableQty * 0.3);
-
-                    const requestBody = {
-                        usersId: user.uuid,
-                        ingredientName: pantryIngredient.name,
-                        count: defaultUsage,
-                        unit: pantryIngredient.unit
-                    };
-
-                    console.log(`🏺 Taking default portion from pantry: ${defaultUsage} ${pantryIngredient.unit} of ${pantryIngredient.name}`);
-
-                    const response = await fetch('http://localhost:9097/api/pantry/take', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify(requestBody)
-                    });
-
-                    const responseText = await response.text();
-                    console.log(`📡 API Response for ${pantryIngredient.name}:`, response.status, responseText);
-
-                    if (response.ok) {
-                        console.log(`✅ Successfully took ${defaultUsage} ${pantryIngredient.unit} of ${pantryIngredient.name}`);
-                        results.push({
-                            ingredient: pantryIngredient.name,
-                            quantityProvided: pantryIngredient.quantity,
-                            quantityUsed: defaultUsage,
-                            unit: pantryIngredient.unit,
-                            status: 'success',
-                            message: 'Used default portion (ingredient not explicitly found in recipe)'
-                        });
-                    } else {
-                        console.log(`❌ Failed to take ${pantryIngredient.name}:`, responseText);
-                        errors.push({
-                            ingredient: pantryIngredient.name,
-                            error: responseText,
-                            status: response.status
-                        });
-                    }
-                    continue;
+                    quantityToUse = Math.max(0.1, availableQty * 0.3);
+                    console.log(`⚠️ No matching used ingredient, using default: ${quantityToUse} ${unitToUse}`);
                 }
 
-                // ✅ USE THE ACTUAL USED QUANTITY FROM RECIPE
-                const actualQuantityUsed = parseFloat(usedIngredient.quantity) || 0;
-                const actualUnitUsed = usedIngredient.unit || pantryIngredient.unit;
-
-                if (actualQuantityUsed <= 0) {
-                    console.log(`⚠️ No valid quantity used for "${pantryIngredient.name}" - using minimal amount`);
-
-                    const requestBody = {
-                        usersId: user.uuid,
-                        ingredientName: pantryIngredient.name,
-                        count: 0.1, // Use minimal amount
-                        unit: pantryIngredient.unit
-                    };
-
-                    const response = await fetch('http://localhost:9097/api/pantry/take', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify(requestBody)
-                    });
-
-                    const responseText = await response.text();
-
-                    if (response.ok) {
-                        results.push({
-                            ingredient: pantryIngredient.name,
-                            quantityProvided: pantryIngredient.quantity,
-                            quantityUsed: 0.1,
-                            unit: pantryIngredient.unit,
-                            status: 'success',
-                            message: 'Used minimal amount (no valid quantity found)'
-                        });
-                    } else {
-                        errors.push({
-                            ingredient: pantryIngredient.name,
-                            error: responseText,
-                            status: response.status
-                        });
-                    }
-                    continue;
+                if (quantityToUse <= 0) {
+                    quantityToUse = 0.1;
                 }
 
+                // ✅ FIXED: Convert count to string and ensure all fields are strings
                 const requestBody = {
-                    usersId: user.uuid,
-                    ingredientName: pantryIngredient.name,
-                    count: actualQuantityUsed,
-                    unit: actualUnitUsed
+                    usersId: user.uuid,                    // UUID (stays as is)
+                    ingredientName: pantryIngredient.name, // String ✓
+                    count: quantityToUse.toString(),       // ✅ Convert number to string!
+                    unit: unitToUse                        // String ✓
                 };
 
-                console.log(`🏺 Taking from pantry: ${actualQuantityUsed} ${actualUnitUsed} of ${pantryIngredient.name} (originally provided: ${pantryIngredient.quantity} ${pantryIngredient.unit})`);
+                console.log(`🌐 Making API call with CORRECTED format:`, {
+                    usersId: `${requestBody.usersId} (${typeof requestBody.usersId})`,
+                    ingredientName: `"${requestBody.ingredientName}" (${typeof requestBody.ingredientName})`,
+                    count: `"${requestBody.count}" (${typeof requestBody.count})`, // Should now be string
+                    unit: `"${requestBody.unit}" (${typeof requestBody.unit})`
+                });
 
                 const response = await fetch('http://localhost:9097/api/pantry/take', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     credentials: 'include',
                     body: JSON.stringify(requestBody)
                 });
 
+                console.log(`📡 Response Status: ${response.status}`);
+
                 const responseText = await response.text();
-                console.log(`📡 API Response for ${pantryIngredient.name}:`, response.status, responseText);
+                console.log(`📥 Response: "${responseText}"`);
 
                 if (response.ok) {
-                    console.log(`✅ Successfully took ${actualQuantityUsed} ${actualUnitUsed} of ${pantryIngredient.name}`);
+                    console.log(`✅ SUCCESS: Took ${quantityToUse} ${unitToUse} of ${pantryIngredient.name}`);
                     results.push({
                         ingredient: pantryIngredient.name,
                         quantityProvided: pantryIngredient.quantity,
-                        quantityUsed: actualQuantityUsed,
-                        unit: actualUnitUsed,
+                        quantityUsed: quantityToUse,
+                        unit: unitToUse,
                         status: 'success',
-                        message: responseText
+                        message: responseText,
+                        matched: !!usedIngredient
                     });
                 } else {
-                    console.log(`❌ Failed to take ${pantryIngredient.name}:`, responseText);
+                    console.log(`❌ FAILED: ${response.status} - ${responseText}`);
                     errors.push({
                         ingredient: pantryIngredient.name,
-                        error: responseText,
-                        status: response.status
+                        error: responseText || `HTTP ${response.status}`,
+                        status: response.status,
+                        requestData: requestBody,
+                        responseText: responseText
                     });
                 }
+
             } catch (error) {
-                console.error(`❌ Network error taking ${pantryIngredient.name}:`, error);
+                console.error(`❌ ERROR processing ${pantryIngredient.name}:`, error);
                 errors.push({
                     ingredient: pantryIngredient.name,
                     error: error.message,
@@ -383,12 +346,27 @@ const RecipeGenerator = () => {
             success: errors.length === 0,
             deducted: results,
             errors: errors,
-            totalProcessed: pantryIngredients.length
+            totalProcessed: pantryIngredients.length,
+            successCount: results.length,
+            errorCount: errors.length
         };
 
-        console.log('🏺 Final pantry deduction result:', finalResult);
+        console.log(`\n🏺 ======= FINAL PANTRY DEDUCTION RESULT =======`);
+        console.log(`✅ Successful deductions: ${results.length}`);
+        console.log(`❌ Failed deductions: ${errors.length}`);
+
+        if (errors.length > 0) {
+            console.log(`❌ Detailed errors:`, errors.map(e => ({
+                ingredient: e.ingredient,
+                error: e.error,
+                status: e.status
+            })));
+        }
+
+        console.log(`🏺 ===============================================\n`);
+
         return finalResult;
-    };
+};
 
     const handleNextStep = () => {
         if (currentStep < 3) {
@@ -402,7 +380,7 @@ const RecipeGenerator = () => {
         }
     };
 
-    // ✅ ENHANCED: handleGenerateRecipe function with better debugging
+    // ✅ FIXED: handleGenerateRecipe function with proper pantry deduction
     const handleGenerateRecipe = async () => {
         console.log('🚀 Starting recipe generation...');
         setIsGenerating(true);
@@ -417,21 +395,33 @@ const RecipeGenerator = () => {
             const response = await recipeAPI.generateRecipe(ingredients, preferences);
             const recipeContent = response.data;
             console.log('✅ Recipe generated successfully');
+            console.log('📝 Recipe content length:', recipeContent?.length);
 
             // 2. ✅ Extract the actual ingredients used from the AI response
+            console.log('🔍 Extracting used ingredients from AI response...');
             const usedIngredients = extractUsedIngredients(recipeContent);
             console.log('🔍 Final used ingredients for pantry deduction:', usedIngredients);
 
-            // 3. ✅ Process pantry deductions using ACTUAL used amounts
-            console.log('🏺 Processing pantry deductions...');
-            const pantryResult = await takePantryIngredients(ingredients, usedIngredients, currentUser);
-            setPantryUsage(pantryResult);
+            // 3. ✅ ENSURE PANTRY DEDUCTIONS HAPPEN - Check if we have pantry ingredients
+            const hasPantryIngredients = ingredients.some(ing => ing.isFromPantry);
+            console.log('🏺 Has pantry ingredients?', hasPantryIngredients);
+            console.log('🏺 Current user for pantry deduction:', currentUser?.uuid);
 
-            if (pantryResult.success && pantryResult.deducted.length > 0) {
-                console.log(`🏺 Successfully processed pantry deductions:`, pantryResult.deducted);
-            } else if (pantryResult.errors && pantryResult.errors.length > 0) {
-                console.log(`⚠️ Some pantry deductions failed:`, pantryResult.errors);
+            let pantryResult = { success: true, deducted: [], errors: [], totalProcessed: 0 };
+
+            if (hasPantryIngredients && currentUser?.uuid) {
+                console.log('🏺 ===== STARTING PANTRY DEDUCTION PROCESS =====');
+                pantryResult = await takePantryIngredients(ingredients, usedIngredients, currentUser);
+                console.log('🏺 ===== PANTRY DEDUCTION COMPLETED =====');
+            } else {
+                console.log('⚠️ Skipping pantry deduction:', {
+                    hasPantryIngredients,
+                    hasUser: !!currentUser?.uuid,
+                    userUuid: currentUser?.uuid
+                });
             }
+
+            setPantryUsage(pantryResult);
 
             // 4. Set the generated recipe with pantry usage info
             setGeneratedRecipe({
@@ -442,8 +432,21 @@ const RecipeGenerator = () => {
                 ).join(', '),
                 preferences: preferences,
                 createdAt: new Date().toISOString(),
-                pantryUsage: pantryResult
+                pantryUsage: pantryResult,
+                usedIngredients: usedIngredients // ✅ Store for debugging
             });
+
+            // 5. Log final results
+            if (pantryResult.success && pantryResult.deducted.length > 0) {
+                console.log(`🏺 ✅ Successfully processed ${pantryResult.deducted.length} pantry deductions`);
+                pantryResult.deducted.forEach(item => {
+                    console.log(`  - ${item.ingredient}: used ${item.quantityUsed} ${item.unit} (had ${item.quantityProvided} ${item.unit})`);
+                });
+            } else if (pantryResult.errors && pantryResult.errors.length > 0) {
+                console.log(`🏺 ⚠️ Some pantry deductions failed:`, pantryResult.errors);
+            } else if (hasPantryIngredients) {
+                console.log('🏺 ⚠️ No pantry deductions were processed despite having pantry ingredients');
+            }
 
             console.log('✅ Recipe generation and pantry processing completed successfully');
 
@@ -456,7 +459,8 @@ const RecipeGenerator = () => {
                 ingredients: ingredients.map(ing => ing.name).join(', '),
                 preferences: preferences,
                 createdAt: new Date().toISOString(),
-                error: true
+                error: true,
+                errorMessage: error.message
             });
         } finally {
             setIsGenerating(false);
