@@ -191,7 +191,7 @@ const HomePage = () => {
                             <span className="features__cta">Manage Pantry →</span>
                         </div>
 
-                        <div className="features__card" onClick={() => handleFeatureClick('/meal-planning')}>
+                        <div className="features__card" onClick={() => handleFeatureClick('/meal-plan')}>
                             <div className="features__icon">📅</div>
                             <h3>Meal Planning</h3>
                             <p>Plan your weekly meals based on your preferences and available ingredients.</p>

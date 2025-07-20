@@ -1,0 +1,700 @@
+/* Container */
+.meal-plan-container {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    max-width: 1200px;
+    position: relative;
+}
+
+/* Header */
+.meal-plan-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.meal-plan-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.meal-plan-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+/* Messages */
+.meal-plan-error,
+.meal-plan-success {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.meal-plan-error {
+    background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+.meal-plan-success {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    color: #2e7d32;
+    border-left: 4px solid #4caf50;
+}
+
+.meal-plan-error button,
+.meal-plan-success button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.meal-plan-auth-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-left: 4px solid #ffc107;
+}
+
+/* Existing Plans */
+.existing-plans-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border-left: 4px solid #17a2b8;
+}
+
+.existing-plans-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.existing-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.existing-plan-card {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.existing-plan-card:hover {
+    border-color: #17a2b8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2);
+}
+
+.plan-info h4 {
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.plan-info p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.load-plan-btn {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.load-plan-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* Settings */
+.meal-plan-settings {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.setting-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border-left: 4px solid #667eea;
+}
+
+.setting-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.optional-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.setting-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+/* Duration Selector */
+.duration-selector {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+}
+
+.duration-btn {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.duration-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.duration-btn.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.duration-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.duration-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Meals Selector */
+.meals-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.meals-btn {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meals-btn:hover {
+    border-color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.meals-btn.selected {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+}
+
+.meals-number {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.meals-label {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.meals-types {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+}
+
+/* Date Input */
+.date-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Preferences Grid */
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.preference-btn {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.preference-btn:hover {
+    border-color: var(--pref-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preference-btn.selected {
+    background: var(--pref-color);
+    color: white;
+    border-color: var(--pref-color);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.selected-preferences {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.clear-preferences-btn {
+    background: transparent;
+    color: #6c757d;
+    border: 2px solid #e9ecef;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-preferences-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+/* Generate Section */
+.generate-section {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    color: white;
+    margin-top: 2rem;
+}
+
+.generate-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 1.5rem 3rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 auto 1rem;
+}
+
+.generate-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.plan-summary {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+/* Results */
+.meal-plan-results {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.results-header {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border-left: 4px solid #28a745;
+}
+
+.results-header h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.results-header p {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.plan-preferences h4 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.preferences-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.preference-tag {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Meals Grid */
+.meals-grid {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.day-section {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.day-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.day-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.day-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.day-meals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.meal-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.meal-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.meal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.meal-icon {
+    font-size: 1.5rem;
+}
+
+.meal-type {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.meal-title {
+    color: #495057;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.meal-description {
+    color: #6c757d;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Results Actions */
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 2rem;
+    border-top: 2px solid #f8f9fa;
+}
+
+.save-btn,
+.regenerate-btn,
+.back-btn {
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.save-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.5);
+}
+
+.save-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.regenerate-btn {
+    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.regenerate-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.5);
+}
+
+.back-btn {
+    background: transparent;
+    color: #6c757d;
+    border: 2px solid #e9ecef;
+}
+
+.back-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    color: #495057;
+    transform: translateY(-2px);
+}
+
+/* Button Icons */
+.btn-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.generate-btn:hover .btn-icon,
+.save-btn:hover .btn-icon,
+.regenerate-btn:hover .btn-icon {
+    transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .meal-plan-container {
+        margin: 0 1rem;
+        padding: 2rem;
+    }
+
+    .meal-plan-title {
+        font-size: 2rem;
+    }
+
+    .duration-selector {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .meals-selector {
+        grid-template-columns: 1fr;
+    }
+
+    .preferences-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .existing-plans-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .day-meals {
+        grid-template-columns: 1fr;
+    }
+
+    .results-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .save-btn,
+    .regenerate-btn,
+    .back-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .meal-plan-container {
+        padding: 1.5rem;
+    }
+
+    .meal-plan-title {
+        font-size: 1.8rem;
+    }
+
+    .duration-selector {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .setting-section {
+        padding: 1.5rem;
+    }
+
+    .meal-card {
+        padding: 1rem;
+    }
+
+    .day-title {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .day-number {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1rem;
+    }
+
+    .selected-preferences {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
