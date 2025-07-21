@@ -16,7 +16,8 @@ import './App.css';
 import RecipeGenerator from "./components/recipe/RecipeGenerator";
 import SavedRecipesPage from "./components/saved-recipes/SavedRecipesPage";
 import PantryPage from "./components/pantry/PantryPage";
-import MealPlanMaker from "./components/meal/MealPlanMaker";
+import MealPlanMaker from "./components/mealPlan/MealPlanMaker";
+import CreateMealPlan from './components/mealPlan/CreateMealPlan';
 
 // Component to handle authenticated user redirects
 const AuthenticatedRedirect = () => {
@@ -51,6 +52,7 @@ function App() {
               <Route path="/saved-recipes" element={<SavedRecipesPage/>} />
               <Route path="/pantry" element={<PantryPage/>} />
               <Route path="/meal-plan" element={<MealPlanMaker/>} />
+              <Route path="/create-meal-plan" element={<CreateMealPlan />} />
               {/* Add your other protected routes here */}
             </Route>
 

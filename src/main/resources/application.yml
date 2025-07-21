@@ -20,9 +20,9 @@ server:
   port: 9097
   servlet:
     session:
-      timeout: 30m
+      timeout: 7d
       cookie:
-        max-age: 30m
+        max-age: 7d
         http-only: true
         secure: false
         same-site: lax

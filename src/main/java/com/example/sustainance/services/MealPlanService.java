@@ -62,7 +62,7 @@ public class MealPlanService {
         }
     }
 
-    public void deleteMealPlanByUserAndId(UUID userId, Long id) {
+    public void deleteMealPlanByUserAndId(UUID userId, UUID id) {
         if (mealPlanRepository.existsByUserIdAndId(userId, id)) {
             mealPlanRepository.deleteByUserIdAndId(userId, id);
         } else {

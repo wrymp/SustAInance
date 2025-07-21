@@ -108,7 +108,7 @@ public class MealPlanController {
     }
 
     @DeleteMapping("/user/{userId}/{id}")
-    public ResponseEntity<?> deleteMealPlanByUserAndId(@PathVariable UUID userId, @PathVariable Long id) {
+    public ResponseEntity<?> deleteMealPlanByUserAndId(@PathVariable UUID userId, @PathVariable UUID id) {
         try {
             System.out.println("Deleting meal plan " + id + " for user: " + userId);
             mealPlanService.deleteMealPlanByUserAndId(userId, id);

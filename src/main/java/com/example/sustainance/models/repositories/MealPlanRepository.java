@@ -17,7 +17,7 @@ public interface MealPlanRepository extends JpaRepository<MealPlan, Long> {
     @Query("SELECT mp FROM MealPlan mp WHERE mp.userId = :userId ORDER BY mp.createdAt DESC")
     List<MealPlan> findMealPlansByUserId(@Param("userId") UUID userId);
 
-    void deleteByUserIdAndId(UUID userId, Long id);
+    void deleteByUserIdAndId(UUID userId, UUID id);
 
-    boolean existsByUserIdAndId(UUID userId, Long id);
+    boolean existsByUserIdAndId(UUID userId, UUID id);
 }
