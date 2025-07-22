@@ -384,3 +384,264 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* Enhanced Pantry Styles for Preferences */
+
+.preferences__pantry-badge {
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(139, 69, 19, 0.3);
+}
+
+/* Enhanced Ingredients Summary for Pantry */
+.preferences__ingredients-summary {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.preferences__ingredients-summary--from-pantry {
+    background: linear-gradient(135deg, #FFF8DC, #FFEFD5);
+    border: 2px solid #D2691E;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(139, 69, 19, 0.15);
+}
+
+.preferences__ingredients-summary--from-pantry::before {
+    content: '🏺';
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 3rem;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.preferences__ingredients-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preferences__ingredients-summary--from-pantry .preferences__ingredients-title {
+    color: #8B4513;
+}
+
+.preferences__title-icon {
+    font-size: 1.5rem;
+}
+
+.preferences__pantry-master-badge {
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
+    animation: pantryPulse 2s ease-in-out infinite;
+}
+
+@keyframes pantryPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Individual Ingredient Items */
+.preferences__ingredients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preferences__ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.preferences__ingredient-item--from-pantry {
+    background: linear-gradient(135deg, #FFFAF0, #FDF6E3);
+    border: 2px solid #D2691E;
+    box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
+    position: relative;
+}
+
+.preferences__ingredient-item--from-pantry::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+    border-radius: 0 4px 4px 0;
+}
+
+.preferences__ingredient-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.preferences__ingredient-name {
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: capitalize;
+    font-size: 1rem;
+}
+
+.preferences__ingredient-item--from-pantry .preferences__ingredient-name {
+    color: #8B4513;
+    font-weight: 700;
+}
+
+.preferences__ingredient-pantry-tag {
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 1px 3px rgba(139, 69, 19, 0.3);
+}
+
+.preferences__ingredient-amount {
+    font-weight: 500;
+    color: #4a5568;
+    background: #f7fafc;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.preferences__ingredient-item--from-pantry .preferences__ingredient-amount {
+    background: rgba(139, 69, 19, 0.1);
+    color: #8B4513;
+    font-weight: 600;
+}
+
+/* Pantry Notice */
+.preferences__pantry-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(139, 69, 19, 0.1);
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border-left: 4px solid #D2691E;
+    box-shadow: inset 0 1px 3px rgba(139, 69, 19, 0.1);
+}
+
+.preferences__pantry-notice-icon {
+    color: #8B4513;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.preferences__pantry-notice-text {
+    color: #8B4513;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Hover Effects */
+.preferences__ingredient-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preferences__ingredient-item--from-pantry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(139, 69, 19, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .preferences__ingredients-summary--from-pantry {
+        padding: 16px;
+    }
+
+    .preferences__ingredients-summary--from-pantry::before {
+        font-size: 2rem;
+        top: 10px;
+        right: 15px;
+    }
+
+    .preferences__pantry-master-badge {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        margin-left: 8px;
+    }
+
+    .preferences__ingredient-item {
+        padding: 10px 12px;
+    }
+
+    .preferences__ingredient-info {
+        gap: 8px;
+    }
+
+    .preferences__ingredient-pantry-tag {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+
+    .preferences__pantry-notice {
+        padding: 12px 14px;
+    }
+}
+
+/* Animation for when ingredients load */
+.preferences__ingredient-item {
+    animation: slideInFromLeft 0.3s ease-out forwards;
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.preferences__ingredient-item:nth-child(1) { animation-delay: 0.1s; }
+.preferences__ingredient-item:nth-child(2) { animation-delay: 0.2s; }
+.preferences__ingredient-item:nth-child(3) { animation-delay: 0.3s; }
+.preferences__ingredient-item:nth-child(4) { animation-delay: 0.4s; }
+.preferences__ingredient-item:nth-child(5) { animation-delay: 0.5s; }

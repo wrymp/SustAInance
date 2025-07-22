@@ -121,19 +121,39 @@ const PreferencesStep = ({
 
             {/* Selected Ingredients Summary */}
             {fromPantry && (
-                <div className="preferences__ingredients-summary">
+                <div className="preferences__ingredients-summary preferences__ingredients-summary--from-pantry">
                     <h3 className="preferences__ingredients-title">
-                        🥫 Selected Pantry Ingredients ({ingredients.length})
+                        <span className="preferences__title-icon">🏺</span>
+                        Selected Pantry Ingredients ({ingredients.length})
+                        <span className="preferences__pantry-master-badge">FROM YOUR PANTRY</span>
                     </h3>
                     <div className="preferences__ingredients-list">
                         {ingredients.map((ingredient, index) => (
-                            <div key={index} className="preferences__ingredient-item">
-                                <span className="preferences__ingredient-name">{ingredient.name}</span>
+                            <div
+                                key={index}
+                                className={`preferences__ingredient-item ${
+                                    ingredient.isFromPantry ? 'preferences__ingredient-item--from-pantry' : ''
+                                }`}
+                            >
+                                <div className="preferences__ingredient-info">
+                                    <span className="preferences__ingredient-name">{ingredient.name}</span>
+                                    {ingredient.isFromPantry && (
+                                        <span className="preferences__ingredient-pantry-tag">
+                                            🏺 PANTRY
+                                        </span>
+                                    )}
+                                </div>
                                 <span className="preferences__ingredient-amount">
                                     {ingredient.quantity} {ingredient.unit}
                                 </span>
                             </div>
                         ))}
+                    </div>
+                    <div className="preferences__pantry-notice">
+                        <span className="preferences__pantry-notice-icon">ℹ️</span>
+                        <span className="preferences__pantry-notice-text">
+                            These ingredients will be automatically deducted from your pantry when you use this recipe!
+                        </span>
                     </div>
                 </div>
             )}

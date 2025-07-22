@@ -505,3 +505,258 @@
         padding: 2rem;
     }
 }
+
+/* Existing styles + new pantry styles */
+
+/* Pantry Badge Styles */
+.ingredients__pantry-badge {
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(139, 69, 19, 0.3);
+    animation: pantryGlow 0.3s ease-in-out;
+}
+
+.ingredients__pantry-icon {
+    font-size: 0.8rem;
+}
+
+@keyframes pantryGlow {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Enhanced Card Styles for Pantry Items */
+.ingredients__card {
+    position: relative;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.ingredients__card--from-pantry {
+    border: 2px solid #D2691E;
+    background: linear-gradient(135deg, #FFF8DC, #FFEFD5);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.ingredients__card--from-pantry::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #D2691E, #8B4513, #D2691E);
+    border-radius: 12px;
+    z-index: -1;
+    animation: pantryBorderGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pantryBorderGlow {
+    0% { opacity: 0.5; }
+    100% { opacity: 0.8; }
+}
+
+.ingredients__card--from-pantry::after {
+    content: '🏺';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.2rem;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.ingredients__card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.ingredients__card-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2d3748;
+    text-transform: capitalize;
+}
+
+.ingredients__card--from-pantry .ingredients__card-name {
+    color: #8B4513;
+    font-weight: 700;
+}
+
+.ingredients__card-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.ingredients__custom-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ingredients__remove-btn {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #e53e3e;
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.ingredients__remove-btn:hover {
+    background: #c53030;
+    transform: scale(1.1);
+}
+
+.ingredients__card-details {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.ingredients__quantity-input,
+.ingredients__unit-select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.ingredients__card--from-pantry .ingredients__quantity-input,
+.ingredients__card--from-pantry .ingredients__unit-select {
+    border-color: #D2691E;
+    background: rgba(255, 248, 220, 0.5);
+}
+
+.ingredients__quantity-input:focus,
+.ingredients__unit-select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.ingredients__card--from-pantry .ingredients__quantity-input:focus,
+.ingredients__card--from-pantry .ingredients__unit-select:focus {
+    border-color: #8B4513;
+    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+}
+
+/* Grid Layout */
+.ingredients__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ingredients__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ingredients__pantry-badge {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+
+    .ingredients__card--from-pantry::after {
+        font-size: 1rem;
+        top: 6px;
+        right: 6px;
+    }
+}
+
+/* Add some additional styles for better visual hierarchy */
+.current-ingredients__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.current-ingredients__title::before {
+    content: '🥘';
+    font-size: 1.5rem;
+}
+
+/* Loading and Error States */
+.ingredients-step__error {
+    background: linear-gradient(135deg, #fed7d7, #feb2b2);
+    border: 1px solid #fc8181;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ingredients-step__error-icon {
+    font-size: 1.2rem;
+}
+
+.ingredients-step__error-text {
+    flex: 1;
+    color: #c53030;
+    font-weight: 500;
+}
+
+.ingredients-step__error-close {
+    background: none;
+    border: none;
+    color: #c53030;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.ingredients-step__error-close:hover {
+    background: rgba(197, 48, 48, 0.1);
+}

@@ -75,7 +75,9 @@ public class PromptService {
             - Match the difficulty level requested
             - Design for the specified meal type
             
-            Format your response EXACTLY like this:
+            Format your response EXACTLY like this, make sure to
+            match the unit name to what was given, don't add anything to the unit name
+            or the ingredient name for that matter:
             
             === [Creative Recipe Name] ===
             

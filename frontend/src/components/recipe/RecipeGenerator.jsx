@@ -296,6 +296,8 @@ const RecipeGenerator = () => {
                     unit: `"${requestBody.unit}" (${typeof requestBody.unit})`
                 });
 
+                console.log("AAAAARGSSSSSSSSS")
+                console.log(JSON.stringify(requestBody))
                 const response = await fetch('http://localhost:9097/api/pantry/take', {
                     method: 'POST',
                     headers: {

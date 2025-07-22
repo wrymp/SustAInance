@@ -5,6 +5,7 @@ import com.example.sustainance.models.DTO.UpdateIngredientRequest;
 import com.example.sustainance.models.entities.PantryItem;
 import com.example.sustainance.models.repositories.PantryItemRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +82,7 @@ public class PantryService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public PantryItem takeIngredient(UpdateIngredientRequest request) {
         Optional<PantryItem> existingItem = pantryItemRepository
                 .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());
@@ -88,8 +90,8 @@ public class PantryService {
         if (existingItem.isPresent()) {
             PantryItem item = existingItem.get();
 
-            if(!item.getUnit().equals(request.getUnit())){
-                throw new RuntimeException("Ingredient Unit mismatch " + item.getUnit() + " " + request.getUnit());
+            if (!unitsAreCompatible(item.getUnit(), request.getUnit())) {
+                throw new RuntimeException("Unit mismatch: pantry has '" + item.getUnit() + "' but recipe needs '" + request.getUnit() + "'");
             }
 
             String newCount = subtractCounts(item.getCount(), request.getCount());
@@ -104,6 +106,19 @@ public class PantryService {
         } else {
             throw new RuntimeException("Ingredient not found in pantry for user: " + request.getUsersId());
         }
+    }
+
+    private boolean unitsAreCompatible(String unit1, String unit2) {
+        if (unit1 == null || unit2 == null) return false;
+
+        if (unit1.trim().equalsIgnoreCase(unit2.trim())) {
+            return true;
+        }
+
+        String clean1 = unit1.trim().split(" ")[0].toLowerCase();
+        String clean2 = unit2.trim().split(" ")[0].toLowerCase();
+
+        return clean1.equals(clean2);
     }
 
     public List<PantryItem> getUserPantry(UUID usersId) {

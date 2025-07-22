@@ -132,7 +132,12 @@ const IngredientsStep = ({
                     <h3 className="current-ingredients__title">Your Ingredients ({ingredients.length})</h3>
                     <div className="ingredients__grid">
                         {ingredients.map((ingredient) => (
-                            <div key={ingredient.id} className="ingredients__card">
+                            <div
+                                key={ingredient.id}
+                                className={`ingredients__card ${
+                                    ingredient.isFromPantry ? 'ingredients__card--from-pantry' : ''
+                                }`}
+                            >
                                 <div className="ingredients__card-main">
                                     <span className="ingredients__card-name">{ingredient.name}</span>
                                     <div className="ingredients__card-badges">
@@ -140,7 +145,10 @@ const IngredientsStep = ({
                                             <span className="ingredients__custom-badge">Custom</span>
                                         )}
                                         {ingredient.isFromPantry && (
-                                            <span className="ingredients__pantry-badge">From Pantry</span>
+                                            <span className="ingredients__pantry-badge">
+                                                <span className="ingredients__pantry-icon">🏺</span>
+                                                FROM PANTRY
+                                            </span>
                                         )}
                                     </div>
                                     <button

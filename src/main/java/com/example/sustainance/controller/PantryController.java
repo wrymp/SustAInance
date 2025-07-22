@@ -80,21 +80,26 @@ public class PantryController {
     }
 
     @PostMapping("/take")
+    @Transactional
     public ResponseEntity<String> takeIngredient(@Valid @RequestBody UpdateIngredientRequest request, HttpServletRequest httpRequest) {
         try {
             UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
             if (!authenticatedUserId.equals(request.getUsersId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
+
             PantryItem result = pantryService.takeIngredient(request);
+            System.out.println("SUCCY");
             if (result == null) {
                 return ResponseEntity.ok("Ingredient removed from pantry (count reached zero)");
             } else {
                 return ResponseEntity.ok("Ingredient count updated successfully");
             }
         } catch (RuntimeException e) {
+            System.out.println("ERROR 1");
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
+            System.out.println("ERROR 2");
             return ResponseEntity.badRequest().body("Error processing request");
         }
     }
