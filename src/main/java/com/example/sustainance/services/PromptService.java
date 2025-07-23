@@ -4,6 +4,8 @@ import com.example.sustainance.config.AIProperties;
 import com.example.sustainance.models.Preference.RecipePreferences;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PromptService {
 
@@ -15,10 +17,6 @@ public class PromptService {
 
     public String getRecipeSystemMessage() {
         return aiProperties.getPrompts().getRecipe().getSystemMessage();
-    }
-
-    public String getMealPlanSystemMessage() {
-        return aiProperties.getPrompts().getMealPlan().getSystemMessage();
     }
 
     public String buildRecipePrompt(String ingredients, RecipePreferences preferences) {
@@ -110,60 +108,84 @@ public class PromptService {
         );
     }
 
-    public String buildMealPlanPrompt(String foodPreferences, String planPreference, String timeframe, String ingredients) {
+    public String buildMealPlanStructurePrompt(int duration, int mealsPerDay, List<String> preferences) {
+        List<String> mealTypes = getMealTypes(mealsPerDay);
+        String preferencesStr = preferences != null && !preferences.isEmpty()
+                ? String.join(", ", preferences)
+                : "No specific preferences";
+
+        String jsonExample = """
+        {
+            "meals": [
+                {
+                    "day": 1,
+                    "mealType": "Breakfast",
+                    "title": "Example Meal Name",
+                    "content": "Brief description of the meal"
+                },
+                {
+                    "day": 1,
+                    "mealType": "Lunch",
+                    "title": "Another Meal Name",
+                    "content": "Brief description of this meal"
+                }
+            ],
+            "totalMeals": 2,
+            "status": "completed"
+        }
+        """;
+
         return String.format("""
-            Create a comprehensive meal plan with these specifications:
-            
-            PREFERENCES:
-            • Food preferences: %s
-            • Plan type: %s
-            • Duration: %s
-            
-            AVAILABLE INGREDIENTS:
-            %s
-            
-            REQUIREMENTS:
-            - Create realistic, balanced meals for the specified timeframe
-            - If timeframe is longer than 1 week, provide a weekly template with variations
-            - Use available ingredients efficiently
-            - Include prep times and cooking difficulty
-            - If ingredients are insufficient, provide a shopping list at the end
-            
-            FORMAT EXACTLY LIKE THIS:
-            
-            === MEAL PLAN FOR [TIMEFRAME] ===
-            
-            === DAY 1 ===
-            
-            **Breakfast:**
-            === [Recipe Name] ===
-            Ingredients: [list with quantities]
-            Instructions: [numbered steps]
-            Prep Time: [time] | Cook Time: [time] | Difficulty: [level]
-            
-            **Lunch:**
-            === [Recipe Name] ===
-            [same format]
-            
-            **Dinner:**
-            === [Recipe Name] ===
-            [same format]
-            
-            [Continue for each day...]
-            
-            === WEEKLY PREP TIPS ===
-            • [Batch cooking suggestions]
-            • [Storage tips]
-            • [Time-saving techniques]
-            
-            SHOPPING LIST:
-            [Only if needed - list missing ingredients with quantities]
-            === [INGREDIENT_NAME]: [Quantity, Unit]
-            """,
-                foodPreferences.isEmpty() ? "No specific preferences" : foodPreferences,
-                planPreference.isEmpty() ? "Balanced nutrition" : planPreference,
-                timeframe,
-                ingredients.isEmpty() ? "No specific ingredients provided - assume basic pantry items available" : ingredients
+        Generate a %d-day meal plan with %d meals per day.
+        Meal types per day: %s
+        Dietary preferences: %s
+        
+        You MUST return ONLY valid JSON that matches this exact structure:
+        %s
+        
+        Requirements:
+        - The "meals" array must contain exactly %d meal objects
+        - Each meal must have: day (number 1-%d), mealType (%s), title (meal name), content (1-2 sentence description)
+        - Set "totalMeals" to %d
+        - Set "status" to "completed"
+        - Ensure variety across days
+        - Follow dietary preferences if specified
+        - Return ONLY the JSON, no explanations or markdown
+        """,
+                duration,
+                mealsPerDay,
+                String.join(", ", mealTypes),
+                preferencesStr,
+                jsonExample,
+                duration * mealsPerDay,
+                duration,
+                String.join("/", mealTypes),
+                duration * mealsPerDay
         );
+    }
+
+    public String getMealPlanStructureSystemMessage() {
+        return """
+    You are a JSON API that generates meal plans.
+    
+    CRITICAL RULES:
+    1. Return ONLY valid JSON - no explanations, no markdown
+    2. Use ONLY standard ASCII double quotes (") - character code 34
+    3. Do NOT use smart quotes ("" or '') - these break JSON parsing
+    4. Keep meal descriptions under 15 words
+    5. Ensure the response is complete - do not truncate
+    
+    Example of CORRECT quotes: "title": "Meal Name"
+    Example of WRONG quotes: "title": "Meal Name"
+    """;
+    }
+
+    private List<String> getMealTypes(int mealsPerDay) {
+        return switch (mealsPerDay) {
+            case 1 -> List.of("Lunch");
+            case 2 -> List.of("Lunch", "Dinner");
+            case 3 -> List.of("Breakfast", "Lunch", "Dinner");
+            default -> List.of("Breakfast", "Lunch", "Dinner");
+        };
     }
 }

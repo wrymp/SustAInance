@@ -38,8 +38,6 @@ public class PantryController {
 
             PantryItem result = pantryService.addIngredient(request);
             return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -55,8 +53,6 @@ public class PantryController {
 
             PantryItem result = pantryService.updateIngredient(request);
             return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

@@ -7,7 +7,6 @@ import com.example.sustainance.models.DTO.RecipeGenerationRequest;
 import com.example.sustainance.models.Preference.RecipePreferences;
 import com.example.sustainance.models.entities.UserInfo;
 import com.example.sustainance.models.ingredients.Ingredient;
-import com.example.sustainance.models.ingredients.MealPlanRequest;
 import com.example.sustainance.models.ingredients.Preference;
 import com.example.sustainance.services.EmailSenderService;
 import com.example.sustainance.services.IngredientSelectionService;
@@ -150,48 +149,6 @@ public class RecipeController {
             log.error("❌ Error generating recipe for user {}: {}", currentUser.getUsername(), e.getMessage(), e);
             return ResponseEntity.internalServerError()
                     .body("Failed to generate recipe: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/generateMealPlan")
-    public ResponseEntity<String> generateMealPlan(
-            @RequestBody MealPlanRequest mealPlanRequest,
-            HttpServletRequest httpRequest) {
-        
-        UserInfo currentUser = AuthenticationUtil.getCurrentUser(httpRequest);
-        log.info("📅 User {} generating meal plan", currentUser.getUsername());
-        
-        String ingredients = ingredientService.toString();
-        log.info("📝 Ingredients for meal plan ({}): {}", currentUser.getUsername(), ingredients);
-        
-        try {
-            String recipe = aiService.generateMealPlan(
-                mealPlanRequest.getFoodPreferenceString(),
-                mealPlanRequest.getTimeframe(), 
-                mealPlanRequest.getPlanPreferenceString(), 
-                ingredients
-            );
-            
-            log.info("📅 Meal plan generated successfully for user: {}", currentUser.getUsername());
-
-            // Handle shopping list email
-            int index = recipe.indexOf("SHOPPING LIST:");
-            if (index >= 0) {
-                String shoppingList = recipe.substring(index);
-                recipe = recipe.substring(0, index);
-                
-                if (!mealPlanRequest.getRecipient().isEmpty()) {
-                    log.info("📧 Sending shopping list to: {}", mealPlanRequest.getRecipient());
-                    emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shoppingList);
-                }
-            }
-
-            return ResponseEntity.ok(recipe);
-            
-        } catch (Exception e) {
-            log.error("❌ Error generating meal plan for user {}: {}", currentUser.getUsername(), e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error generating meal plan: " + e.getMessage());
         }
     }
 }

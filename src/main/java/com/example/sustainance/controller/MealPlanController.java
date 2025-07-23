@@ -1,8 +1,14 @@
 package com.example.sustainance.controller;
 
+import com.example.sustainance.config.authConfig.AuthenticationUtil;
 import com.example.sustainance.config.authConfig.RequireAuthentication;
+import com.example.sustainance.models.DTO.MealPlanGenerationRequest;
+import com.example.sustainance.models.DTO.MealPlanGenerationResponse;
 import com.example.sustainance.models.entities.MealPlan;
+import com.example.sustainance.models.entities.UserInfo;
+import com.example.sustainance.services.MealPlanGenerationService;
 import com.example.sustainance.services.MealPlanService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +24,9 @@ public class MealPlanController {
 
     @Autowired
     private MealPlanService mealPlanService;
+
+    @Autowired
+    private MealPlanGenerationService mealPlanGenerationService;
 
     @PostMapping
     public ResponseEntity<?> createMealPlan(@RequestBody MealPlan mealPlan) {
@@ -60,7 +69,7 @@ public class MealPlanController {
     public ResponseEntity<?> getMealPlanById(@PathVariable Long id) {
         try {
             return mealPlanService.getMealPlanById(id)
-                    .map(mealPlan -> ResponseEntity.ok(mealPlan))
+                    .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
             System.err.println("Error fetching meal plan: " + e.getMessage());
@@ -123,6 +132,19 @@ public class MealPlanController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to delete meal plan: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/generate")
+    public ResponseEntity<MealPlanGenerationResponse> generateMealPlan(
+            @RequestBody MealPlanGenerationRequest MealRequest,
+            HttpServletRequest request) {
+        try {
+            UserInfo currentUser = AuthenticationUtil.getCurrentUser(request);
+            MealPlanGenerationResponse response = mealPlanGenerationService.generateBasicMealPlan(MealRequest, currentUser.getUuid());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
