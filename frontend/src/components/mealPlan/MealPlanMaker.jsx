@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { mealPlanAPI, recipeAPI } from '../../services/api';
 import './MealPlanMaker.css';
-
-const API_BASE_URL = 'http://localhost:9097/api';
 
 const MyMealPlans = () => {
     const [mealPlans, setMealPlans] = useState([]);
     const [currentMealPlan, setCurrentMealPlan] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [, setCurrentDate] = useState(new Date());
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [planToDelete, setPlanToDelete] = useState(null);
 
     const { isAuthenticated } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -21,24 +22,16 @@ const MyMealPlans = () => {
         'Dinner': '🌙'
     };
 
-    // Get current user method (same as your recipe page)
     const getCurrentUser = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const user = await response.json();
-                return user.uuid;
-            }
+            const response = await recipeAPI.getCurrentUser();
+            return response.data.uuid;
         } catch (error) {
             console.error('Error getting current user:', error);
+            throw new Error('Failed to get user information');
         }
-        return null;
     };
 
-    // Fetch meal plans for current user
     const fetchMealPlans = async () => {
         if (!isAuthenticated) {
             setError('Please log in to view your meal plans');
@@ -50,42 +43,25 @@ const MyMealPlans = () => {
             console.log('🔍 Getting current user...');
             const userId = await getCurrentUser();
 
-            if (!userId) {
-                setError('Could not get user information');
-                setLoading(false);
-                return;
-            }
-
             console.log('📋 Fetching meal plans for user:', userId);
-            const response = await fetch(`${API_BASE_URL}/meal-plans/user/${userId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
-            });
+            const response = await mealPlanAPI.getUserMealPlans(userId);
 
-            if (response.ok) {
-                const plans = await response.json();
-                console.log('✅ Fetched meal plans:', plans);
-                setMealPlans(plans);
+            console.log('✅ Fetched meal plans:', response.data);
+            setMealPlans(response.data);
 
-                // Set the most recent meal plan as current
-                if (plans.length > 0) {
-                    const mostRecent = plans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-                    setCurrentMealPlan(mostRecent);
-                }
-            } else {
-                console.error('❌ Failed to fetch meal plans:', response.status);
-                setError('Failed to load meal plans');
+            if (response.data.length > 0) {
+                const mostRecent = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                setCurrentMealPlan(mostRecent);
             }
+
         } catch (err) {
             console.error('❌ Error fetching meal plans:', err);
-            setError('Error loading meal plans');
+            setError(err.response?.data?.message || 'Error loading meal plans');
         } finally {
             setLoading(false);
         }
     };
 
-    // Parse meals data from JSON string
     const parseMealsData = (mealsDataString) => {
         try {
             return JSON.parse(mealsDataString);
@@ -95,47 +71,45 @@ const MyMealPlans = () => {
         }
     };
 
-    // Get current day number (1-7 based on start date)
     const getCurrentDayNumber = (startDate) => {
         const start = new Date(startDate);
         const today = new Date();
         const diffTime = today - start;
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-        // Return day number within the meal plan duration
         if (diffDays < 1) return 1;
         if (currentMealPlan && diffDays > currentMealPlan.duration) return currentMealPlan.duration;
         return diffDays;
     };
 
-    // Get day name
     const getDayName = (dayNumber) => {
         const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         return days[dayNumber - 1] || `Day ${dayNumber}`;
     };
 
-    // Delete meal plan
-    const deleteMealPlan = async (planId) => {
-        if (!window.confirm('Are you sure you want to delete this meal plan?')) {
-            return;
-        }
+    const handleDeleteClick = (planId) => {
+        setPlanToDelete(planId);
+        setShowDeleteModal(true);
+    };
+
+    const deleteMealPlan = async () => {
+        if (!planToDelete) return;
 
         try {
             const userId = await getCurrentUser();
-            const response = await fetch(`${API_BASE_URL}/meal-plans/user/${userId}/${planId}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
 
-            if (response.ok) {
-                console.log('✅ Meal plan deleted successfully');
-                fetchMealPlans(); // Refresh the list
-            } else {
-                setError('Failed to delete meal plan');
-            }
+            console.log('🗑️ Deleting meal plan:', planToDelete);
+            await mealPlanAPI.deleteMealPlanByUser(userId, planToDelete);
+
+            console.log('✅ Meal plan deleted successfully');
+            setShowDeleteModal(false);
+            setPlanToDelete(null);
+            fetchMealPlans();
         } catch (err) {
             console.error('❌ Error deleting meal plan:', err);
-            setError('Error deleting meal plan');
+            setError(err.response?.data?.message || 'Error deleting meal plan');
+            setShowDeleteModal(false);
+            setPlanToDelete(null);
         }
     };
 
@@ -143,7 +117,6 @@ const MyMealPlans = () => {
         fetchMealPlans();
     }, [isAuthenticated]);
 
-    // Update current date every minute
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentDate(new Date());
@@ -190,6 +163,16 @@ const MyMealPlans = () => {
     if (mealPlans.length === 0) {
         return (
             <div className="my-meal-plans">
+                <div className="page-header">
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => navigate('/')}
+                        style={{ padding: '0.75rem 1.25rem', marginBottom: '1rem' }}
+                    >
+                        🏠 Home
+                    </button>
+                </div>
+
                 <div className="no-plans-container">
                     <div className="no-plans-icon">🍽️</div>
                     <h2>No Meal Plans Yet</h2>
@@ -211,15 +194,26 @@ const MyMealPlans = () => {
 
     return (
         <div className="my-meal-plans">
-            {/* Header */}
             <div className="page-header">
-                <h1>🍽️ My Meal Plans</h1>
-                <button
-                    className="btn btn-primary create-new-btn"
-                    onClick={() => navigate('/meal-planner')}
-                >
-                    ➕ Create New Meal Plan
-                </button>
+                <div className="header-left">
+                    <button
+                        className="btn btn-secondary home-btn"
+                        onClick={() => navigate('/')}
+                    >
+                        🏠 Home
+                    </button>
+                </div>
+                <div className="header-center">
+                    <h1>🍽️ My Meal Plans</h1>
+                </div>
+                <div className="header-right">
+                    <button
+                        className="btn btn-primary create-new-btn"
+                        onClick={() => navigate('/create-meal-plan')}
+                    >
+                        ➕ Create New Meal Plan
+                    </button>
+                </div>
             </div>
 
             {/* Current Day Banner */}
@@ -316,7 +310,7 @@ const MyMealPlans = () => {
                         <div className="plan-actions">
                             <button
                                 className="btn btn-danger btn-sm"
-                                onClick={() => deleteMealPlan(currentMealPlan.id)}
+                                onClick={() => handleDeleteClick(currentMealPlan.id)}
                             >
                                 🗑️ Delete
                             </button>
@@ -377,11 +371,34 @@ const MyMealPlans = () => {
 
                 <button
                     className="btn btn-primary"
-                    onClick={() => navigate('/meal-planner')}
+                    onClick={() => navigate('/create-meal-plan')}
                 >
                     🚀 Create New Plan
                 </button>
             </div>
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h3>Delete Meal Plan</h3>
+                        <p>Are you sure you want to delete this meal plan?</p>
+                        <div className="modal-actions">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-danger"
+                                onClick={deleteMealPlan}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

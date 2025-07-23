@@ -7,10 +7,8 @@ const api = axios.create({
     withCredentials: true,
 });
 
-// ✅ Setup to handle session timeout automatically
 let authContextRef = null;
 
-// Export function to set auth context reference
 export const setAuthContext = (authContext) => {
     authContextRef = authContext;
 };
@@ -60,5 +58,17 @@ export const recipeAPI = {
     attemptLogout: () => api.post("/api/auth/logout"),
     getCurrentUser: () => api.get("/api/auth/me"),
 }
+
+export const mealPlanAPI = {
+    generateMealPlan: (planSettings) => api.post('/api/meal-plans/generate', planSettings),
+
+    createMealPlan: (mealPlan) => api.post('/api/meal-plans', mealPlan),
+    getUserMealPlans: (userId) => api.get(`/api/meal-plans/user/${userId}`),
+    getMealPlanById: (id) => api.get(`/api/meal-plans/${id}`),
+    updateMealPlan: (id, mealPlan) => api.put(`/api/meal-plans/${id}`, mealPlan),
+    deleteMealPlan: (id) => api.delete(`/api/meal-plans/${id}`),
+    deleteMealPlanByUser: (userId, id) => api.delete(`/api/meal-plans/user/${userId}/${id}`)
+};
+
 
 export default api;

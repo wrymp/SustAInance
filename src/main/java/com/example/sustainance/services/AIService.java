@@ -5,6 +5,8 @@ import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.ai.openai.models.*;
 import com.azure.core.credential.AzureKeyCredential;
 import com.example.sustainance.config.AIProperties;
+import com.example.sustainance.models.DTO.GeneratedMealDTO;
+import com.example.sustainance.models.DTO.MealPlanGenerationResponse;
 import com.example.sustainance.models.Preference.RecipePreferences;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ public class AIService {
     private final String model;
     private final PromptService promptService;
     private final AIProperties aiProperties;
+    private final ObjectMapper objectMapper;
 
     public AIService(AIProperties aiProperties, PromptService promptService) {
 
@@ -32,6 +35,7 @@ public class AIService {
         this.model = aiProperties.getGithub().getModel();
         this.promptService = promptService;
         this.aiProperties = aiProperties;
+        this.objectMapper = new ObjectMapper();
 
         log.info("🤖 AI Service initialized:");
         log.info("   Endpoint: {}", aiProperties.getGithub().getUrl());
@@ -57,13 +61,13 @@ public class AIService {
                     )
             );
 
-            // Set AI parameters using all properties from AIProperties
             options.setModel(model);
             options.setMaxTokens(aiProperties.getOpenai().getMaxTokens());
             options.setTemperature(aiProperties.getOpenai().getTemperature());
             options.setTopP(aiProperties.getOpenai().getTopP());
             options.setFrequencyPenalty(aiProperties.getOpenai().getFrequencyPenalty());
             options.setPresencePenalty(aiProperties.getOpenai().getPresencePenalty());
+
 
             ChatCompletions completions = client.getChatCompletions(model, options);
             String rawRecipe = completions.getChoices().get(0).getMessage().getContent();
@@ -84,16 +88,12 @@ public class AIService {
             return "No recipe generated. Please try again.";
         }
 
-        // Extract used ingredients section
         String usedIngredientsJson = extractUsedIngredients(rawRecipe);
         
-        // Remove the used ingredients section from the recipe content
         String cleanedRecipe = rawRecipe.replaceAll("USED_INGREDIENTS_START.*?USED_INGREDIENTS_END\\s*", "");
         
-        // Format the recipe normally
         String formattedRecipe = formatRecipe(cleanedRecipe);
         
-        // Append the used ingredients as JSON at the end
         if (!usedIngredientsJson.isEmpty()) {
             formattedRecipe += "\n\nUSED_INGREDIENTS_JSON:" + usedIngredientsJson;
         }
@@ -102,28 +102,24 @@ public class AIService {
     }
 
     private String extractUsedIngredients(String rawRecipe) {
-        // Extract the used ingredients section
         Pattern pattern = Pattern.compile("USED_INGREDIENTS_START\\s*(.*?)\\s*USED_INGREDIENTS_END", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(rawRecipe);
         
         if (matcher.find()) {
             String usedIngredientsText = matcher.group(1).trim();
             
-            // Parse the used ingredients into JSON format
             List<Map<String, String>> usedIngredients = new ArrayList<>();
             
             String[] lines = usedIngredientsText.split("\n");
             for (String line : lines) {
                 line = line.trim();
                 if (line.startsWith("•") || line.startsWith("-")) {
-                    // Parse line like "• Black pepper: 2 tsp"
                     String ingredient = line.substring(1).trim();
                     String[] parts = ingredient.split(":");
                     if (parts.length == 2) {
                         String name = parts[0].trim();
                         String quantityAndUnit = parts[1].trim();
                         
-                        // Split quantity and unit (e.g., "2 tsp" -> quantity="2", unit="tsp")
                         String[] qtyParts = quantityAndUnit.split(" ", 2);
                         String quantity = qtyParts.length > 0 ? qtyParts[0] : "";
                         String unit = qtyParts.length > 1 ? qtyParts[1] : "";
@@ -137,7 +133,6 @@ public class AIService {
                 }
             }
             
-            // Convert to JSON string (you might want to use Jackson ObjectMapper for this)
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 return mapper.writeValueAsString(usedIngredients);
@@ -150,47 +145,11 @@ public class AIService {
         return "[]";
     }
 
-    @Cacheable(value = "mealPlans", key = "#foodPreferences + '_' + #timeframe + '_' + #planPreference + '_' + #ingredients.hashCode()")
-    public String generateMealPlan(String foodPreferences, String timeframe, String planPreference, String ingredients) {
-        log.info("Generating meal plan for duration: {}", timeframe);
-
-        try {
-            String systemMessage = promptService.getMealPlanSystemMessage();
-            String userPrompt = promptService.buildMealPlanPrompt(foodPreferences, planPreference, timeframe, ingredients);
-
-            ChatCompletionsOptions options = new ChatCompletionsOptions(
-                    Arrays.asList(
-                            new ChatMessage(ChatRole.SYSTEM).setContent(systemMessage),
-                            new ChatMessage(ChatRole.USER).setContent(userPrompt)
-                    )
-            );
-
-            // Meal plans need more tokens
-            options.setModel(model);
-            options.setMaxTokens(Math.max(aiProperties.getOpenai().getMaxTokens(), 2000));
-            options.setTemperature(aiProperties.getOpenai().getTemperature());
-            options.setTopP(aiProperties.getOpenai().getTopP());
-            options.setFrequencyPenalty(aiProperties.getOpenai().getFrequencyPenalty());
-            options.setPresencePenalty(aiProperties.getOpenai().getPresencePenalty());
-
-            ChatCompletions completions = client.getChatCompletions(model, options);
-            String rawMealPlan = completions.getChoices().get(0).getMessage().getContent();
-
-            log.info("Successfully generated meal plan");
-            return formatRecipe(rawMealPlan);
-
-        } catch (Exception e) {
-            log.error("Error generating meal plan: {}", e.getMessage());
-            throw new RuntimeException("Failed to generate meal plan: " + e.getMessage());
-        }
-    }
-
     private String formatRecipe(String rawRecipe) {
         if (rawRecipe == null || rawRecipe.isEmpty()) {
             return "No recipe generated. Please try again.";
         }
 
-        // Extract and preserve the title before cleaning
         String title = "";
         String titleMatch = rawRecipe.replaceAll("(?s).*?===\\s*(.+?)\\s*===.*", "$1");
         if (!titleMatch.equals(rawRecipe)) {
@@ -199,21 +158,130 @@ public class AIService {
 
         String cleanedRecipe = rawRecipe
                 .replaceAll("(?m)^\\s*$[\n\r]{1,}", "\n")
-                .replaceAll("===.*?===", "") // Remove the title from the content since we extracted it
+                .replaceAll("===.*?===", "")
                 .trim();
 
-        // SIMPLIFIED: Just add the title back and return the rest as-is
-        // Don't over-process the instructions section
         StringBuilder formatted = new StringBuilder();
 
-        // Add the title back at the beginning
         if (!title.isEmpty()) {
             formatted.append(title);
         }
 
-        // Add the rest of the content without heavy processing
         formatted.append(cleanedRecipe);
 
         return formatted.toString().trim();
+    }
+
+    @Cacheable(value = "mealPlanStructures", key = "#duration + '_' + #mealsPerDay + '_' + #preferences.hashCode()")
+    public String generateMealPlanStructure(int duration, int mealsPerDay, List<String> preferences) {
+        log.info("🍽️ Generating meal plan structure for {} days with {} meals per day", duration, mealsPerDay);
+
+        if (duration > 7) {
+            return generateMealPlanInBatches(duration, mealsPerDay, preferences);
+        }
+
+        return generateSingleBatchMealPlan(duration, mealsPerDay, preferences);
+    }
+
+    private String generateMealPlanInBatches(int duration, int mealsPerDay, List<String> preferences) {
+        List<GeneratedMealDTO> allMeals = new ArrayList<>();
+        int batchSize = 2;
+
+        for (int startDay = 1; startDay <= duration; startDay += batchSize) {
+            int endDay = Math.min(startDay + batchSize - 1, duration);
+            int batchDays = endDay - startDay + 1;
+
+            log.info("📦 Generating batch: days {} to {}", startDay, endDay);
+
+            String batchResponse = generateSingleBatchMealPlan(batchDays, mealsPerDay, preferences);
+
+            try {
+                MealPlanGenerationResponse batchResult = objectMapper.readValue(
+                        batchResponse,
+                        MealPlanGenerationResponse.class
+                );
+
+                for (GeneratedMealDTO meal : batchResult.getMeals()) {
+                    meal.setDay(meal.getDay() + startDay - 1);
+                    allMeals.add(meal);
+                }
+
+            } catch (Exception e) {
+                log.error("Failed to parse batch response", e);
+                throw new RuntimeException("Failed to parse batch response", e);
+            }
+        }
+
+        MealPlanGenerationResponse finalResponse = new MealPlanGenerationResponse();
+        finalResponse.setMeals(allMeals);
+        finalResponse.setTotalMeals(allMeals.size());
+        finalResponse.setStatus("completed");
+
+        try {
+            return objectMapper.writeValueAsString(finalResponse);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize final response", e);
+        }
+    }
+
+    private String generateSingleBatchMealPlan(int duration, int mealsPerDay, List<String> preferences) {
+        try {
+            String systemMessage = promptService.getMealPlanStructureSystemMessage();
+            String userPrompt = promptService.buildMealPlanStructurePrompt(duration, mealsPerDay, preferences);
+
+            int totalMeals = duration * mealsPerDay;
+            int estimatedTokensNeeded = Math.max(3000, totalMeals * 200);
+
+            ChatCompletionsOptions options = new ChatCompletionsOptions(
+                    Arrays.asList(
+                            new ChatMessage(ChatRole.SYSTEM).setContent(systemMessage),
+                            new ChatMessage(ChatRole.USER).setContent(userPrompt)
+                    )
+            );
+
+            options.setModel(model);
+            options.setMaxTokens(estimatedTokensNeeded);
+            options.setTemperature(0.7);
+            options.setTopP(0.9);
+            options.setFrequencyPenalty(0.3);
+            options.setPresencePenalty(0.3);
+
+            ChatCompletions completions = client.getChatCompletions(model, options);
+            String response = completions.getChoices().get(0).getMessage().getContent();
+
+            log.info("✅ Successfully generated batch meal plan");
+            log.info("Response: {}", response);
+
+            return extractAndValidateJson(response);
+
+        } catch (Exception e) {
+            log.error("❌ Error generating batch meal plan: {}", e.getMessage());
+            throw new RuntimeException("Failed to generate batch meal plan: " + e.getMessage());
+        }
+    }
+
+    private String extractAndValidateJson(String response) {
+        String cleaned = response.trim();
+
+
+        if (cleaned.startsWith("```json")) {
+            cleaned = cleaned.substring(7);
+        }
+        if (cleaned.startsWith("```")) {
+            cleaned = cleaned.substring(3);
+        }
+        if (cleaned.endsWith("```")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 3);
+        }
+
+        cleaned = cleaned
+                .replace("“", "\"")  // Left smart quote
+                .replace("”", "\"")  // Right smart quote
+                .replace("‘", "'")   // Left smart single quote
+                .replace("’", "'");  // Right smart single quote
+
+        cleaned = cleaned.trim();
+
+        return cleaned;
     }
 }

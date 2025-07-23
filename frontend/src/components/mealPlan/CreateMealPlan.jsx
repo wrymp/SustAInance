@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { mealPlanAPI } from '../../services/api';
 import './CreateMealPlan.css';
-
-const API_BASE_URL = 'http://localhost:9097/api';
 
 const CreateMealPlan = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -16,7 +15,6 @@ const CreateMealPlan = () => {
 
     const [generatedMeals, setGeneratedMeals] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -47,24 +45,6 @@ const CreateMealPlan = () => {
         'Lunch': '☀️',
         'Dinner': '🌙'
     };
-
-    // Get current user
-    const getCurrentUser = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const user = await response.json();
-                return user.uuid;
-            }
-        } catch (error) {
-            console.error('Error getting current user:', error);
-        }
-        return null;
-    };
-
     const updateSetting = (key, value) => {
         setPlanSettings(prev => ({
             ...prev,
@@ -98,118 +78,33 @@ const CreateMealPlan = () => {
         setError('');
 
         try {
-            // Simulate meal generation with more realistic delay
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            console.log('🎯 Generating meal plan with settings:', planSettings);
 
-            const sampleMeals = [
-                { title: "Avocado Toast with Poached Egg", content: "Wholesome breakfast with creamy avocado on sourdough topped with a perfectly poached egg.", category: "breakfast" },
-                { title: "Greek Yogurt Parfait", content: "Layered parfait with Greek yogurt, fresh berries, and granola.", category: "breakfast" },
-                { title: "Overnight Oats", content: "Nutritious overnight oats with chia seeds, almond milk, and fresh fruit.", category: "breakfast" },
-                { title: "Scrambled Eggs with Spinach", content: "Fluffy scrambled eggs with fresh spinach and herbs.", category: "breakfast" },
 
-                { title: "Quinoa Buddha Bowl", content: "Nutritious bowl with quinoa, roasted vegetables, chickpeas, and tahini dressing.", category: "lunch" },
-                { title: "Chicken Caesar Salad", content: "Classic Caesar salad with grilled chicken, romaine lettuce, and parmesan.", category: "lunch" },
-                { title: "Turkey & Avocado Wrap", content: "Whole wheat wrap with turkey, avocado, lettuce, and tomatoes.", category: "lunch" },
-                { title: "Lentil Soup", content: "Hearty lentil soup with vegetables and herbs.", category: "lunch" },
-                { title: "Caprese Sandwich", content: "Fresh mozzarella, tomatoes, and basil on artisan bread.", category: "lunch" },
+            const response = await mealPlanAPI.generateMealPlan({
+                duration: planSettings.duration,
+                mealsPerDay: planSettings.mealsPerDay,
+                preferences: planSettings.preferences,
+                startDate: planSettings.startDate
+            });
 
-                { title: "Grilled Salmon with Asparagus", content: "Fresh Atlantic salmon grilled to perfection with seasoned asparagus spears.", category: "dinner" },
-                { title: "Chicken Stir-Fry", content: "Tender chicken with colorful vegetables in a savory soy-ginger sauce over rice.", category: "dinner" },
-                { title: "Vegetable Curry", content: "Aromatic curry with mixed vegetables, coconut milk, and fragrant spices.", category: "dinner" },
-                { title: "Beef Tacos", content: "Seasoned ground beef in soft tortillas with fresh toppings and lime.", category: "dinner" },
-                { title: "Mushroom Risotto", content: "Creamy arborio rice with wild mushrooms, white wine, and parmesan.", category: "dinner" },
-                { title: "Thai Green Curry", content: "Authentic Thai curry with coconut milk, basil, and your choice of protein.", category: "dinner" },
-                { title: "Lemon Herb Roasted Chicken", content: "Juicy roasted chicken with herbs, lemon, and roasted root vegetables.", category: "dinner" },
-                { title: "Stuffed Bell Peppers", content: "Colorful bell peppers stuffed with rice, ground meat, and vegetables.", category: "dinner" },
-                { title: "Fish and Chips", content: "Crispy battered fish with golden fries and mushy peas.", category: "dinner" },
-                { title: "Beef Stew", content: "Hearty stew with tender beef, potatoes, carrots, and herbs.", category: "dinner" }
-            ];
+            console.log('✅ Generated meal plan:', response.data);
 
-            const meals = [];
-            const mealTypes = mealTypeLabels[planSettings.mealsPerDay];
 
-            for (let day = 1; day <= planSettings.duration; day++) {
-                for (let mealIndex = 0; mealIndex < planSettings.mealsPerDay; mealIndex++) {
-                    const mealType = mealTypes[mealIndex];
-                    const categoryFilter = mealType.toLowerCase();
-
-                    // Filter meals by category if available
-                    const filteredMeals = sampleMeals.filter(meal =>
-                        meal.category === categoryFilter || meal.category === 'any'
-                    );
-
-                    const mealsToChooseFrom = filteredMeals.length > 0 ? filteredMeals : sampleMeals;
-                    const randomMeal = mealsToChooseFrom[Math.floor(Math.random() * mealsToChooseFrom.length)];
-
-                    meals.push({
-                        day,
-                        mealType,
-                        title: randomMeal.title,
-                        content: randomMeal.content
-                    });
-                }
+            if (response.data && response.data.meals) {
+                setGeneratedMeals(response.data.meals);
+                setCurrentStep(3);
+            } else {
+                throw new Error('Invalid response format from meal plan generation');
             }
 
-            setGeneratedMeals(meals);
-            setCurrentStep(3);
-
         } catch (err) {
-            setError('Failed to generate meal plan. Please try again.');
+            console.error('❌ Error generating meal plan:', err);
+            setError(err.response?.data?.message || 'Failed to generate meal plan. Please try again.');
         } finally {
             setIsGenerating(false);
         }
     };
-
-    const saveMealPlan = async () => {
-        if (!isAuthenticated) {
-            setError('Please log in to save meal plans');
-            return;
-        }
-
-        const userId = await getCurrentUser();
-        if (!userId) {
-            setError('Could not get user information');
-            return;
-        }
-
-        setIsSaving(true);
-        setError('');
-
-        try {
-            const mealPlanData = {
-                userId: userId,
-                startDate: planSettings.startDate,
-                duration: planSettings.duration,
-                mealsPerDay: planSettings.mealsPerDay,
-                preferences: JSON.stringify(planSettings.preferences),
-                mealsData: JSON.stringify(generatedMeals)
-            };
-
-            console.log('💾 Saving meal plan:', mealPlanData);
-
-            const response = await fetch(`${API_BASE_URL}/meal-plans`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(mealPlanData)
-            });
-
-            if (response.ok) {
-                setSuccess('Meal plan saved successfully!');
-                setTimeout(() => {
-                    navigate('/my-meal-plans');
-                }, 1500);
-            } else {
-                const errorText = await response.text();
-                setError(`Failed to save meal plan: ${errorText}`);
-            }
-        } catch (err) {
-            setError(`Network error: ${err.message}`);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
     const resetForm = () => {
         setCurrentStep(1);
         setPlanSettings({
@@ -248,8 +143,21 @@ const CreateMealPlan = () => {
         <div className="create-meal-plan">
             {/* Header */}
             <div className="page-header">
-                <h1>🍽️ Create Your Meal Plan</h1>
-                <p>Design a personalized meal plan that fits your lifestyle</p>
+                <div className="header-left">
+                    <button
+                        className="btn btn-secondary home-btn"
+                        onClick={() => navigate('/')}
+                    >
+                        🏠 Home
+                    </button>
+                </div>
+                <div className="header-center">
+                    <h1>🍽️ Create Your Meal Plan</h1>
+                    <p>Design a personalized meal plan that fits your lifestyle</p>
+                </div>
+                <div className="header-right">
+                    {/* Spacer for layout balance */}
+                </div>
             </div>
 
             {/* Step Indicator */}
@@ -489,15 +397,14 @@ const CreateMealPlan = () => {
                         <button className="btn btn-secondary" onClick={resetForm}>
                             🔄 Create New Plan
                         </button>
-                        <button className="btn btn-secondary" onClick={generateMealPlan}>
+                        <button className="btn btn-secondary" onClick={generateMealPlan} disabled={isGenerating}>
                             🎲 Regenerate
                         </button>
                         <button
                             className="btn btn-primary"
-                            onClick={saveMealPlan}
-                            disabled={isSaving || !isAuthenticated}
+                            onClick={() => navigate('/meal-plan')}
                         >
-                            {isSaving ? '💾 Saving...' : '💾 Save Meal Plan'}
+                            📋 Go to My Meal Plans
                         </button>
                     </div>
 

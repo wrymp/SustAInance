@@ -193,18 +193,13 @@ public class RecipeController {
             log.info("📅 Meal plan generated successfully for user: {}", currentUser.getUsername());
 
             // Handle shopping list email
-            System.out.println("TRYNA SEND");
             int index = recipe.indexOf("SHOPPING LIST:");
             if (index >= 0) {
-                System.out.println("IN IF");
                 String shoppingList = recipe.substring(index);
                 recipe = recipe.substring(0, index);
-
-                System.out.print("CHECK ");
-                System.out.println(!mealPlanRequest.getRecipient().isEmpty());
+                
                 if (!mealPlanRequest.getRecipient().isEmpty()) {
                     log.info("📧 Sending shopping list to: {}", mealPlanRequest.getRecipient());
-                    System.out.println("LE-FUCKYOU-THREE");
                     emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shoppingList);
                 }
             }
