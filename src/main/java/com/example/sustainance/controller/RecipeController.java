@@ -144,6 +144,24 @@ public class RecipeController {
             String recipe = aiService.generateRecipe(request.getIngredients(), preferences);
             log.info("✅ Recipe generated successfully for user: {}", currentUser.getUsername());
 
+            System.out.println("TRYNA SEND");
+            int index = recipe.indexOf("SHOPPING LIST:");
+            System.out.println(index);
+            System.out.println(recipe);
+            if (index >= 0) {
+                System.out.println("IN IF");
+                String shoppingList = recipe.substring(index);
+                recipe = recipe.substring(0, index);
+
+                System.out.print("CHECK ");
+                System.out.println(currentUser.getEmail());
+                if (currentUser.getEmail() != null) {
+                    log.info("📧 Sending shopping list to: {}", currentUser.getEmail());
+                    System.out.println("LE-FUCKYOU-THREE");
+                    emailSenderService.sendEmail(currentUser.getEmail(), shoppingList);
+                }
+            }
+
             return ResponseEntity.ok(recipe);
 
         } catch (Exception e) {
@@ -175,13 +193,18 @@ public class RecipeController {
             log.info("📅 Meal plan generated successfully for user: {}", currentUser.getUsername());
 
             // Handle shopping list email
+            System.out.println("TRYNA SEND");
             int index = recipe.indexOf("SHOPPING LIST:");
             if (index >= 0) {
+                System.out.println("IN IF");
                 String shoppingList = recipe.substring(index);
                 recipe = recipe.substring(0, index);
-                
+
+                System.out.print("CHECK ");
+                System.out.println(!mealPlanRequest.getRecipient().isEmpty());
                 if (!mealPlanRequest.getRecipient().isEmpty()) {
                     log.info("📧 Sending shopping list to: {}", mealPlanRequest.getRecipient());
+                    System.out.println("LE-FUCKYOU-THREE");
                     emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shoppingList);
                 }
             }

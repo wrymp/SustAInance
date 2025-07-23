@@ -37,7 +37,7 @@ public class EmailSenderService {
             System.out.println("Email sent successfully.");
 
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 

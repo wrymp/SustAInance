@@ -104,6 +104,10 @@ public class PromptService {
             Cooking Time: [prep time] + [cook time] = [total time]
             Serves: [number of people]
             Difficulty: [Easy/Medium/Hard]
+            
+            SHOPPING LIST:
+            [Only if needed - list missing ingredients with quantities]
+            === [INGREDIENT_NAME]: [Quantity, Unit]
             """,
                 ingredients,
                 !preferencesContext.isEmpty() ? preferencesContext.toString() : "No specific preferences provided"
