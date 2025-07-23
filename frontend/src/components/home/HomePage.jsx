@@ -31,7 +31,6 @@ const HomePage = () => {
 
     return (
         <div className="home">
-            {/* Header with logout button for authenticated users */}
             {isAuthenticated && (
                 <header className="home-header">
                     <div className="home-header__content">
@@ -43,7 +42,6 @@ const HomePage = () => {
                 </header>
             )}
 
-            {/* Hero Section */}
             <section className="hero">
                 <div className="hero__content">
                     <h1 className="hero__title">
@@ -55,7 +53,6 @@ const HomePage = () => {
                         No more wondering "what can I cook with this?"
                     </p>
 
-                    {/* ✨ Magic Kitchen Interactive Button */}
                     <div className="magic-kitchen">
                         <div
                             className={`magic-kitchen__scene ${isHovered ? 'magic-kitchen__scene--active' : ''}`}
@@ -63,7 +60,6 @@ const HomePage = () => {
                             onMouseLeave={() => setIsHovered(false)}
                             onClick={handleStartCooking}
                         >
-                            {/* Cooking Pot */}
                             <div className="magic-kitchen__pot">
                                 <div className="magic-kitchen__pot-body">🍲</div>
                                 <div className="magic-kitchen__steam">
@@ -73,7 +69,6 @@ const HomePage = () => {
                                 </div>
                             </div>
 
-                            {/* Floating Ingredients */}
                             <div className="magic-kitchen__orbit">
                                 <div className="magic-kitchen__ingredient" style={{'--delay': '0s'}}>🥕</div>
                                 <div className="magic-kitchen__ingredient" style={{'--delay': '0.5s'}}>🧄</div>
@@ -83,7 +78,6 @@ const HomePage = () => {
                                 <div className="magic-kitchen__ingredient" style={{'--delay': '2.5s'}}>🍗</div>
                             </div>
 
-                            {/* Magic Sparkles */}
                             <div className="magic-kitchen__sparkles">
                                 <span className="magic-kitchen__sparkle">✨</span>
                                 <span className="magic-kitchen__sparkle">⭐</span>
@@ -92,7 +86,6 @@ const HomePage = () => {
                                 <span className="magic-kitchen__sparkle">✨</span>
                             </div>
 
-                            {/* Main CTA Button */}
                             <div className="magic-kitchen__button">
                                 <div className="magic-kitchen__button-content">
                                     <span className="magic-kitchen__button-icon">👨‍🍳</span>
@@ -124,7 +117,6 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* How It Works Section */}
             <section className="how-it-works">
                 <div className="container">
                     <h2 className="section__title">How It Works</h2>
@@ -148,7 +140,6 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* Sample Recipes Section */}
             <section className="sample-recipes">
                 <div className="container">
                     <h2 className="section__title">Recipe Examples</h2>
@@ -179,7 +170,6 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* Features Section */}
             <section className="features">
                 <div className="container">
                     <h2 className="section__title">More Than Just Recipes</h2>

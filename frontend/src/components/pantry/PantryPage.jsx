@@ -33,10 +33,7 @@ const PantryPage = () => {
         unit: ''
     });
 
-    // Fetch current user from /api/auth/me
     const fetchCurrentUser = useCallback(async () => {
-        console.log('Fetching current user...');
-
         try {
             const response = await fetch('http://localhost:9097/api/auth/me', {
                 method: 'GET',
@@ -46,37 +43,28 @@ const PantryPage = () => {
                 credentials: 'include'
             });
 
-            console.log('User fetch response status:', response.status);
-
             const responseText = await response.text();
 
             if (response.ok) {
                 try {
                     const user = JSON.parse(responseText);
-                    console.log('Current user:', user);
                     setCurrentUser(user);
                     return user;
                 } catch (parseError) {
-                    console.error('Failed to parse JSON:', parseError);
                     setError('Server returned invalid response format');
                     return null;
                 }
             } else {
-                console.log('Failed to fetch user, status:', response.status);
                 setError(`Failed to fetch user information: ${response.status}`);
                 return null;
             }
         } catch (err) {
-            console.error('Error fetching user:', err);
             setError('Error fetching user information');
             return null;
         }
     }, []);
 
-    // Fetch pantry items
     const fetchPantryItems = useCallback(async () => {
-        console.log('Fetching pantry items...');
-
         try {
             setLoading(true);
             setError('');
@@ -89,29 +77,22 @@ const PantryPage = () => {
                 credentials: 'include'
             });
 
-            console.log('Pantry response status:', response.status);
-
             if (response.ok) {
                 const items = await response.json();
-                console.log('Received pantry items:', items);
                 setPantryItems(items);
                 setFilteredItems(items);
                 setError('');
             } else {
                 const errorText = await response.text();
-                console.log('Pantry error response:', errorText);
                 setError(`Failed to fetch pantry items: ${response.status} - ${errorText}`);
             }
         } catch (err) {
-            console.error('Pantry fetch error:', err);
             setError(`Network error: ${err.message}`);
         } finally {
-            console.log('Setting loading to false');
             setLoading(false);
         }
     }, []);
 
-    // Filter items based on search query
     useEffect(() => {
         if (!searchQuery.trim()) {
             setFilteredItems(pantryItems);
@@ -124,7 +105,6 @@ const PantryPage = () => {
         }
     }, [searchQuery, pantryItems]);
 
-    // Toggle item selection
     const toggleItemSelection = (itemId) => {
         setSelectedItems(prev => {
             const newSet = new Set(prev);
@@ -137,18 +117,15 @@ const PantryPage = () => {
         });
     };
 
-    // Select all filtered items
     const selectAllItems = () => {
         const allFilteredIds = new Set(filteredItems.map(item => item.id));
         setSelectedItems(allFilteredIds);
     };
 
-    // Clear all selections
     const clearAllSelections = () => {
         setSelectedItems(new Set());
     };
 
-    // Generate recipe with selected items - CORRECTED VERSION
     const generateRecipeWithSelected = () => {
         const selectedPantryItems = pantryItems.filter(item => selectedItems.has(item.id));
 
@@ -157,9 +134,8 @@ const PantryPage = () => {
             return;
         }
 
-        // Convert pantry items to the same format as IngredientsStep expects
         const ingredients = selectedPantryItems.map(pantryItem => ({
-            id: `pantry-${pantryItem.id}-${Date.now()}`, // Unique ID for ingredient
+            id: `pantry-${pantryItem.id}-${Date.now()}`,
             name: pantryItem.ingredientName,
             quantity: pantryItem.count.toString(),
             unit: pantryItem.unit,
@@ -168,23 +144,18 @@ const PantryPage = () => {
             availableUnits: [
                 pantryItem.unit,
                 'grams', 'cups', 'pieces', 'tablespoons', 'teaspoons', 'ml', 'kg', 'lbs', 'oz'
-            ].filter((unit, index, arr) => arr.indexOf(unit) === index) // Remove duplicates
+            ].filter((unit, index, arr) => arr.indexOf(unit) === index)
         }));
 
-        console.log('🏺 Navigating to recipe generator with pantry ingredients:', ingredients);
-
-        // Navigate to recipe generator with selected ingredients
-        // This should skip IngredientsStep and go directly to PreferencesStep
         navigate('/recipe-generator', {
             state: {
                 selectedIngredients: ingredients,
                 fromPantry: true,
-                skipIngredientsStep: true // Flag to indicate we should skip to preferences
+                skipIngredientsStep: true
             }
         });
     };
 
-    // Delete pantry item
     const handleDeleteItem = async (itemId) => {
         if (!currentUser?.uuid) {
             setError('User not authenticated');
@@ -199,8 +170,6 @@ const PantryPage = () => {
                 id: itemId
             };
 
-            console.log('Request body:', requestBody);
-
             const response = await fetch('http://localhost:9097/api/pantry/remove', {
                 method: 'POST',
                 headers: {
@@ -210,22 +179,14 @@ const PantryPage = () => {
                 body: JSON.stringify(requestBody)
             });
 
-            console.log('Response status:', response.status);
-
             const responseText = await response.text();
-            console.log('Raw response text:', responseText);
 
             if (response.ok) {
-                console.log('✅ DELETE SUCCESS');
-
                 setPantryItems(prevItems => {
                     const newItems = prevItems.filter(item => item.id !== itemId);
-                    console.log('Items before filter:', prevItems.length);
-                    console.log('Items after filter:', newItems.length);
                     return newItems;
                 });
 
-                // Remove from selected items if it was selected
                 setSelectedItems(prev => {
                     const newSet = new Set(prev);
                     newSet.delete(itemId);
@@ -234,14 +195,11 @@ const PantryPage = () => {
 
                 setError('');
             } else {
-                console.log('❌ DELETE FAILED');
-
                 let errorMessage = 'Unknown error';
 
                 if (responseText) {
                     try {
                         const errorJson = JSON.parse(responseText);
-                        console.log('Parsed error JSON:', errorJson);
 
                         if (errorJson.message) {
                             errorMessage = errorJson.message;
@@ -254,16 +212,13 @@ const PantryPage = () => {
                             errorMessage = JSON.stringify(errorJson);
                         }
                     } catch (parseError) {
-                        console.log('Failed to parse error JSON:', parseError);
                         errorMessage = responseText.substring(0, 200);
                     }
                 }
 
-                console.log('Final error message:', errorMessage);
                 setError(`Delete failed (${response.status}): ${errorMessage}`);
             }
         } catch (err) {
-            console.error('Network/Request error:', err);
             setError(`Network error: ${err.message}`);
         } finally {
             setDeletingItems(prev => {
@@ -274,7 +229,6 @@ const PantryPage = () => {
         }
     };
 
-    // Show update form
     const showUpdateFormForItem = (item) => {
         setUpdateItem({
             id: item.id,
@@ -286,9 +240,7 @@ const PantryPage = () => {
         setShowAddForm(false);
     };
 
-    // Combined function to fetch user and then pantry
     const initializePage = useCallback(async () => {
-        console.log('Initializing pantry page...');
         const user = await fetchCurrentUser();
         if (user && user.uuid) {
             await fetchPantryItems();
@@ -297,7 +249,6 @@ const PantryPage = () => {
         }
     }, [fetchCurrentUser, fetchPantryItems]);
 
-    // Add new pantry item
     const handleAddItem = async (e) => {
         e.preventDefault();
         if (!currentUser?.uuid) return;
@@ -321,15 +272,12 @@ const PantryPage = () => {
             if (response.ok) {
                 const addedItem = await response.json();
                 setPantryItems(prevItems => {
-                    // Check if item already exists (backend handles merging)
                     const existingIndex = prevItems.findIndex(item => item.id === addedItem.id);
                     if (existingIndex >= 0) {
-                        // Update existing item
                         const newItems = [...prevItems];
                         newItems[existingIndex] = addedItem;
                         return newItems;
                     } else {
-                        // Add new item
                         return [...prevItems, addedItem];
                     }
                 });
@@ -342,13 +290,11 @@ const PantryPage = () => {
             }
         } catch (err) {
             setError(`Error adding item: ${err.message}`);
-            console.error('Error:', err);
         } finally {
             setAddingItem(false);
         }
     };
 
-    // Update existing pantry item
     const handleUpdateItem = async (e) => {
         e.preventDefault();
         if (!currentUser?.uuid) return;
@@ -386,26 +332,19 @@ const PantryPage = () => {
             }
         } catch (err) {
             setError(`Error updating item: ${err.message}`);
-            console.error('Error:', err);
         } finally {
             setUpdatingItem(false);
         }
     };
 
-    // Main useEffect
     useEffect(() => {
-        console.log('useEffect triggered', { isAuthenticated, isLoading });
-
         if (!isLoading && isAuthenticated) {
-            console.log('User is authenticated, initializing page');
             initializePage();
         } else if (!isLoading && !isAuthenticated) {
-            console.log('Not authenticated, redirecting to login');
             navigate('/login');
         }
     }, [isAuthenticated, isLoading, initializePage, navigate]);
 
-    // Show loading for auth context
     if (isLoading) {
         return (
             <div className="pantry-loading">
@@ -426,7 +365,6 @@ const PantryPage = () => {
 
     return (
         <div className="pantry">
-            {/* Header */}
             <header className="pantry__header">
                 <button
                     onClick={() => navigate('/home')}
@@ -455,7 +393,6 @@ const PantryPage = () => {
                 </div>
             </header>
 
-            {/* Search Bar */}
             <div className="pantry__search">
                 <div className="pantry__search-container">
                     <span className="pantry__search-icon">🔍</span>
@@ -477,7 +414,6 @@ const PantryPage = () => {
                 </div>
             </div>
 
-            {/* Selection Controls */}
             {filteredItems.length > 0 && (
                 <div className="pantry__selection-controls">
                     <div className="pantry__selection-info">
@@ -512,7 +448,6 @@ const PantryPage = () => {
                 </div>
             )}
 
-            {/* Error Message */}
             {error && (
                 <div className="pantry__error">
                     <div className="pantry__error-content">
@@ -529,7 +464,6 @@ const PantryPage = () => {
                 </div>
             )}
 
-            {/* Add Form */}
             {showAddForm && currentUser && (
                 <div className="pantry__add-form">
                     <div className="pantry__form-header">
@@ -604,7 +538,6 @@ const PantryPage = () => {
                 </div>
             )}
 
-            {/* Update Form */}
             {showUpdateForm && currentUser && (
                 <div className="pantry__add-form">
                     <div className="pantry__form-header">
@@ -688,7 +621,6 @@ const PantryPage = () => {
                 </div>
             )}
 
-            {/* Pantry Grid */}
             <main className="pantry__main">
                 {loading ? (
                     <div className="pantry__loading-state">

@@ -48,7 +48,6 @@ const RecipeDetailView = ({
 
     const API_BASE_URL = 'http://localhost:9097/api';
 
-    // Get current user
     const getCurrentUser = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -60,12 +59,11 @@ const RecipeDetailView = ({
                 return user.uuid;
             }
         } catch (error) {
-            console.error('Error getting current user:', error);
+            // Error handling
         }
         return null;
     };
 
-    // Get average rating for recipe
     const getAverageRating = async (recipeId) => {
         try {
             const response = await fetch(`${API_BASE_URL}/ratings/average/${recipeId}`, {
@@ -77,12 +75,10 @@ const RecipeDetailView = ({
             }
             return 0;
         } catch (error) {
-            console.error('Error getting average rating:', error);
             return 0;
         }
     };
 
-    // Get user's specific rating for recipe
     const getUserRating = async (recipeId, userId) => {
         try {
             const response = await fetch(`${API_BASE_URL}/ratings/user?recipeId=${recipeId}&userId=${userId}`, {
@@ -95,7 +91,6 @@ const RecipeDetailView = ({
             }
             return 0;
         } catch (error) {
-            console.error('Error getting user rating:', error);
             return 0;
         }
     };
@@ -116,12 +111,10 @@ const RecipeDetailView = ({
             });
             return response.ok;
         } catch (error) {
-            console.error('Error adding rating:', error);
             return false;
         }
     };
 
-    // Delete user's rating
     const deleteRating = async (recipeId, userId) => {
         try {
             const response = await fetch(`${API_BASE_URL}/ratings/delete?recipeId=${recipeId}&userId=${userId}`, {
@@ -130,12 +123,10 @@ const RecipeDetailView = ({
             });
             return response.ok;
         } catch (error) {
-            console.error('Error deleting rating:', error);
             return false;
         }
     };
 
-    // Load ratings on component mount
     useEffect(() => {
         const loadRatings = async () => {
             setIsLoadingRating(true);
@@ -144,7 +135,6 @@ const RecipeDetailView = ({
                 setCurrentUserId(userId);
 
                 if (userId) {
-                    // Get both average rating and user's specific rating
                     const [avgRating, myRating] = await Promise.all([
                         getAverageRating(recipe.id),
                         getUserRating(recipe.id, userId)
@@ -153,13 +143,12 @@ const RecipeDetailView = ({
                     setAverageRating(avgRating || 0);
                     setUserRating(myRating || 0);
                 } else {
-                    // If no user, just get average rating
                     const avgRating = await getAverageRating(recipe.id);
                     setAverageRating(avgRating || 0);
                     setUserRating(0);
                 }
             } catch (error) {
-                console.error('Error loading ratings:', error);
+                // Error handling
             } finally {
                 setIsLoadingRating(false);
             }
@@ -177,12 +166,11 @@ const RecipeDetailView = ({
             const success = await addOrUpdateRating(recipe.id, currentUserId, rating);
             if (success) {
                 setUserRating(rating);
-                // Refresh average rating after user rates
                 const newAvgRating = await getAverageRating(recipe.id);
                 setAverageRating(newAvgRating || 0);
             }
         } catch (error) {
-            console.error('Error submitting rating:', error);
+            // Error handling
         }
     };
 
@@ -193,16 +181,14 @@ const RecipeDetailView = ({
             const success = await deleteRating(recipe.id, currentUserId);
             if (success) {
                 setUserRating(0);
-                // Refresh average rating after removing user's rating
                 const newAvgRating = await getAverageRating(recipe.id);
                 setAverageRating(newAvgRating || 0);
             }
         } catch (error) {
-            console.error('Error removing rating:', error);
+            // Error handling
         }
     };
 
-    // Parse recipe content if it's formatted text
     const parseRecipeContent = (content) => {
         if (!content) return { instructions: [], metadata: {} };
 
@@ -211,7 +197,6 @@ const RecipeDetailView = ({
             metadata: {}
         };
 
-        // Extract Instructions section
         const instructionsMatch = content.match(/Instructions:\s*(.*?)(?=Cooking Time:|Chef's Tips:|$)/s);
         if (instructionsMatch) {
             const instructionsText = instructionsMatch[1];
@@ -221,7 +206,6 @@ const RecipeDetailView = ({
                 .map(step => step.trim());
         }
 
-        // Extract metadata
         const cookingTimeMatch = content.match(/Cooking Time:\s*([^\n]+)/);
         const servesMatch = content.match(/Serves:\s*([^\n]+)/);
         const difficultyMatch = content.match(/Difficulty:\s*([^\n]+)/);
@@ -244,7 +228,7 @@ const RecipeDetailView = ({
                     url: window.location.href
                 });
             } catch (error) {
-                console.log('Error sharing:', error);
+                // Error handling
             }
         } else {
             navigator.clipboard.writeText(`${recipe.recipeName}\n\n${recipe.recipeText}`);
@@ -254,7 +238,6 @@ const RecipeDetailView = ({
 
     return (
         <div className="recipe-detail-view">
-            {/* Header with Back Button */}
             <div className="recipe-detail-view__header">
                 <button className="recipe-detail-view__back-btn" onClick={onBack}>
                     <span className="recipe-detail-view__back-icon">←</span>
@@ -277,14 +260,11 @@ const RecipeDetailView = ({
                 </div>
             </div>
 
-            {/* Recipe Content */}
             <div className="recipe-detail-view__container">
-                {/* Title Section */}
                 <div className="recipe-detail-view__title-section">
                     <h1 className="recipe-detail-view__title">{recipe.recipeName}</h1>
                     <p className="recipe-detail-view__description">{recipe.recipeDesc}</p>
 
-                    {/* Rating Section */}
                     <div className="recipe-detail-view__rating-section">
                         <div className="recipe-detail-view__average-rating">
                             <h3>📊 Recipe Rating</h3>
@@ -330,14 +310,11 @@ const RecipeDetailView = ({
                     </div>
                 </div>
 
-                {/* Recipe Card */}
                 <div className="recipe-detail-view__recipe-card">
-                    {/* Metadata Section */}
                     {(recipe.prepTime || recipe.difficulty || parsedContent.metadata.cookingTime || parsedContent.metadata.serves || parsedContent.metadata.difficulty) && (
                         <div className="recipe-detail-view__metadata">
                             <h3>📋 Recipe Details</h3>
                             <div className="recipe-detail-view__metadata-grid">
-                                {/* Use prepTime from recipe object first, then parsed content */}
                                 {(recipe.prepTime || parsedContent.metadata.cookingTime) && (
                                     <div className="recipe-detail-view__metadata-item">
                                         <span className="recipe-detail-view__metadata-icon">⏰</span>
@@ -354,7 +331,6 @@ const RecipeDetailView = ({
                                         <span className="recipe-detail-view__metadata-value">{parsedContent.metadata.serves}</span>
                                     </div>
                                 )}
-                                {/* Use difficulty from recipe object first, then parsed content */}
                                 {(recipe.difficulty || parsedContent.metadata.difficulty) && (
                                     <div className="recipe-detail-view__metadata-item">
                                         <span className="recipe-detail-view__metadata-icon">📊</span>
@@ -368,7 +344,6 @@ const RecipeDetailView = ({
                         </div>
                     )}
 
-                    {/* Instructions Section */}
                     {parsedContent.instructions.length > 0 ? (
                         <div className="recipe-detail-view__instructions">
                             <h3>👨‍🍳 Instructions</h3>
@@ -392,7 +367,6 @@ const RecipeDetailView = ({
                             </div>
                         </div>
                     ) : (
-                        // Fallback: Show raw content if no structured instructions found
                         <div className="recipe-detail-view__raw-content">
                             <h3>📝 Recipe Content</h3>
                             <div className={`recipe-detail-view__content-text ${
@@ -413,13 +387,11 @@ const RecipeDetailView = ({
                         </div>
                     )}
 
-                    {/* Tags Section */}
                     {recipe.tags && (
                         <div className="recipe-detail-view__tags">
                             <h4>🏷️ Tags:</h4>
                             <div className="recipe-detail-view__tags-list">
                                 {(() => {
-                                    // Handle both string and array cases
                                     let tagsArray;
                                     if (Array.isArray(recipe.tags)) {
                                         tagsArray = recipe.tags;
@@ -440,7 +412,6 @@ const RecipeDetailView = ({
                     )}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="recipe-detail-view__actions">
                     <button
                         className="recipe-detail-view__print-btn"

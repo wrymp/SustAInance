@@ -36,7 +36,6 @@ const SavedRecipesPage = () => {
         { color: "#F06292", gradient: "linear-gradient(135deg, #F06292 0%, #FF80AB 100%)" }
     ];
 
-    // Get current user from session
     const getCurrentUser = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -48,15 +47,12 @@ const SavedRecipesPage = () => {
                 return user.uuid;
             }
         } catch (error) {
-            console.error('Error getting current user:', error);
+            // Error handling
         }
         return null;
     };
 
     function normalizeTags(tags) {
-        console.log("typeof tags:", typeof tags);
-        console.log("tags:", tags);
-
         if (typeof tags === 'string') {
             return tags
                 .split(',')
@@ -70,74 +66,36 @@ const SavedRecipesPage = () => {
                 .filter(tag => tag.length > 0);
         }
 
-        // If it's an object, log its structure
         if (typeof tags === 'object' && tags !== null) {
-            console.warn("Received object for tags, expected string or array:", tags);
             return [];
         }
 
-        // Default fallback
         return [];
     }
 
-
-    // 🔥 Get icon for tag based on content
     const getIconForTag = (tag) => {
         const tagLower = tag.toLowerCase();
 
-        // Italian/Pasta
         if (['italian', 'pasta', 'pizza', 'lasagna', 'spaghetti'].includes(tagLower)) return '🍝';
-
-        // Seafood
         if (['seafood', 'fish', 'salmon', 'tuna', 'shrimp', 'crab', 'lobster'].includes(tagLower)) return '🐟';
-
-        // Desserts
         if (['dessert', 'cake', 'sweet', 'chocolate', 'cookie', 'pie', 'ice cream'].includes(tagLower)) return '🧁';
-
-        // Asian
         if (['chinese', 'asian', 'japanese', 'korean', 'thai', 'sushi', 'ramen'].includes(tagLower)) return '🥢';
-
-        // Healthy
         if (['healthy', 'salad', 'vegetarian', 'vegan', 'diet', 'low-carb', 'keto'].includes(tagLower)) return '🥗';
-
-        // Mexican
         if (['mexican', 'spanish', 'latin', 'taco', 'burrito', 'quesadilla'].includes(tagLower)) return '🌮';
-
-        // Indian
         if (['indian', 'curry', 'spicy', 'masala', 'tikka'].includes(tagLower)) return '🍛';
-
-        // Meat
         if (['beef', 'steak', 'pork', 'lamb', 'meat', 'barbecue', 'bbq'].includes(tagLower)) return '🥩';
-
-        // Chicken
         if (['chicken', 'poultry', 'wings', 'breast'].includes(tagLower)) return '🍗';
-
-        // Breakfast
         if (['breakfast', 'brunch', 'pancake', 'waffle', 'egg', 'omelet'].includes(tagLower)) return '🍳';
-
-        // Soup
         if (['soup', 'broth', 'stew', 'chowder'].includes(tagLower)) return '🍲';
-
-        // Bread/Baking
         if (['bread', 'baking', 'muffin', 'scone', 'roll'].includes(tagLower)) return '🍞';
-
-        // Drinks
         if (['drink', 'beverage', 'smoothie', 'juice', 'cocktail'].includes(tagLower)) return '🥤';
-
-        // Quick/Easy
         if (['quick', 'easy', 'fast', '15-minute', '30-minute'].includes(tagLower)) return '⚡';
-
-        // Comfort food
         if (['comfort', 'homemade', 'comfort-food', 'cozy'].includes(tagLower)) return '🏠';
-
-        // Holiday/Special
         if (['holiday', 'christmas', 'thanksgiving', 'easter', 'birthday', 'party'].includes(tagLower)) return '🎉';
 
-        // Default
         return '🏷️';
     };
 
-    // Extract basic ingredients from recipe text
     const extractIngredients = (recipeText) => {
         if (!recipeText) return [];
 
@@ -168,7 +126,6 @@ const SavedRecipesPage = () => {
         return Array.from(ingredients).slice(0, 5);
     };
 
-    // Transform API recipe to UI format
     const transformRecipeForUI = (apiRecipe, index = 0) => {
         const theme = RECIPE_THEMES[index % RECIPE_THEMES.length];
 
@@ -181,8 +138,8 @@ const SavedRecipesPage = () => {
             difficulty: apiRecipe.difficulty,
             time: apiRecipe.prepTime,
             prepTime: apiRecipe.prepTime,
-            tags: normalizeTags(apiRecipe.tags), // 🔥 Normalize tags
-            originalTags: apiRecipe.tags, // 🔥 Keep original for reference
+            tags: normalizeTags(apiRecipe.tags),
+            originalTags: apiRecipe.tags,
             ingredients: extractIngredients(apiRecipe.recipeText),
             color: theme.color,
             gradient: theme.gradient,
@@ -192,7 +149,6 @@ const SavedRecipesPage = () => {
         };
     };
 
-    // Create a recipe object compatible with RecipeDetailView
     const getRecipeForDetailView = (recipe) => {
         const originalRecipe = originalRecipes.find(r => r.id === recipe.id);
         return {
@@ -207,11 +163,9 @@ const SavedRecipesPage = () => {
         };
     };
 
-    // 🔥 Generate categories from actual recipe tags
     const generateCategoriesFromRecipes = (recipes) => {
         const tagCounts = {};
 
-        // Collect all tags and count their occurrences
         recipes.forEach(recipe => {
             const tags = normalizeTags(recipe.originalTags || recipe.tags);
             tags.forEach(tag => {
@@ -221,20 +175,18 @@ const SavedRecipesPage = () => {
             });
         });
 
-        // Create categories array starting with "All"
         const categories = [
             { id: 'all', name: 'All Recipes', icon: '🍽️', count: recipes.length }
         ];
 
-        // Sort tags by count (most popular first) and add to categories
         const sortedTags = Object.entries(tagCounts)
-            .sort(([,a], [,b]) => b - a) // Sort by count descending
-            .slice(0, 20); // Limit to top 20 tags to avoid clutter
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 20);
 
         sortedTags.forEach(([tag, count]) => {
             categories.push({
                 id: tag,
-                name: tag.charAt(0).toUpperCase() + tag.slice(1), // Capitalize first letter
+                name: tag.charAt(0).toUpperCase() + tag.slice(1),
                 icon: getIconForTag(tag),
                 count: count
             });
@@ -243,11 +195,9 @@ const SavedRecipesPage = () => {
         return categories;
     };
 
-    // 🔥 Updated LOCAL FILTERING LOGIC to work with actual tags
     const applyFilters = (recipes, searchTerm, selectedCategory, showFavoritesOnly, favorites) => {
         let filtered = [...recipes];
 
-        // Apply search filter
         if (searchTerm.trim()) {
             const searchLower = searchTerm.toLowerCase();
             filtered = filtered.filter(recipe => {
@@ -265,7 +215,6 @@ const SavedRecipesPage = () => {
             });
         }
 
-        // Apply tag/category filter
         if (selectedCategory !== 'all') {
             filtered = filtered.filter(recipe => {
                 const tags = normalizeTags(recipe.originalTags || recipe.tags);
@@ -273,7 +222,6 @@ const SavedRecipesPage = () => {
             });
         }
 
-        // Apply favorites filter
         if (showFavoritesOnly) {
             filtered = filtered.filter(recipe => favorites.has(recipe.id));
         }
@@ -281,13 +229,11 @@ const SavedRecipesPage = () => {
         return filtered;
     };
 
-    // Update filtered recipes when filters change
     const updateFilteredRecipes = () => {
         const filtered = applyFilters(allRecipes, searchTerm, selectedCategory, showFavoritesOnly, favorites);
         setFilteredRecipes(filtered);
     };
 
-    // API Functions (Only keep essential ones)
     const getUserRecipes = async () => {
         const userId = await getCurrentUser();
         if (!userId) throw new Error('User not authenticated');
@@ -343,50 +289,39 @@ const SavedRecipesPage = () => {
         return await response.json();
     };
 
-    // Load recipes from API (only called once)
     const loadRecipes = async () => {
         try {
             setLoading(true);
             setError(null);
 
             const apiRecipes = await getUserRecipes();
-            console.log('Raw API recipes:', apiRecipes); // 🔥 Debug log
-
             const transformedRecipes = apiRecipes.map((recipe, index) =>
                 transformRecipeForUI(recipe, index)
             );
-
-            console.log('Transformed recipes:', transformedRecipes); // 🔥 Debug log
 
             setOriginalRecipes(apiRecipes);
             setAllRecipes(transformedRecipes);
             setFilteredRecipes(transformedRecipes);
 
-            // 🔥 Generate categories from actual tags
             const generatedCategories = generateCategoriesFromRecipes(transformedRecipes);
-            console.log('Generated categories:', generatedCategories); // 🔥 Debug log
             setCategories(generatedCategories);
 
-            // Load favorites from localStorage
             const savedFavorites = localStorage.getItem('recipeFavorites');
             if (savedFavorites) {
                 setFavorites(new Set(JSON.parse(savedFavorites)));
             }
 
         } catch (error) {
-            console.error('Error loading recipes:', error);
             setError(error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    // Initial load
     useEffect(() => {
         loadRecipes();
     }, []);
 
-    // Apply filters whenever any filter state changes
     useEffect(() => {
         updateFilteredRecipes();
     }, [searchTerm, selectedCategory, showFavoritesOnly, favorites, allRecipes]);
@@ -413,7 +348,6 @@ const SavedRecipesPage = () => {
                     setSelectedRecipe(detailRecipe);
                     break;
                 case 'delete':
-                    // ✅ Enhanced confirmation dialog (keep this one)
                     const recipeName = recipe.recipeName || recipe.title || 'this recipe';
                     const confirmed = window.confirm(
                         `🗑️ Delete Recipe?\n\nAre you sure you want to permanently delete "${recipeName}"?\n\nThis action cannot be undone and will remove the recipe from your saved collection.`
@@ -426,18 +360,13 @@ const SavedRecipesPage = () => {
                             setSelectedRecipe(null);
                         }
 
-                        // Remove from local state and regenerate categories
                         const updatedRecipes = allRecipes.filter(r => r.id !== recipe.id);
                         setAllRecipes(updatedRecipes);
                         setOriginalRecipes(prev => prev.filter(r => r.id !== recipe.id));
                         setCategories(generateCategoriesFromRecipes(updatedRecipes));
-
-                        // ✅ Optional: Show success message
-                        console.log(`✅ "${recipeName}" has been deleted successfully`);
                     }
                     break;
                 case 'edit':
-                    console.log('Edit recipe:', recipe);
                     break;
                 case 'duplicate':
                     const originalRecipe = originalRecipes.find(r => r.id === recipe.id);
@@ -468,7 +397,7 @@ const SavedRecipesPage = () => {
                                 url: window.location.href
                             });
                         } catch (shareError) {
-                            console.log('Error sharing:', shareError);
+                            // Error handling
                         }
                     } else {
                         const recipeText = `${recipe.recipeName || recipe.title}\n\n${recipe.recipeDesc || recipe.description}\n\n${recipe.recipeText}`;
@@ -477,10 +406,9 @@ const SavedRecipesPage = () => {
                     }
                     break;
                 default:
-                    console.log(`${action} recipe:`, recipe);
+                    break;
             }
         } catch (error) {
-            console.error(`Error ${action} recipe:`, error);
             setError(error.message);
         }
     };
@@ -489,7 +417,6 @@ const SavedRecipesPage = () => {
         setSelectedRecipe(null);
     };
 
-    // Show RecipeDetailView if a recipe is selected
     if (selectedRecipe) {
         return (
             <RecipeDetailView
@@ -528,7 +455,6 @@ const SavedRecipesPage = () => {
     return (
         <div className="saved-recipes-page">
             <div className="saved-recipes-page__container">
-                {/* Magical Background */}
                 <div className="saved-recipes-page__magical-background">
                     <div className="saved-recipes-page__floating-particles"></div>
                     <div className="saved-recipes-page__gradient-orbs">
@@ -538,7 +464,6 @@ const SavedRecipesPage = () => {
                     </div>
                 </div>
 
-                {/* Header */}
                 <SearchHeader
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -549,14 +474,12 @@ const SavedRecipesPage = () => {
                     totalCategories={categories.length - 1}
                 />
 
-                {/* Category Filter */}
                 <CategoryFilter
                     categories={categories}
                     selectedCategory={selectedCategory}
                     setSelectedCategory={setSelectedCategory}
                 />
 
-                {/* Main Content */}
                 <main className="saved-recipes-page__main-content">
                     {filteredRecipes.length === 0 ? (
                         <EmptyState
@@ -575,7 +498,6 @@ const SavedRecipesPage = () => {
                     )}
                 </main>
 
-                {/* Floating Action Button */}
                 <FloatingActionButton />
             </div>
         </div>
