@@ -145,13 +145,15 @@ public class RecipeController {
             log.info("✅ Recipe generated successfully for user: {}", currentUser.getUsername());
 
             System.out.println("TRYNA SEND");
-            int index = recipe.indexOf("SHOPPING LIST:");
-            System.out.println(index);
+            int index_s = recipe.indexOf("SHOPPING LIST:");
+            int index_e = recipe.indexOf("SHOPPING LIST END");
+            System.out.println(index_s);
+            System.out.println(index_e);
             System.out.println(recipe);
-            if (index >= 0) {
+            if (index_s >= 0) {
                 System.out.println("IN IF");
-                String shoppingList = recipe.substring(index);
-                recipe = recipe.substring(0, index);
+                String shoppingList = recipe.substring(index_s, index_e);
+                recipe = recipe.substring(0, index_s);
 
                 System.out.print("CHECK ");
                 System.out.println(currentUser.getEmail());
@@ -182,34 +184,35 @@ public class RecipeController {
         String ingredients = ingredientService.toString();
         log.info("📝 Ingredients for meal plan ({}): {}", currentUser.getUsername(), ingredients);
         
-        try {
-            String recipe = aiService.generateMealPlan(
-                mealPlanRequest.getFoodPreferenceString(),
-                mealPlanRequest.getTimeframe(), 
-                mealPlanRequest.getPlanPreferenceString(), 
-                ingredients
-            );
-            
-            log.info("📅 Meal plan generated successfully for user: {}", currentUser.getUsername());
-
-            // Handle shopping list email
-            int index = recipe.indexOf("SHOPPING LIST:");
-            if (index >= 0) {
-                String shoppingList = recipe.substring(index);
-                recipe = recipe.substring(0, index);
-                
-                if (!mealPlanRequest.getRecipient().isEmpty()) {
-                    log.info("📧 Sending shopping list to: {}", mealPlanRequest.getRecipient());
-                    emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shoppingList);
-                }
-            }
-
-            return ResponseEntity.ok(recipe);
-            
-        } catch (Exception e) {
-            log.error("❌ Error generating meal plan for user {}: {}", currentUser.getUsername(), e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error generating meal plan: " + e.getMessage());
-        }
+//        try {
+//            String recipe = aiService.generateMealPlan(
+//                mealPlanRequest.getFoodPreferenceString(),
+//                mealPlanRequest.getTimeframe(),
+//                mealPlanRequest.getPlanPreferenceString(),
+//                ingredients
+//            );
+//
+//            log.info("📅 Meal plan generated successfully for user: {}", currentUser.getUsername());
+//
+//            // Handle shopping list email
+//            int index = recipe.indexOf("SHOPPING LIST:");
+//            if (index >= 0) {
+//                String shoppingList = recipe.substring(index);
+//                recipe = recipe.substring(0, index);
+//
+//                if (!mealPlanRequest.getRecipient().isEmpty()) {
+//                    log.info("📧 Sending shopping list to: {}", mealPlanRequest.getRecipient());
+//                    emailSenderService.sendEmail(mealPlanRequest.getRecipient(), shoppingList);
+//                }
+//            }
+//
+//            return ResponseEntity.ok(recipe);
+//
+//        } catch (Exception e) {
+//            log.error("❌ Error generating meal plan for user {}: {}", currentUser.getUsername(), e.getMessage(), e);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error generating meal plan: " + e.getMessage());
+//        }
+        return null;
     }
 }

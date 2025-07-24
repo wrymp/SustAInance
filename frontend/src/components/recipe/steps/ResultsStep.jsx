@@ -338,25 +338,6 @@ const ResultsStep = ({
         }
     };
 
-    const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Check out this amazing recipe!',
-                    text: `I just generated this recipe with ${ingredients.length} ingredients!`,
-                    url: window.location.href
-                });
-            } catch (error) {
-                console.log('Error sharing:', error);
-            }
-        } else {
-            const cleanContent = cleanRecipeContent(generatedRecipe.content);
-            const recipeText = `${cleanContent}\n\nGenerated with: ${ingredients.map(ing => ing.name).join(', ')}`;
-            navigator.clipboard.writeText(recipeText);
-            alert('Recipe copied to clipboard!');
-        }
-    };
-
     const formatRecipeContent = (content) => {
         if (!content) return '';
 
@@ -592,10 +573,6 @@ const ResultsStep = ({
                                     💾 Save Recipe
                                 </>
                             )}
-                        </button>
-
-                        <button className="results-step__action-btn results-step__share-btn" onClick={handleShare}>
-                            📤 Share
                         </button>
                     </div>
                 </div>

@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.sustainance.config.authConfig.RequireAuthentication;
 
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -44,10 +47,10 @@ public class RecipeSaverController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRecipe(@PathVariable UUID id, @RequestParam UUID userId, HttpServletRequest httpRequest) {
         try {
-            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
-            if (!authenticatedUserId.equals(userId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
+//            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+//            if (!authenticatedUserId.equals(userId)) {
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//            }
 
             boolean deleted = recipeService.deleteRecipe(id, userId);
             if (deleted) {
@@ -69,6 +72,31 @@ public class RecipeSaverController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{recipeId}")
+    public ResponseEntity<?> getRecipeById(@PathVariable UUID recipeId, HttpServletRequest httpRequest) {
+        try {
+            UUID authenticatedUserId = (UUID) httpRequest.getAttribute("authenticatedUserId");
+
+            FavoriteRecipe recipe = recipeService.getRecipeById(recipeId);
+
+            if (recipe == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("recipe", recipe);
+            response.put("isOwner", recipe.getUserId().equals(authenticatedUserId));
+            response.put("viewerUserId", authenticatedUserId);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching recipe: " + e.getMessage());
         }
     }
 }

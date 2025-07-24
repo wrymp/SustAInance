@@ -1,35 +1,211 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './RecipeDetailView.css';
 
-const StarRating = ({ rating, onRatingChange, readOnly = false, size = 'medium' }) => {
-    const [hover, setHover] = useState(0);
-
-    const handleClick = (value) => {
-        if (!readOnly && onRatingChange) {
-            onRatingChange(value);
-        }
-    };
-
+const StarRating = ({ rating, readOnly = false, size = 'medium' }) => {
     const starSize = size === 'small' ? '16px' : size === 'large' ? '32px' : '24px';
 
     return (
         <div className={`star-rating star-rating--${size}`} style={{ fontSize: starSize }}>
             {[1, 2, 3, 4, 5].map((star) => (
-                <button
+                <span
                     key={star}
-                    type="button"
                     className={`star-rating__star ${
-                        star <= (hover || rating) ? 'star-rating__star--filled' : 'star-rating__star--empty'
+                        star <= rating ? 'star-rating__star--filled' : 'star-rating__star--empty'
                     }`}
-                    onClick={() => handleClick(star)}
-                    onMouseEnter={() => !readOnly && setHover(star)}
-                    onMouseLeave={() => !readOnly && setHover(0)}
-                    disabled={readOnly}
-                    style={{ cursor: readOnly ? 'default' : 'pointer' }}
+                    style={{ cursor: 'default' }}
                 >
                     ⭐
-                </button>
+                </span>
             ))}
+        </div>
+    );
+};
+
+const ShareModal = ({ recipe, onClose, averageRating, parsedContent, recipeUrl }) => {
+    const [shareStatus, setShareStatus] = useState('');
+    const [showPreview, setShowPreview] = useState(false);
+
+    const formatRecipeForSharing = () => {
+        const lines = [];
+        lines.push(`🍽️ ${recipe.recipeName}`);
+        lines.push('');
+
+        if (recipe.recipeDesc) {
+            lines.push(recipe.recipeDesc);
+            lines.push('');
+        }
+
+        if (averageRating > 0) {
+            lines.push(`⭐ Rating: ${averageRating.toFixed(1)}/5.0`);
+            lines.push('');
+        }
+
+        const metadata = [];
+        if (recipe.prepTime || parsedContent.metadata.cookingTime) {
+            metadata.push(`⏰ Prep Time: ${recipe.prepTime || parsedContent.metadata.cookingTime}`);
+        }
+        if (parsedContent.metadata.serves) {
+            metadata.push(`🍽️ Serves: ${parsedContent.metadata.serves}`);
+        }
+        if (recipe.difficulty || parsedContent.metadata.difficulty) {
+            metadata.push(`📊 Difficulty: ${recipe.difficulty || parsedContent.metadata.difficulty}`);
+        }
+
+        if (metadata.length > 0) {
+            lines.push(...metadata);
+            lines.push('');
+        }
+
+        if (parsedContent.instructions.length > 0) {
+            lines.push('👨‍🍳 INSTRUCTIONS:');
+            parsedContent.instructions.forEach((instruction, index) => {
+                const cleanInstruction = instruction
+                    .replace(/^\d+\.\s*/, '')
+                    .replace(/\*\*(.*?)\*\*/g, '$1')
+                    .trim();
+                lines.push(`${index + 1}. ${cleanInstruction}`);
+            });
+        } else if (recipe.recipeText) {
+            lines.push('📝 RECIPE:');
+            lines.push(recipe.recipeText);
+        }
+
+        if (recipe.tags) {
+            lines.push('');
+            let tagsArray;
+            if (Array.isArray(recipe.tags)) {
+                tagsArray = recipe.tags;
+            } else if (typeof recipe.tags === 'string') {
+                tagsArray = recipe.tags.split(',').map(tag => tag.trim());
+            } else {
+                tagsArray = [];
+            }
+
+            if (tagsArray.length > 0) {
+                lines.push(`🏷️ Tags: ${tagsArray.map(tag => `#${tag}`).join(' ')}`);
+            }
+        }
+
+        lines.push('');
+        lines.push(`🔗 View recipe: ${recipeUrl}`);
+        return lines.join('\n');
+    };
+
+    const handleNativeShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `${recipe.recipeName} - Recipe`,
+                    text: recipe.recipeDesc || 'Check out this delicious recipe!',
+                    url: recipeUrl
+                });
+                setShareStatus('Shared successfully! 🎉');
+                setTimeout(() => {
+                    setShareStatus('');
+                    onClose();
+                }, 2000);
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    setShareStatus('Share cancelled');
+                }
+            }
+        }
+    };
+
+    const handleCopyRecipe = async () => {
+        try {
+            const formattedText = formatRecipeForSharing();
+            await navigator.clipboard.writeText(formattedText);
+            setShareStatus('Recipe copied to clipboard! 📋');
+            setTimeout(() => setShareStatus(''), 3000);
+        } catch (error) {
+            setShareStatus('Failed to copy recipe');
+        }
+    };
+
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(recipeUrl);
+            setShareStatus('Recipe link copied to clipboard! 🔗');
+            setTimeout(() => setShareStatus(''), 3000);
+        } catch (error) {
+            setShareStatus('Failed to copy link');
+        }
+    };
+
+    return (
+        <div className="share-modal-overlay" onClick={onClose}>
+            <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="share-modal__header">
+                    <h2>📤 Share Recipe</h2>
+                    <button className="share-modal__close" onClick={onClose}>×</button>
+                </div>
+
+                <div className="share-modal__content">
+                    <div className="share-modal__recipe-info">
+                        <h3>{recipe.recipeName}</h3>
+                        <p>{recipe.recipeDesc}</p>
+                        {averageRating > 0 && (
+                            <div className="share-modal__rating">
+                                <StarRating rating={Math.round(averageRating)} readOnly size="small" />
+                                <span>{averageRating.toFixed(1)}/5.0</span>
+                            </div>
+                        )}
+                        <div className="share-modal__recipe-url">
+                            <strong>Recipe Link:</strong> <code>{recipeUrl}</code>
+                        </div>
+                    </div>
+
+                    <div className="share-modal__actions">
+                        {navigator.share && (
+                            <button
+                                className="share-modal__action-btn share-modal__action-btn--primary"
+                                onClick={handleNativeShare}
+                            >
+                                📱 Share Recipe Link
+                            </button>
+                        )}
+
+                        <button
+                            className="share-modal__action-btn"
+                            onClick={handleCopyRecipe}
+                        >
+                            📋 Copy Full Recipe
+                        </button>
+
+                        <button
+                            className="share-modal__action-btn"
+                            onClick={handleCopyLink}
+                        >
+                            🔗 Copy Recipe Link
+                        </button>
+                    </div>
+
+                    <div className="share-modal__preview-section">
+                        <button
+                            className="share-modal__preview-toggle"
+                            onClick={() => setShowPreview(!showPreview)}
+                        >
+                            {showPreview ? '👁️ Hide Preview' : '👀 Preview What Will Be Shared'}
+                        </button>
+
+                        {showPreview && (
+                            <div className="share-modal__preview">
+                                <h4>📝 Recipe Preview:</h4>
+                                <div className="share-modal__preview-content">
+                                    <pre>{formatRecipeForSharing()}</pre>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {shareStatus && (
+                        <div className={`share-modal__status ${shareStatus.includes('successfully') || shareStatus.includes('copied') ? 'success' : 'error'}`}>
+                            {shareStatus}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };
@@ -38,164 +214,19 @@ const RecipeDetailView = ({
                               recipe,
                               onBack,
                               onDelete,
-                              onShare
+                              recipeUrl,
+                              isOwner = true,
+                              averageRating = 0
                           }) => {
     const [showFullContent, setShowFullContent] = useState(false);
-    const [averageRating, setAverageRating] = useState(0);
-    const [userRating, setUserRating] = useState(0);
-    const [currentUserId, setCurrentUserId] = useState(null);
-    const [isLoadingRating, setIsLoadingRating] = useState(true);
+    const [showShareModal, setShowShareModal] = useState(false);
 
-    const API_BASE_URL = 'http://localhost:9097/api';
-
-    const getCurrentUser = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const user = await response.json();
-                return user.uuid;
-            }
-        } catch (error) {
-            // Error handling
-        }
-        return null;
-    };
-
-    const getAverageRating = async (recipeId) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/ratings/average/${recipeId}`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                return await response.json();
-            }
-            return 0;
-        } catch (error) {
-            return 0;
-        }
-    };
-
-    const getUserRating = async (recipeId, userId) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/ratings/user?recipeId=${recipeId}&userId=${userId}`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                const rating = await response.json();
-                return rating || 0;
-            }
-            return 0;
-        } catch (error) {
-            return 0;
-        }
-    };
-
-    const addOrUpdateRating = async (recipeId, userId, rating) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/ratings/add`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    recipeId,
-                    userId,
-                    rating
-                }),
-            });
-            return response.ok;
-        } catch (error) {
-            return false;
-        }
-    };
-
-    const deleteRating = async (recipeId, userId) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/ratings/delete?recipeId=${recipeId}&userId=${userId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-            return response.ok;
-        } catch (error) {
-            return false;
-        }
-    };
-
-    useEffect(() => {
-        const loadRatings = async () => {
-            setIsLoadingRating(true);
-            try {
-                const userId = await getCurrentUser();
-                setCurrentUserId(userId);
-
-                if (userId) {
-                    const [avgRating, myRating] = await Promise.all([
-                        getAverageRating(recipe.id),
-                        getUserRating(recipe.id, userId)
-                    ]);
-
-                    setAverageRating(avgRating || 0);
-                    setUserRating(myRating || 0);
-                } else {
-                    const avgRating = await getAverageRating(recipe.id);
-                    setAverageRating(avgRating || 0);
-                    setUserRating(0);
-                }
-            } catch (error) {
-                // Error handling
-            } finally {
-                setIsLoadingRating(false);
-            }
-        };
-
-        if (recipe?.id) {
-            loadRatings();
-        }
-    }, [recipe?.id]);
-
-    const handleUserRating = async (rating) => {
-        if (!currentUserId) return;
-
-        try {
-            const success = await addOrUpdateRating(recipe.id, currentUserId, rating);
-            if (success) {
-                setUserRating(rating);
-                const newAvgRating = await getAverageRating(recipe.id);
-                setAverageRating(newAvgRating || 0);
-            }
-        } catch (error) {
-            // Error handling
-        }
-    };
-
-    const handleRemoveRating = async () => {
-        if (!currentUserId || userRating === 0) return;
-
-        try {
-            const success = await deleteRating(recipe.id, currentUserId);
-            if (success) {
-                setUserRating(0);
-                const newAvgRating = await getAverageRating(recipe.id);
-                setAverageRating(newAvgRating || 0);
-            }
-        } catch (error) {
-            // Error handling
-        }
-    };
+    const finalRecipeUrl = recipeUrl || window.location.href;
 
     const parseRecipeContent = (content) => {
         if (!content) return { instructions: [], metadata: {} };
 
-        const result = {
-            instructions: [],
-            metadata: {}
-        };
+        const result = { instructions: [], metadata: {} };
 
         const instructionsMatch = content.match(/Instructions:\s*(.*?)(?=Cooking Time:|Chef's Tips:|$)/s);
         if (instructionsMatch) {
@@ -219,23 +250,6 @@ const RecipeDetailView = ({
 
     const parsedContent = parseRecipeContent(recipe.recipeText);
 
-    const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: recipe.recipeName,
-                    text: recipe.recipeDesc,
-                    url: window.location.href
-                });
-            } catch (error) {
-                // Error handling
-            }
-        } else {
-            navigator.clipboard.writeText(`${recipe.recipeName}\n\n${recipe.recipeText}`);
-            alert('Recipe copied to clipboard!');
-        }
-    };
-
     return (
         <div className="recipe-detail-view">
             <div className="recipe-detail-view__header">
@@ -247,16 +261,18 @@ const RecipeDetailView = ({
                 <div className="recipe-detail-view__header-actions">
                     <button
                         className="recipe-detail-view__action-btn recipe-detail-view__share-btn"
-                        onClick={handleShare}
+                        onClick={() => setShowShareModal(true)}
                     >
                         📤 Share
                     </button>
-                    <button
-                        className="recipe-detail-view__action-btn recipe-detail-view__delete-btn"
-                        onClick={() => onDelete && onDelete(recipe)}
-                    >
-                        🗑️ Delete
-                    </button>
+                    {isOwner && onDelete && (
+                        <button
+                            className="recipe-detail-view__action-btn recipe-detail-view__delete-btn"
+                            onClick={() => onDelete(recipe)}
+                        >
+                            🗑️ Delete
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -264,50 +280,6 @@ const RecipeDetailView = ({
                 <div className="recipe-detail-view__title-section">
                     <h1 className="recipe-detail-view__title">{recipe.recipeName}</h1>
                     <p className="recipe-detail-view__description">{recipe.recipeDesc}</p>
-
-                    <div className="recipe-detail-view__rating-section">
-                        <div className="recipe-detail-view__average-rating">
-                            <h3>📊 Recipe Rating</h3>
-                            {isLoadingRating ? (
-                                <div className="recipe-detail-view__rating-loading">Loading ratings...</div>
-                            ) : (
-                                <div className="recipe-detail-view__rating-display">
-                                    <StarRating rating={Math.round(averageRating)} readOnly size="large" />
-                                    <span className="recipe-detail-view__rating-value">
-                                        {averageRating.toFixed(1)} / 5.0
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        {currentUserId && (
-                            <div className="recipe-detail-view__user-rating">
-                                <h4>
-                                    {userRating > 0 ? `Your rating: ${userRating}/5` : 'Rate this recipe:'}
-                                </h4>
-                                <div className="recipe-detail-view__user-rating-controls">
-                                    <StarRating
-                                        rating={userRating}
-                                        onRatingChange={handleUserRating}
-                                        size="medium"
-                                    />
-                                    {userRating > 0 && (
-                                        <button
-                                            className="recipe-detail-view__remove-rating-btn"
-                                            onClick={handleRemoveRating}
-                                        >
-                                            Remove Rating
-                                        </button>
-                                    )}
-                                </div>
-                                {userRating > 0 && (
-                                    <p className="recipe-detail-view__rating-help-text">
-                                        Click on stars to update your rating
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 <div className="recipe-detail-view__recipe-card">
@@ -421,6 +393,16 @@ const RecipeDetailView = ({
                     </button>
                 </div>
             </div>
+
+            {showShareModal && (
+                <ShareModal
+                    recipe={recipe}
+                    onClose={() => setShowShareModal(false)}
+                    averageRating={averageRating}
+                    parsedContent={parsedContent}
+                    recipeUrl={finalRecipeUrl}
+                />
+            )}
         </div>
     );
 };

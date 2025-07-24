@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SearchHeader from './SearchHeader';
 import CategoryFilter from './CategoryFilter';
 import RecipeGrid from './RecipeGrid';
 import EmptyState from './EmptyState';
 import FloatingActionButton from './FloatingActionButton';
 import LoadingState from './LoadingState';
-import RecipeDetailView from '../recipeDetail/RecipeDetailView';
 import './SavedRecipesPage.css';
 
 const SavedRecipesPage = () => {
+    const navigate = useNavigate();
     const [allRecipes, setAllRecipes] = useState([]);
     const [filteredRecipes, setFilteredRecipes] = useState([]);
     const [originalRecipes, setOriginalRecipes] = useState([]);
-    const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -47,7 +47,7 @@ const SavedRecipesPage = () => {
                 return user.uuid;
             }
         } catch (error) {
-            // Error handling
+            console.error('Error getting current user:', error);
         }
         return null;
     };
@@ -146,20 +146,6 @@ const SavedRecipesPage = () => {
             createdAt: apiRecipe.createdAt,
             lastCooked: null,
             recipeText: apiRecipe.recipeText
-        };
-    };
-
-    const getRecipeForDetailView = (recipe) => {
-        const originalRecipe = originalRecipes.find(r => r.id === recipe.id);
-        return {
-            id: recipe.id,
-            recipeName: recipe.recipeName || recipe.title,
-            recipeDesc: recipe.recipeDesc || recipe.description,
-            recipeText: recipe.recipeText,
-            tags: originalRecipe?.tags || recipe.originalTags,
-            difficulty: recipe.difficulty,
-            prepTime: recipe.prepTime || recipe.time,
-            ...recipe
         };
     };
 
@@ -344,8 +330,8 @@ const SavedRecipesPage = () => {
         try {
             switch (action) {
                 case 'view':
-                    const detailRecipe = getRecipeForDetailView(recipe);
-                    setSelectedRecipe(detailRecipe);
+                    // Navigate to the individual recipe page
+                    navigate(`/recipe/${recipe.id}`);
                     break;
                 case 'delete':
                     const recipeName = recipe.recipeName || recipe.title || 'this recipe';
@@ -356,10 +342,6 @@ const SavedRecipesPage = () => {
                     if (confirmed) {
                         await deleteRecipe(recipe.id);
 
-                        if (selectedRecipe && selectedRecipe.id === recipe.id) {
-                            setSelectedRecipe(null);
-                        }
-
                         const updatedRecipes = allRecipes.filter(r => r.id !== recipe.id);
                         setAllRecipes(updatedRecipes);
                         setOriginalRecipes(prev => prev.filter(r => r.id !== recipe.id));
@@ -367,6 +349,7 @@ const SavedRecipesPage = () => {
                     }
                     break;
                 case 'edit':
+                    // Navigate to edit page or implement edit functionality
                     break;
                 case 'duplicate':
                     const originalRecipe = originalRecipes.find(r => r.id === recipe.id);
@@ -389,44 +372,42 @@ const SavedRecipesPage = () => {
                     }
                     break;
                 case 'share':
+                    // Create the specific recipe URL
+                    const recipeUrl = `${window.location.origin}/recipe/${recipe.id}`;
+
                     if (navigator.share) {
                         try {
                             await navigator.share({
-                                title: recipe.recipeName || recipe.title,
-                                text: recipe.recipeDesc || recipe.description,
-                                url: window.location.href
+                                title: `${recipe.recipeName || recipe.title} - Recipe`,
+                                text: recipe.recipeDesc || recipe.description || 'Check out this delicious recipe!',
+                                url: recipeUrl
                             });
                         } catch (shareError) {
-                            // Error handling
+                            if (shareError.name !== 'AbortError') {
+                                console.error('Error sharing:', shareError);
+                            }
                         }
                     } else {
-                        const recipeText = `${recipe.recipeName || recipe.title}\n\n${recipe.recipeDesc || recipe.description}\n\n${recipe.recipeText}`;
-                        navigator.clipboard.writeText(recipeText);
-                        alert('Recipe copied to clipboard!');
+                        // Fallback: copy recipe link to clipboard
+                        try {
+                            await navigator.clipboard.writeText(recipeUrl);
+                            alert('Recipe link copied to clipboard!');
+                        } catch (clipboardError) {
+                            // Fallback: copy recipe text
+                            const recipeText = `${recipe.recipeName || recipe.title}\n\n${recipe.recipeDesc || recipe.description}\n\n${recipe.recipeText}\n\nView recipe: ${recipeUrl}`;
+                            navigator.clipboard.writeText(recipeText);
+                            alert('Recipe details copied to clipboard!');
+                        }
                     }
                     break;
                 default:
                     break;
             }
         } catch (error) {
+            console.error('Recipe action error:', error);
             setError(error.message);
         }
     };
-
-    const handleBackToList = () => {
-        setSelectedRecipe(null);
-    };
-
-    if (selectedRecipe) {
-        return (
-            <RecipeDetailView
-                recipe={selectedRecipe}
-                onBack={handleBackToList}
-                onEdit={(recipe) => handleRecipeAction('edit', recipe)}
-                onDelete={(recipe) => handleRecipeAction('delete', recipe)}
-            />
-        );
-    }
 
     if (loading && allRecipes.length === 0) {
         return (

@@ -45,4 +45,8 @@ public class RecipeService {
     public List<FavoriteRecipe> getUserRecipes(UUID userId) {
         return favoriteRecipeRepository.findByUserId(userId);
     }
+
+    public FavoriteRecipe getRecipeById(UUID recipeId) {
+        return favoriteRecipeRepository.findById(recipeId).orElse(null);
+    }
 }

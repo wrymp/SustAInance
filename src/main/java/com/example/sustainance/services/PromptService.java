@@ -106,6 +106,7 @@ public class PromptService {
             SHOPPING LIST:
             [Only if needed - list missing ingredients with quantities]
             === [INGREDIENT_NAME]: [Quantity, Unit]
+            SHOPPING LIST END
             """,
                 ingredients,
                 !preferencesContext.isEmpty() ? preferencesContext.toString() : "No specific preferences provided"

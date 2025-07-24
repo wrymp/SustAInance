@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.*;
 import javax.mail.internet.*;
-
-
 import java.util.Properties;
 
 @Service
@@ -34,23 +32,30 @@ public class EmailSenderService {
             message.setText(content);
 
             Transport.send(message);
-            System.out.println("Email sent successfully.");
+            log.info("✅ Email sent successfully to: {}", recipients_email);
 
         } catch (MessagingException e) {
-            System.out.println(e.getMessage());
+            log.error("❌ Failed to send email: {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
     public EmailSenderService(){
-        this.my_email = "sustainancehelper@gmail.com";
-        this.my_password = "oops";
+        // Get from environment variables with fallback defaults
+        this.my_email = System.getenv("SUSTAINANCE_HELPER_EMAIL");
+        this.my_password = System.getenv("SUSTAINANCE_HELPER_PASSWORD");
+
+        if (this.my_password == null || this.my_password.isEmpty()) {
+            log.error("❌ GMAIL_APP_PASSWORD environment variable not set!");
+            throw new RuntimeException("GMAIL_APP_PASSWORD environment variable is required");
+        }
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
         this.properties = props;
-
     }
 }

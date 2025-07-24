@@ -1986,7 +1986,7 @@
     }
 
     .saved-recipes-page__category-scroll {
-        justify-content: flex-start;
+        justify-content: center;
     }
 
     .saved-recipes-page__fab {
@@ -2053,7 +2053,7 @@
     gap: 1rem;
     padding: 1rem 0;
     min-width: min-content;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .saved-recipes-page__category-btn {
@@ -2135,7 +2135,7 @@
 /* Responsive adjustments for category buttons */
 @media (max-width: 768px) {
     .saved-recipes-page__category-scroll {
-        justify-content: flex-start;
+        justify-content: center;
         padding-left: 1rem;
         padding-right: 1rem;
     }

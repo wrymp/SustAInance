@@ -18,50 +18,46 @@ import SavedRecipesPage from "./components/saved-recipes/SavedRecipesPage";
 import PantryPage from "./components/pantry/PantryPage";
 import MealPlanMaker from "./components/mealPlan/MealPlanMaker";
 import CreateMealPlan from './components/mealPlan/CreateMealPlan';
+import RecipeDetailPage from './components/recipeDetail/RecipeDetailPage';
 
-// Component to handle authenticated user redirects
 const AuthenticatedRedirect = () => {
   const { isAuthenticated, isLoading } = useContext(AuthContext);
-  
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  
+
   return isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />;
 };
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <Routes>
-            {/* Root path - redirect to home if authenticated, otherwise show login */}
-            <Route path="/" element={<AuthenticatedRedirect />} />
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/" element={<AuthenticatedRedirect />} />
 
-            {/* Public routes - accessible when not logged in */}
-            <Route element={<PublicRoute />}>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-            </Route>
+              <Route element={<PublicRoute />}>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+              </Route>
 
-            {/* Protected routes - require authentication */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/recipe-generator" element={<RecipeGenerator/>} />
-              <Route path="/saved-recipes" element={<SavedRecipesPage/>} />
-              <Route path="/pantry" element={<PantryPage/>} />
-              <Route path="/meal-plan" element={<MealPlanMaker/>} />
-              <Route path="/create-meal-plan" element={<CreateMealPlan />} />
-              {/* Add your other protected routes here */}
-            </Route>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/recipe-generator" element={<RecipeGenerator/>} />
+                <Route path="/saved-recipes" element={<SavedRecipesPage/>} />
+                <Route path="/recipe/:recipeId" element={<RecipeDetailPage />} />
+                <Route path="/pantry" element={<PantryPage/>} />
+                <Route path="/meal-plan" element={<MealPlanMaker/>} />
+                <Route path="/create-meal-plan" element={<CreateMealPlan />} />
+              </Route>
 
-            {/* Redirect all other routes to home (which will redirect to login if not authenticated) */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
   );
 }
 
