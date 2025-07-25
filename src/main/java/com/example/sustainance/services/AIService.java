@@ -176,7 +176,7 @@ public class AIService {
     public String generateMealPlanStructure(int duration, int mealsPerDay, List<String> preferences) {
         log.info("🍽️ Generating meal plan structure for {} days with {} meals per day", duration, mealsPerDay);
 
-        if (duration > 7) {
+        if (duration > 2) {
             return generateMealPlanInBatches(duration, mealsPerDay, preferences);
         }
 
