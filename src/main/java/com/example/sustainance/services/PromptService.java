@@ -193,4 +193,54 @@ public class PromptService {
             default -> List.of("Breakfast", "Lunch", "Dinner");
         };
     }
+
+    public String getDetailedRecipeSystemMessage() {
+        return """
+        You are a professional chef creating detailed recipes.
+        Provide complete, easy-to-follow recipes with exact measurements.
+        Include prep time, cook time, difficulty level, and number of servings.
+        Format the recipe clearly with sections for ingredients and instructions.
+        """;
+    }
+
+    public String buildDetailedRecipePrompt(String mealTitle, String mealDescription,
+                                            String mealType, List<String> preferences) {
+        String preferencesStr = preferences != null && !preferences.isEmpty()
+                ? String.join(", ", preferences)
+                : "No specific preferences";
+
+        return String.format("""
+        Create a detailed recipe for: %s
+        
+        Description: %s
+        Meal Type: %s
+        Dietary Preferences: %s
+        
+        === %s ===
+        
+        Provide:
+        
+        Ingredients:
+        • [List each ingredient with exact measurements]
+        
+        Instructions:
+        1. [Detailed step-by-step instructions]
+        2. [Continue with clear steps]
+        
+        Chef's Tips:
+        • [Any helpful tips]
+        
+        Prep Time: [X minutes]
+        Cook Time: [Y minutes]
+        Total Time: [Z minutes]
+        Serves: [number]
+        Difficulty: [Easy/Medium/Hard]
+        """,
+                mealTitle,
+                mealDescription,
+                mealType,
+                preferencesStr,
+                mealTitle
+        );
+    }
 }

@@ -1,7 +1,7 @@
 package com.example.sustainance.services;
 
 import com.example.sustainance.models.entities.RecipeRating;
-import com.example.sustainance.models.repositories.RecipeRatingRepository;
+import com.example.sustainance.repositories.RecipeRatingRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

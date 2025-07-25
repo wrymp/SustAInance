@@ -1,8 +1,7 @@
 package com.example.sustainance.services;
 
 import com.example.sustainance.models.entities.MealPlan;
-import com.example.sustainance.models.repositories.MealPlanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.sustainance.repositories.MealPlanRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 @Transactional
 public class MealPlanService {
 
-    private MealPlanRepository mealPlanRepository;
+    private final MealPlanRepository mealPlanRepository;
 
     public MealPlanService(MealPlanRepository mealPlanRepository) {
         this.mealPlanRepository = mealPlanRepository;
@@ -62,7 +61,7 @@ public class MealPlanService {
         }
     }
 
-    public void deleteMealPlanByUserAndId(UUID userId, UUID id) {
+    public void deleteMealPlanByUserAndId(UUID userId, long id) {
         if (mealPlanRepository.existsByUserIdAndId(userId, id)) {
             mealPlanRepository.deleteByUserIdAndId(userId, id);
         } else {

@@ -1,4 +1,4 @@
-package com.example.sustainance.models.repositories;
+package com.example.sustainance.repositories;
 
 import com.example.sustainance.models.entities.RecipeRating;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,11 +18,6 @@ public interface RecipeRatingRepository extends JpaRepository<RecipeRating, UUID
 
     @Query("SELECT COALESCE(AVG(CAST(r.rating AS double)), 0.0) FROM RecipeRating r WHERE r.recipeId = :recipeId")
     Double getAverageRatingByRecipeId(@Param("recipeId") UUID recipeId);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE RecipeRating r SET r.rating = :rating WHERE r.userId = :userId AND r.recipeId = :recipeId")
-    int updateRatingByUserIdAndRecipeId(@Param("userId") UUID userId, @Param("recipeId") UUID recipeId, @Param("rating") Integer rating);
 
     @Modifying
     @Transactional

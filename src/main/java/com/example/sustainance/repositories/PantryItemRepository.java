@@ -1,10 +1,7 @@
-package com.example.sustainance.models.repositories;
+package com.example.sustainance.repositories;
 
 import com.example.sustainance.models.entities.PantryItem;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,8 +17,4 @@ public interface PantryItemRepository extends JpaRepository<PantryItem, UUID> {
 
     List<PantryItem> findByUsersId(UUID usersId);
 
-    @Modifying
-    @Query("DELETE FROM PantryItem p WHERE p.usersId = :usersId AND p.ingredientName = :ingredientName")
-    void deleteByUsersIdAndIngredientName(@Param("usersId") UUID usersId,
-                                          @Param("ingredientName") String ingredientName);
 }

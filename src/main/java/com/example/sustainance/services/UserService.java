@@ -4,7 +4,7 @@ import com.example.sustainance.models.DTO.LoginRequest;
 import com.example.sustainance.models.DTO.RegisterRequest;
 import com.example.sustainance.models.DTO.UserResponse;
 import com.example.sustainance.models.entities.UserInfo;
-import com.example.sustainance.models.repositories.UserInfoRepository;
+import com.example.sustainance.repositories.UserInfoRepository;
 import com.example.sustainance.excpetions.UserNotFoundException;
 import com.example.sustainance.excpetions.InvalidCredentialsException;
 import com.example.sustainance.excpetions.UserAlreadyExistsException;

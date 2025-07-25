@@ -4,6 +4,8 @@ import com.example.sustainance.config.authConfig.AuthenticationUtil;
 import com.example.sustainance.config.authConfig.RequireAuthentication;
 import com.example.sustainance.models.DTO.MealPlanGenerationRequest;
 import com.example.sustainance.models.DTO.MealPlanGenerationResponse;
+import com.example.sustainance.models.DTO.MealPlanProgressDTO;
+import com.example.sustainance.models.entities.FavoriteRecipe;
 import com.example.sustainance.models.entities.MealPlan;
 import com.example.sustainance.models.entities.UserInfo;
 import com.example.sustainance.services.MealPlanGenerationService;
@@ -14,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -117,7 +121,7 @@ public class MealPlanController {
     }
 
     @DeleteMapping("/user/{userId}/{id}")
-    public ResponseEntity<?> deleteMealPlanByUserAndId(@PathVariable UUID userId, @PathVariable UUID id) {
+    public ResponseEntity<?> deleteMealPlanByUserAndId(@PathVariable UUID userId, @PathVariable long id) {
         try {
             System.out.println("Deleting meal plan " + id + " for user: " + userId);
             mealPlanService.deleteMealPlanByUserAndId(userId, id);
@@ -145,6 +149,48 @@ public class MealPlanController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{mealPlanId}/meals/{day}/{mealType}/generate-recipe")
+    public ResponseEntity<Map<String, Object>> generateRecipeForMeal(
+            @PathVariable long mealPlanId,
+            @PathVariable int day,
+            @PathVariable String mealType,
+            HttpServletRequest request) {
+
+        try {
+            UserInfo currentUser = AuthenticationUtil.getCurrentUser(request);
+
+            FavoriteRecipe savedRecipe = mealPlanGenerationService.generateAndSaveRecipeForMeal(
+                    mealPlanId, day, mealType, currentUser.getUuid()
+            );
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("recipeId", savedRecipe.getId());
+            response.put("status", "completed");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            error.put("status", "failed");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    @GetMapping("/{mealPlanId}/progress")
+    public ResponseEntity<MealPlanProgressDTO> getMealPlanProgress(
+            @PathVariable long mealPlanId,
+            HttpServletRequest request) {
+
+        try {
+            UserInfo currentUser = AuthenticationUtil.getCurrentUser(request);
+            MealPlanProgressDTO progress = mealPlanGenerationService.getMealPlanProgress(mealPlanId, currentUser.getUuid());
+            return ResponseEntity.ok(progress);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 }

@@ -2,7 +2,7 @@ package com.example.sustainance.services;
 
 import com.example.sustainance.models.DTO.SaveRecipeRequest;
 import com.example.sustainance.models.entities.FavoriteRecipe;
-import com.example.sustainance.models.repositories.FavoriteRecipeRepository;
+import com.example.sustainance.repositories.FavoriteRecipeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +43,7 @@ public class RecipeService {
     }
 
     public List<FavoriteRecipe> getUserRecipes(UUID userId) {
-        return favoriteRecipeRepository.findByUserId(userId);
+        return favoriteRecipeRepository.findSavedRecipesByUserId(userId);
     }
 
     public FavoriteRecipe getRecipeById(UUID recipeId) {

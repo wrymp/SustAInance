@@ -12,4 +12,5 @@ public class GeneratedMealDTO {
     private String mealType;
     private String title;
     private String content;
+    private String recipeId;
 }

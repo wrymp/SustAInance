@@ -16,7 +16,7 @@ public class MealPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private long id;
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
@@ -39,7 +39,6 @@ public class MealPlan {
     @Column(name = "created_at")
     private LocalDate createdAt;
 
-    // Constructors
     public MealPlan() {
         this.createdAt = LocalDate.now();
     }

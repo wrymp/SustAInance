@@ -623,3 +623,106 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Recipe Generation Progress Styles */
+.recipe-gen-progress {
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.recipe-gen-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.recipe-gen-stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 120px;
+}
+
+.recipe-gen-stat-card.recipe-gen-error {
+    background-color: #fee;
+    color: #e53e3e;
+}
+
+.recipe-gen-stat-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.recipe-gen-stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+}
+
+.recipe-gen-stat-label {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.recipe-gen-progress-container {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.recipe-gen-progress-bar {
+    height: 24px;
+    background: #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.recipe-gen-progress-fill {
+    height: 100%;
+    background: linear-gradient(45deg, #4caf50, #66bb6a);
+    transition: width 0.3s ease;
+    border-radius: 12px;
+}
+
+.recipe-gen-progress-text {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.recipe-gen-current-meal {
+    text-align: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.recipe-gen-spinner {
+    font-size: 2rem;
+    animation: recipe-gen-spin 2s linear infinite;
+}
+
+@keyframes recipe-gen-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.recipe-gen-completion {
+    text-align: center;
+    padding: 2rem;
+    background: #e8f5e9;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.recipe-gen-completion-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}

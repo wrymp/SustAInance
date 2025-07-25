@@ -14,7 +14,15 @@ const CreateMealPlan = () => {
     });
 
     const [generatedMeals, setGeneratedMeals] = useState([]);
+    const [mealPlanId, setMealPlanId] = useState(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
+    const [recipeProgress, setRecipeProgress] = useState({
+        total: 0,
+        completed: 0,
+        failed: 0,
+        currentMeal: null
+    });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -45,6 +53,7 @@ const CreateMealPlan = () => {
         'Lunch': '☀️',
         'Dinner': '🌙'
     };
+
     const updateSetting = (key, value) => {
         setPlanSettings(prev => ({
             ...prev,
@@ -62,7 +71,7 @@ const CreateMealPlan = () => {
     };
 
     const nextStep = () => {
-        if (currentStep < 3) {
+        if (currentStep < 4) {
             setCurrentStep(currentStep + 1);
         }
     };
@@ -80,7 +89,6 @@ const CreateMealPlan = () => {
         try {
             console.log('🎯 Generating meal plan with settings:', planSettings);
 
-
             const response = await mealPlanAPI.generateMealPlan({
                 duration: planSettings.duration,
                 mealsPerDay: planSettings.mealsPerDay,
@@ -90,9 +98,9 @@ const CreateMealPlan = () => {
 
             console.log('✅ Generated meal plan:', response.data);
 
-
             if (response.data && response.data.meals) {
                 setGeneratedMeals(response.data.meals);
+                setMealPlanId(response.data.mealPlanId);
                 setCurrentStep(3);
             } else {
                 throw new Error('Invalid response format from meal plan generation');
@@ -105,6 +113,69 @@ const CreateMealPlan = () => {
             setIsGenerating(false);
         }
     };
+
+    const generateRecipes = async () => {
+        if (!mealPlanId || !generatedMeals.length) {
+            setError('No meal plan to generate recipes for');
+            return;
+        }
+
+        setIsGeneratingRecipes(true);
+        setError('');
+        setCurrentStep(4);
+
+        const total = generatedMeals.length;
+        setRecipeProgress({ total, completed: 0, failed: 0, currentMeal: null });
+
+        for (let i = 0; i < generatedMeals.length; i++) {
+            const meal = generatedMeals[i];
+
+            try {
+                setRecipeProgress(prev => ({
+                    ...prev,
+                    currentMeal: `${meal.mealType} - Day ${meal.day}: ${meal.title}`
+                }));
+
+                console.log(`🍳 Generating recipe ${i + 1}/${total}: ${meal.title}`);
+
+                await mealPlanAPI.generateRecipeForMeal(
+                    mealPlanId,
+                    meal.day,
+                    meal.mealType
+                );
+
+                setRecipeProgress(prev => ({
+                    ...prev,
+                    completed: prev.completed + 1
+                }));
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+            } catch (err) {
+                console.error(`❌ Failed to generate recipe for ${meal.title}:`, err);
+                setRecipeProgress(prev => ({
+                    ...prev,
+                    failed: prev.failed + 1,
+                    completed: prev.completed + 1
+                }));
+            }
+        }
+
+        setIsGeneratingRecipes(false);
+        setRecipeProgress(prev => ({ ...prev, currentMeal: null }));
+
+        const finalProgress = await mealPlanAPI.getMealPlanProgress(mealPlanId);
+        if (finalProgress.data.status === 'completed') {
+            setSuccess('✅ All recipes generated successfully!');
+        } else if (recipeProgress.failed > 0) {
+            setError(`⚠️ Generated ${recipeProgress.completed - recipeProgress.failed} recipes. ${recipeProgress.failed} failed.`);
+        }
+    };
+
+    const canNavigateToMealPlans = () => {
+        return recipeProgress.completed === recipeProgress.total && recipeProgress.total > 0;
+    };
+
     const resetForm = () => {
         setCurrentStep(1);
         setPlanSettings({
@@ -114,6 +185,13 @@ const CreateMealPlan = () => {
             startDate: new Date().toISOString().split('T')[0]
         });
         setGeneratedMeals([]);
+        setMealPlanId(null);
+        setRecipeProgress({
+            total: 0,
+            completed: 0,
+            failed: 0,
+            currentMeal: null
+        });
         setError('');
         setSuccess('');
     };
@@ -126,13 +204,14 @@ const CreateMealPlan = () => {
     const renderStepIndicator = () => (
         <div className="step-indicator">
             <div className="step-line"></div>
-            {[1, 2, 3].map(step => (
+            {[1, 2, 3, 4].map(step => (
                 <div key={step} className={`step-circle ${currentStep >= step ? 'active' : ''}`}>
                     <span className="step-number">{step}</span>
                     <span className="step-label">
                         {step === 1 && 'Settings'}
                         {step === 2 && 'Generate'}
                         {step === 3 && 'Review'}
+                        {step === 4 && 'Recipes'}
                     </span>
                 </div>
             ))}
@@ -354,7 +433,7 @@ const CreateMealPlan = () => {
                 <div className="step-content">
                     <div className="step-header">
                         <h2>✨ Your Meal Plan is Ready!</h2>
-                        <p>Review your personalized meal plan and save it</p>
+                        <p>Review your personalized meal plan and generate detailed recipes</p>
                     </div>
 
                     <div className="meal-plan-preview">
@@ -402,15 +481,108 @@ const CreateMealPlan = () => {
                         </button>
                         <button
                             className="btn btn-primary"
-                            onClick={() => navigate('/meal-plan')}
+                            onClick={generateRecipes}
                         >
-                            📋 Go to My Meal Plans
+                            ✨ Generate Detailed Recipes
                         </button>
                     </div>
 
                     {!isAuthenticated && (
                         <div className="auth-warning">
                             <p>🔒 Please log in to save your meal plan</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Step 4: Recipe Generation Progress */}
+            {currentStep === 4 && (
+                <div className="step-content">
+                    <div className="step-header">
+                        <h2>👨‍🍳 Generating Detailed Recipes</h2>
+                        <p>Creating step-by-step recipes for each meal</p>
+                    </div>
+
+                    <div className="recipe-gen-progress">
+                        <div className="recipe-gen-stats">
+                            <div className="recipe-gen-stat-card">
+                                <span className="recipe-gen-stat-icon">📝</span>
+                                <span className="recipe-gen-stat-value">{recipeProgress.total}</span>
+                                <span className="recipe-gen-stat-label">Total Recipes</span>
+                            </div>
+                            <div className="recipe-gen-stat-card">
+                                <span className="recipe-gen-stat-icon">✅</span>
+                                <span className="recipe-gen-stat-value">{recipeProgress.completed}</span>
+                                <span className="recipe-gen-stat-label">Completed</span>
+                            </div>
+                            {recipeProgress.failed > 0 && (
+                                <div className="recipe-gen-stat-card recipe-gen-error">
+                                    <span className="recipe-gen-stat-icon">❌</span>
+                                    <span className="recipe-gen-stat-value">{recipeProgress.failed}</span>
+                                    <span className="recipe-gen-stat-label">Failed</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="recipe-gen-progress-container">
+                            <div className="recipe-gen-progress-bar">
+                                <div
+                                    className="recipe-gen-progress-fill"
+                                    style={{
+                                        width: `${(recipeProgress.completed / recipeProgress.total) * 100}%`
+                                    }}
+                                />
+                            </div>
+                            <div className="recipe-gen-progress-text">
+                                {Math.round((recipeProgress.completed / recipeProgress.total) * 100)}% Complete
+                            </div>
+                        </div>
+
+                        {recipeProgress.currentMeal && (
+                            <div className="recipe-gen-current-meal">
+                                <div className="recipe-gen-spinner">🍳</div>
+                                <p>Generating recipe for: <strong>{recipeProgress.currentMeal}</strong></p>
+                            </div>
+                        )}
+
+                        {!isGeneratingRecipes && recipeProgress.completed === recipeProgress.total && (
+                            <div className="recipe-gen-completion">
+                                <div className="recipe-gen-completion-icon">🎉</div>
+                                <h3>All Recipes Generated!</h3>
+                                <p>Your complete meal plan with detailed recipes is ready.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="step-actions">
+                        <button
+                            className="btn btn-secondary"
+                            onClick={resetForm}
+                            disabled={isGeneratingRecipes}
+                        >
+                            🔄 Create Another Plan
+                        </button>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate('/meal-plan')}
+                            disabled={!canNavigateToMealPlans() || isGeneratingRecipes}
+                        >
+                            {canNavigateToMealPlans()
+                                ? '📋 View My Meal Plans'
+                                : `⏳ Generating Recipes... (${recipeProgress.completed}/${recipeProgress.total})`
+                            }
+                        </button>
+                    </div>
+
+                    {!canNavigateToMealPlans() && !isGeneratingRecipes && (
+                        <div className="retry-section">
+                            <p>Some recipes failed to generate. You can:</p>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={generateRecipes}
+                            >
+                                🔄 Retry Failed Recipes
+                            </button>
                         </div>
                     )}
                 </div>

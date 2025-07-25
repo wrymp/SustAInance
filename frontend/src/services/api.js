@@ -67,7 +67,15 @@ export const mealPlanAPI = {
     getMealPlanById: (id) => api.get(`/api/meal-plans/${id}`),
     updateMealPlan: (id, mealPlan) => api.put(`/api/meal-plans/${id}`, mealPlan),
     deleteMealPlan: (id) => api.delete(`/api/meal-plans/${id}`),
-    deleteMealPlanByUser: (userId, id) => api.delete(`/api/meal-plans/user/${userId}/${id}`)
+    deleteMealPlanByUser: (userId, id) => api.delete(`/api/meal-plans/user/${userId}/${id}`),
+
+    generateRecipeForMeal: (mealPlanId, day, mealType) => {
+        return api.post(`/api/meal-plans/${mealPlanId}/meals/${day}/${mealType}/generate-recipe`);
+    },
+
+    getMealPlanProgress: (mealPlanId) => {
+        return api.get(`/api/meal-plans/${mealPlanId}/progress`);
+    }
 };
 
 

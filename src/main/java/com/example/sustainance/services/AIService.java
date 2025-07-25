@@ -284,4 +284,38 @@ public class AIService {
 
         return cleaned;
     }
+    public String generateDetailedRecipeFromMeal(String mealTitle, String mealDescription, String mealType, List<String> preferences) {
+        log.info("🍳 Generating detailed recipe for: {}", mealTitle);
+
+        try {
+            String systemMessage = promptService.getDetailedRecipeSystemMessage();
+            String userPrompt = promptService.buildDetailedRecipePrompt(mealTitle, mealDescription, mealType, preferences);
+
+            ChatCompletionsOptions options = new ChatCompletionsOptions(
+                    Arrays.asList(
+                            new ChatMessage(ChatRole.SYSTEM).setContent(systemMessage),
+                            new ChatMessage(ChatRole.USER).setContent(userPrompt)
+                    )
+            );
+
+            options.setModel(model);
+            options.setMaxTokens(1500);
+            options.setTemperature(0.7);
+            options.setTopP(aiProperties.getOpenai().getTopP());
+            options.setFrequencyPenalty(aiProperties.getOpenai().getFrequencyPenalty());
+            options.setPresencePenalty(aiProperties.getOpenai().getPresencePenalty());
+
+            ChatCompletions completions = client.getChatCompletions(model, options);
+            String rawRecipe = completions.getChoices().get(0).getMessage().getContent();
+
+            log.info("✅ Generated detailed recipe for: {}", mealTitle);
+
+
+            return formatRecipe(rawRecipe);
+
+        } catch (Exception e) {
+            log.error("❌ Error generating detailed recipe for {}: {}", mealTitle, e.getMessage());
+            throw new RuntimeException("Failed to generate detailed recipe: " + e.getMessage());
+        }
+    }
 }

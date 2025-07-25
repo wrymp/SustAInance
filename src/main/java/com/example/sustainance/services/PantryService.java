@@ -3,7 +3,7 @@ package com.example.sustainance.services;
 import com.example.sustainance.models.DTO.RemoveIngredientRequest;
 import com.example.sustainance.models.DTO.UpdateIngredientRequest;
 import com.example.sustainance.models.entities.PantryItem;
-import com.example.sustainance.models.repositories.PantryItemRepository;
+import com.example.sustainance.repositories.PantryItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +27,7 @@ public class PantryService {
         if (existingItem.isPresent()) {
             PantryItem item = existingItem.get();
 
-            // Check if units match
+
             if (!item.getUnit().equals(request.getUnit())) {
                 throw new RuntimeException("Unit mismatch: existing item has unit '" + item.getUnit() +
                         "' but you're trying to add with unit '" + request.getUnit() + "'");
@@ -47,7 +47,7 @@ public class PantryService {
         }
     }
 
-    // Add new method for updating existing items
+
     public PantryItem updateIngredient(UpdateIngredientRequest request) {
         Optional<PantryItem> existingItem = pantryItemRepository
                 .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());
@@ -55,7 +55,7 @@ public class PantryService {
         if (existingItem.isPresent()) {
             PantryItem item = existingItem.get();
 
-            // If ingredient name is being changed, check for conflicts
+
             if (!item.getIngredientName().equals(request.getIngredientName())) {
                 Optional<PantryItem> conflictItem = pantryItemRepository
                         .findByUsersIdAndIngredientName(request.getUsersId(), request.getIngredientName());

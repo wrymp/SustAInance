@@ -1,4 +1,4 @@
-package com.example.sustainance.models.repositories;
+package com.example.sustainance.repositories;
 
 import com.example.sustainance.models.entities.MealPlan;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +12,7 @@ public interface MealPlanRepository extends JpaRepository<MealPlan, Long> {
 
     List<MealPlan> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
-    void deleteByUserIdAndId(UUID userId, UUID id);
+    void deleteByUserIdAndId(UUID userId, long id);
 
-    boolean existsByUserIdAndId(UUID userId, UUID id);
+    boolean existsByUserIdAndId(UUID userId, long id);
 }
