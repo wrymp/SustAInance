@@ -2,6 +2,7 @@ package com.example.sustainance.controller;
 
 import com.example.sustainance.config.authConfig.AuthenticationUtil;
 import com.example.sustainance.config.authConfig.RequireAuthentication;
+import com.example.sustainance.models.DTO.MealDto;
 import com.example.sustainance.models.DTO.MealPlanGenerationRequest;
 import com.example.sustainance.models.DTO.MealPlanGenerationResponse;
 import com.example.sustainance.models.DTO.MealPlanProgressDTO;
@@ -10,16 +11,15 @@ import com.example.sustainance.models.entities.MealPlan;
 import com.example.sustainance.models.entities.UserInfo;
 import com.example.sustainance.services.MealPlanGenerationService;
 import com.example.sustainance.services.MealPlanService;
+import com.example.sustainance.services.RecipeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/meal-plans")
@@ -28,6 +28,12 @@ public class MealPlanController {
 
     @Autowired
     private MealPlanService mealPlanService;
+
+    @Autowired
+    private RecipeService recipeService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private MealPlanGenerationService mealPlanGenerationService;
@@ -124,18 +130,53 @@ public class MealPlanController {
     public ResponseEntity<?> deleteMealPlanByUserAndId(@PathVariable UUID userId, @PathVariable long id) {
         try {
             System.out.println("Deleting meal plan " + id + " for user: " + userId);
+
+            Optional<MealPlan> mealPlanOpt = mealPlanService.getMealPlansByUserIdAndId(userId, id);
+            if (mealPlanOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Meal plan not found");
+            }
+
+            MealPlan mealPlan = mealPlanOpt.get();
+
+            if (mealPlan.getMealsData() != null && !mealPlan.getMealsData().trim().isEmpty()) {
+                deleteAssociatedRecipes(mealPlan.getMealsData(), userId);
+            }
+
             mealPlanService.deleteMealPlanByUserAndId(userId, id);
-            System.out.println("Meal plan deleted successfully");
+
+            System.out.println("Meal plan and associated recipes deleted successfully");
             return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            System.err.println("Error deleting meal plan: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Meal plan not found: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Error deleting meal plan: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to delete meal plan: " + e.getMessage());
+        }
+    }
+
+    private void deleteAssociatedRecipes(String mealsDataJson, UUID userId) {
+        try {
+            MealDto[] meals = objectMapper.readValue(mealsDataJson, MealDto[].class);
+
+            for (MealDto meal : meals) {
+                if (meal.getRecipeId() != null && !meal.getRecipeId().trim().isEmpty()) {
+                    try {
+                        UUID recipeId = UUID.fromString(meal.getRecipeId());
+                        boolean deleted = recipeService.deleteRecipe(recipeId, userId);
+                        if (deleted) {
+                            System.out.println("Deleted recipe: " + recipeId);
+                        } else {
+                            System.out.println("Recipe not found or already deleted: " + recipeId);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Invalid UUID format for recipe ID: " + meal.getRecipeId());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing meals data JSON: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

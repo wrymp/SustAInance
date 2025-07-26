@@ -68,4 +68,8 @@ public class MealPlanService {
             throw new RuntimeException("Meal plan not found for user: " + userId + " with id: " + id);
         }
     }
+
+    public Optional<MealPlan> getMealPlansByUserIdAndId(UUID userId, long id) {
+        return mealPlanRepository.findByUserIdAndId(userId, id);
+    }
 }
