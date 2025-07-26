@@ -102,12 +102,6 @@ public class PromptService {
             Cooking Time: [prep time] + [cook time] = [total time]
             Serves: [number of people]
             Difficulty: [Easy/Medium/Hard]
-            
-            (Write this only if needed - list ANY and ALL missing ingredients with quantities, yes even water, salt and so on.
-            If there is none, dont even write the 'SHOPPING LIST:', 'SHOPPING LIST END' parts)
-            SHOPPING LIST:
-            === [INGREDIENT_NAME]: [Quantity, Unit]
-            SHOPPING LIST END
             """,
                 ingredients,
                 !preferencesContext.isEmpty() ? preferencesContext.toString() : "No specific preferences provided"

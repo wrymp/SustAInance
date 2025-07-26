@@ -83,8 +83,14 @@ const MyMealPlans = () => {
     };
 
     const getDayName = (dayNumber) => {
-        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        return days[dayNumber - 1] || `Day ${dayNumber}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if (!currentMealPlan) return `Day ${dayNumber}`;
+        const startDate = new Date(currentMealPlan.startDate);
+        const targetDate = new Date(startDate);
+        targetDate.setDate(startDate.getDate() + (dayNumber - 1));
+        const dayOfWeek = targetDate.getDay();
+
+        return days[dayOfWeek];
     };
 
     const handleDeleteClick = (planId) => {
