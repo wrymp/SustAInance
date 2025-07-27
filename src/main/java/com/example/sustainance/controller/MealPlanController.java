@@ -9,6 +9,7 @@ import com.example.sustainance.models.DTO.MealPlanProgressDTO;
 import com.example.sustainance.models.entities.FavoriteRecipe;
 import com.example.sustainance.models.entities.MealPlan;
 import com.example.sustainance.models.entities.UserInfo;
+import com.example.sustainance.services.EmailSenderService;
 import com.example.sustainance.services.MealPlanGenerationService;
 import com.example.sustainance.services.MealPlanService;
 import com.example.sustainance.services.RecipeService;
@@ -19,7 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/meal-plans")
@@ -38,23 +42,15 @@ public class MealPlanController {
     @Autowired
     private MealPlanGenerationService mealPlanGenerationService;
 
+    @Autowired
+    private EmailSenderService emailSenderService;
+
     @PostMapping
     public ResponseEntity<?> createMealPlan(@RequestBody MealPlan mealPlan) {
         try {
-            System.out.println("Creating meal plan for user: " + mealPlan.getUserId());
-            System.out.println("Duration: " + mealPlan.getDuration());
-            System.out.println("Meals per day: " + mealPlan.getMealsPerDay());
-            System.out.println("Preferences: " + mealPlan.getPreferences());
-            System.out.println("Meals data length: " + (mealPlan.getMealsData() != null ? mealPlan.getMealsData().length() : 0));
-
             MealPlan savedMealPlan = mealPlanService.createMealPlan(mealPlan);
-
-            System.out.println("Meal plan saved successfully with ID: " + savedMealPlan.getId());
-
             return ResponseEntity.ok(savedMealPlan);
         } catch (Exception e) {
-            System.err.println("Error creating meal plan: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to create meal plan: " + e.getMessage());
         }
@@ -63,13 +59,9 @@ public class MealPlanController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getMealPlansByUserId(@PathVariable UUID userId) {
         try {
-            System.out.println("Fetching meal plans for user: " + userId);
             List<MealPlan> mealPlans = mealPlanService.getMealPlansByUserId(userId);
-            System.out.println("Found " + mealPlans.size() + " meal plans");
             return ResponseEntity.ok(mealPlans);
         } catch (Exception e) {
-            System.err.println("Error fetching meal plans: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch meal plans: " + e.getMessage());
         }
@@ -82,7 +74,6 @@ public class MealPlanController {
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
-            System.err.println("Error fetching meal plan: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch meal plan: " + e.getMessage());
         }
@@ -91,17 +82,12 @@ public class MealPlanController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMealPlan(@PathVariable Long id, @RequestBody MealPlan updatedMealPlan) {
         try {
-            System.out.println("Updating meal plan with ID: " + id);
             MealPlan updated = mealPlanService.updateMealPlan(id, updatedMealPlan);
-            System.out.println("Meal plan updated successfully");
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
-            System.err.println("Error updating meal plan: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Meal plan not found: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error updating meal plan: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to update meal plan: " + e.getMessage());
         }
@@ -110,17 +96,12 @@ public class MealPlanController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMealPlan(@PathVariable Long id) {
         try {
-            System.out.println("Deleting meal plan with ID: " + id);
             mealPlanService.deleteMealPlan(id);
-            System.out.println("Meal plan deleted successfully");
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
-            System.err.println("Error deleting meal plan: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Meal plan not found: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Error deleting meal plan: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to delete meal plan: " + e.getMessage());
         }
@@ -129,8 +110,6 @@ public class MealPlanController {
     @DeleteMapping("/user/{userId}/{id}")
     public ResponseEntity<?> deleteMealPlanByUserAndId(@PathVariable UUID userId, @PathVariable long id) {
         try {
-            System.out.println("Deleting meal plan " + id + " for user: " + userId);
-
             Optional<MealPlan> mealPlanOpt = mealPlanService.getMealPlansByUserIdAndId(userId, id);
             if (mealPlanOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -144,49 +123,21 @@ public class MealPlanController {
             }
 
             mealPlanService.deleteMealPlanByUserAndId(userId, id);
-
-            System.out.println("Meal plan and associated recipes deleted successfully");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            System.err.println("Error deleting meal plan: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to delete meal plan: " + e.getMessage());
         }
     }
 
-    private void deleteAssociatedRecipes(String mealsDataJson, UUID userId) {
-        try {
-            MealDto[] meals = objectMapper.readValue(mealsDataJson, MealDto[].class);
-
-            for (MealDto meal : meals) {
-                if (meal.getRecipeId() != null && !meal.getRecipeId().trim().isEmpty()) {
-                    try {
-                        UUID recipeId = UUID.fromString(meal.getRecipeId());
-                        boolean deleted = recipeService.deleteRecipe(recipeId, userId);
-                        if (deleted) {
-                            System.out.println("Deleted recipe: " + recipeId);
-                        } else {
-                            System.out.println("Recipe not found or already deleted: " + recipeId);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        System.err.println("Invalid UUID format for recipe ID: " + meal.getRecipeId());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error parsing meals data JSON: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     @PostMapping("/generate")
     public ResponseEntity<MealPlanGenerationResponse> generateMealPlan(
-            @RequestBody MealPlanGenerationRequest MealRequest,
+            @RequestBody MealPlanGenerationRequest mealRequest,
             HttpServletRequest request) {
         try {
             UserInfo currentUser = AuthenticationUtil.getCurrentUser(request);
-            MealPlanGenerationResponse response = mealPlanGenerationService.generateBasicMealPlan(MealRequest, currentUser.getUuid());
+            MealPlanGenerationResponse response = mealPlanGenerationService.generateBasicMealPlan(
+                    mealRequest, currentUser.getUuid());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -206,6 +157,12 @@ public class MealPlanController {
             FavoriteRecipe savedRecipe = mealPlanGenerationService.generateAndSaveRecipeForMeal(
                     mealPlanId, day, mealType, currentUser.getUuid()
             );
+
+            try {
+                checkAndSendDailyShoppingList(mealPlanId, day, currentUser);
+            } catch (Exception emailError) {
+
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("recipeId", savedRecipe.getId());
@@ -228,10 +185,214 @@ public class MealPlanController {
 
         try {
             UserInfo currentUser = AuthenticationUtil.getCurrentUser(request);
-            MealPlanProgressDTO progress = mealPlanGenerationService.getMealPlanProgress(mealPlanId, currentUser.getUuid());
+            MealPlanProgressDTO progress = mealPlanGenerationService.getMealPlanProgress(
+                    mealPlanId, currentUser.getUuid());
             return ResponseEntity.ok(progress);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
+    }
+
+    private void deleteAssociatedRecipes(String mealsDataJson, UUID userId) {
+        try {
+            MealDto[] meals = objectMapper.readValue(mealsDataJson, MealDto[].class);
+
+            for (MealDto meal : meals) {
+                if (meal.getRecipeId() != null && !meal.getRecipeId().trim().isEmpty()) {
+                    try {
+                        UUID recipeId = UUID.fromString(meal.getRecipeId());
+                        recipeService.deleteRecipe(recipeId, userId);
+                    } catch (IllegalArgumentException e) {
+
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    private void checkAndSendDailyShoppingList(long mealPlanId, int day, UserInfo user) {
+        try {
+            Optional<MealPlan> mealPlanOpt = mealPlanService.getMealPlanById(mealPlanId);
+            if (mealPlanOpt.isEmpty()) {
+                return;
+            }
+
+            MealPlan mealPlan = mealPlanOpt.get();
+            List<MealDto> dayMeals = getMealsForDay(mealPlan, day);
+            List<FavoriteRecipe> dayRecipes = getGeneratedRecipesForDay(mealPlanId, day, user.getUuid());
+
+            if (dayRecipes.size() == dayMeals.size() && !dayRecipes.isEmpty()) {
+                sendDailyShoppingListEmail(mealPlan, day, dayRecipes, user);
+            }
+
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private List<MealDto> getMealsForDay(MealPlan mealPlan, int day) {
+        try {
+            if (mealPlan.getMealsData() == null || mealPlan.getMealsData().trim().isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            MealDto[] allMeals = objectMapper.readValue(mealPlan.getMealsData(), MealDto[].class);
+            return Arrays.stream(allMeals)
+                    .filter(meal -> meal.getDay() == day)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    private List<FavoriteRecipe> getGeneratedRecipesForDay(long mealPlanId, int day, UUID userId) {
+        try {
+            Optional<MealPlan> mealPlanOpt = mealPlanService.getMealPlanById(mealPlanId);
+            if (mealPlanOpt.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            MealPlan mealPlan = mealPlanOpt.get();
+            List<MealDto> dayMeals = getMealsForDay(mealPlan, day);
+            List<FavoriteRecipe> dayRecipes = new ArrayList<>();
+
+            for (MealDto meal : dayMeals) {
+                if (meal.getRecipeId() != null && !meal.getRecipeId().trim().isEmpty()) {
+                    try {
+                        UUID recipeId = UUID.fromString(meal.getRecipeId());
+                        FavoriteRecipe recipe = recipeService.getRecipeById(recipeId);
+                        dayRecipes.add(recipe);
+                    } catch (IllegalArgumentException e) {
+
+                    }
+                }
+            }
+
+            return dayRecipes;
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    private void sendDailyShoppingListEmail(MealPlan mealPlan, int day, List<FavoriteRecipe> dayRecipes, UserInfo user) {
+        try {
+            if (dayRecipes.isEmpty()) {
+                return;
+            }
+
+            String emailContent = createDailyShoppingListEmailContent(mealPlan, day, dayRecipes);
+            String dayName = getDayName(mealPlan.getStartDate(), day);
+            String subject = "🛒 Shopping List for " + dayName + " (Day " + day + ")";
+
+            emailSenderService.sendEmail(user.getEmail(), emailContent);
+
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private String createDailyShoppingListEmailContent(MealPlan mealPlan, int day, List<FavoriteRecipe> dayRecipes) {
+        StringBuilder emailContent = new StringBuilder();
+
+        String dayName = getDayName(mealPlan.getStartDate(), day);
+        String formattedDate = getFormattedDate(mealPlan.getStartDate(), day);
+
+        emailContent.append("🛒 Shopping List for ").append(dayName).append(" (Day ").append(day).append(")\n\n");
+        emailContent.append("📅 Date: ").append(formattedDate).append("\n\n");
+
+        List<String> mealOrder = Arrays.asList("Breakfast", "Lunch", "Dinner");
+        dayRecipes.sort((r1, r2) -> {
+            String mealType1 = extractMealTypeFromRecipeName(r1.getRecipeName());
+            String mealType2 = extractMealTypeFromRecipeName(r2.getRecipeName());
+            return Integer.compare(mealOrder.indexOf(mealType1), mealOrder.indexOf(mealType2));
+        });
+
+        for (int i = 0; i < dayRecipes.size(); i++) {
+            FavoriteRecipe recipe = dayRecipes.get(i);
+            String mealType = extractMealTypeFromRecipeName(recipe.getRecipeName());
+            String mealIcon = getMealIcon(mealType);
+
+            emailContent.append(mealIcon).append(" ").append(recipe.getRecipeName()).append("\n");
+            emailContent.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+
+            String ingredients = extractIngredients(recipe.getRecipeText());
+            if (ingredients != null && !ingredients.trim().isEmpty()) {
+                emailContent.append(ingredients);
+            } else {
+                emailContent.append("• No ingredients list available for this recipe\n");
+            }
+
+            if (i < dayRecipes.size() - 1) {
+                emailContent.append("\n\n");
+            }
+        }
+
+        emailContent.append("\n\n💡 Pro Tips:\n");
+        emailContent.append("• Check your pantry first to avoid buying duplicates\n");
+        emailContent.append("• Group similar ingredients together for easier shopping\n");
+        emailContent.append("• Consider buying in bulk for frequently used items\n\n");
+
+        emailContent.append("Happy cooking! 👨‍🍳\n\n");
+        emailContent.append("Best regards,\n");
+        emailContent.append("Your Sustainance Team 🌱");
+
+        return emailContent.toString();
+    }
+
+    private String extractMealTypeFromRecipeName(String recipeName) {
+        if (recipeName.toLowerCase().contains("breakfast")) return "Breakfast";
+        if (recipeName.toLowerCase().contains("lunch")) return "Lunch";
+        if (recipeName.toLowerCase().contains("dinner")) return "Dinner";
+        return "Unknown";
+    }
+
+    private String getMealIcon(String mealType) {
+        switch (mealType.toLowerCase()) {
+            case "breakfast": return "🌅";
+            case "lunch": return "☀️";
+            case "dinner": return "🌙";
+            default: return "🍽️";
+        }
+    }
+
+    private String getDayName(LocalDate startDate, int dayNumber) {
+        if (startDate == null) {
+            return "Day " + dayNumber;
+        }
+
+        LocalDate targetDate = startDate.plusDays(dayNumber - 1);
+        String dayName = targetDate.getDayOfWeek().toString();
+        return dayName.charAt(0) + dayName.substring(1).toLowerCase();
+    }
+
+    private String getFormattedDate(LocalDate startDate, int dayNumber) {
+        if (startDate == null) {
+            return "Unknown Date";
+        }
+
+        LocalDate targetDate = startDate.plusDays(dayNumber - 1);
+        return targetDate.format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"));
+    }
+
+    private String extractIngredients(String recipeContent) {
+        if (recipeContent == null || recipeContent.isEmpty()) {
+            return null;
+        }
+
+        int startIndex = recipeContent.indexOf("USED_INGREDIENTS_START");
+        int endIndex = recipeContent.indexOf("USED_INGREDIENTS_END");
+
+        if (startIndex == -1 || endIndex == -1 || startIndex >= endIndex) {
+            return null;
+        }
+
+        String ingredientsSection = recipeContent.substring(
+                startIndex + "USED_INGREDIENTS_START".length(),
+                endIndex
+        ).trim();
+
+        return ingredientsSection;
     }
 }

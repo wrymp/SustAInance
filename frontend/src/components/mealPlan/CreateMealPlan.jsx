@@ -127,13 +127,23 @@ const CreateMealPlan = () => {
         const total = generatedMeals.length;
         setRecipeProgress({ total, completed: 0, failed: 0, currentMeal: null });
 
+        const mealsByDay = generatedMeals.reduce((acc, meal) => {
+            if (!acc[meal.day]) acc[meal.day] = [];
+            acc[meal.day].push(meal);
+            return acc;
+        }, {});
+
         for (let i = 0; i < generatedMeals.length; i++) {
             const meal = generatedMeals[i];
+            const dayMeals = mealsByDay[meal.day];
+            const isLastMealOfDay = dayMeals[dayMeals.length - 1] === meal;
 
             try {
                 setRecipeProgress(prev => ({
                     ...prev,
-                    currentMeal: `${meal.mealType} - Day ${meal.day}: ${meal.title}`
+                    currentMeal: `${meal.mealType} - Day ${meal.day}: ${meal.title}${
+                        isLastMealOfDay ? ' (📧 Sending daily shopping list...)' : ''
+                    }`
                 }));
 
                 console.log(`🍳 Generating recipe ${i + 1}/${total}: ${meal.title}`);
@@ -166,7 +176,8 @@ const CreateMealPlan = () => {
 
         const finalProgress = await mealPlanAPI.getMealPlanProgress(mealPlanId);
         if (finalProgress.data.status === 'completed') {
-            setSuccess('✅ All recipes generated successfully!');
+            const uniqueDays = [...new Set(generatedMeals.map(meal => meal.day))];
+            setSuccess(`✅ All recipes generated! Daily shopping lists sent to your email for ${uniqueDays.length} day${uniqueDays.length > 1 ? 's' : ''}!`);
         } else if (recipeProgress.failed > 0) {
             setError(`⚠️ Generated ${recipeProgress.completed - recipeProgress.failed} recipes. ${recipeProgress.failed} failed.`);
         }
