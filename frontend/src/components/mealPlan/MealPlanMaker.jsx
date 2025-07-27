@@ -98,6 +98,25 @@ const MyMealPlans = () => {
         setShowDeleteModal(true);
     };
 
+    const handleMealClick = (meal) => {
+        if (meal.recipeId) {
+            console.log('🍽️ Opening recipe:', meal.title, 'with ID:', meal.recipeId);
+            navigate(`/recipe/${meal.recipeId}`, {
+                state: {
+                    fromMealPlan: true,
+                    mealPlanId: currentMealPlan?.id,
+                    mealInfo: {
+                        title: meal.title,
+                        mealType: meal.mealType,
+                        day: meal.day
+                    }
+                }
+            });
+        } else {
+            console.warn('No recipe ID found for meal:', meal.title);
+        }
+    };
+
     const deleteMealPlan = async () => {
         if (!planToDelete) return;
 
@@ -236,7 +255,12 @@ const MyMealPlans = () => {
                         <div className="todays-meals">
                             {todaysMeals.length > 0 ? (
                                 todaysMeals.map((meal, index) => (
-                                    <div key={index} className="banner-meal">
+                                    <div
+                                        key={index}
+                                        className="banner-meal banner-meal--clickable"
+                                        onClick={() => handleMealClick(meal)}
+                                        title={`Click to view ${meal.title} recipe`}
+                                    >
                                         <span className="meal-icon">{mealTypeIcons[meal.mealType]}</span>
                                         <div className="meal-info">
                                             <span className="meal-type">{meal.mealType}</span>
@@ -345,7 +369,12 @@ const MyMealPlans = () => {
 
                                     <div className="day-meals">
                                         {dayMeals.map((meal, mealIndex) => (
-                                            <div key={mealIndex} className="meal-card">
+                                            <div
+                                                key={mealIndex}
+                                                className="meal-card meal-card--clickable"
+                                                onClick={() => handleMealClick(meal)}
+                                                title={`Click to view ${meal.title} recipe`}
+                                            >
                                                 <div className="meal-header">
                                                     <span className="meal-icon">
                                                         {mealTypeIcons[meal.mealType]}
@@ -355,6 +384,10 @@ const MyMealPlans = () => {
                                                 <div className="meal-content">
                                                     <h5 className="meal-title">{meal.title}</h5>
                                                     <p className="meal-description">{meal.content}</p>
+                                                </div>
+                                                {/* Add a visual indicator that it's clickable */}
+                                                <div className="meal-card__click-indicator">
+                                                    <span>👀 View Recipe</span>
                                                 </div>
                                             </div>
                                         ))}

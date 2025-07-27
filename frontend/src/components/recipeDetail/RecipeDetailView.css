@@ -704,3 +704,69 @@
     font-family: monospace;
     word-break: break-all;
 }
+
+/* Meal context styling */
+.recipe-detail-view__meal-context {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.meal-context-badge {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+/* Update header to handle the new layout */
+.recipe-detail-view__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.recipe-detail-view__header-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.recipe-detail-view__header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .recipe-detail-view__header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .recipe-detail-view__header-left {
+        justify-content: center;
+    }
+
+    .recipe-detail-view__header-actions {
+        justify-content: center;
+    }
+
+    .meal-context-badge {
+        align-self: center;
+        margin-top: 0.5rem;
+    }
+}

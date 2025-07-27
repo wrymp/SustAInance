@@ -299,8 +299,8 @@ public class AIService {
             );
 
             options.setModel(model);
-            options.setMaxTokens(1500);
-            options.setTemperature(0.7);
+            options.setMaxTokens(aiProperties.getOpenai().getMaxTokens());
+            options.setTemperature(aiProperties.getOpenai().getTemperature());
             options.setTopP(aiProperties.getOpenai().getTopP());
             options.setFrequencyPenalty(aiProperties.getOpenai().getFrequencyPenalty());
             options.setPresencePenalty(aiProperties.getOpenai().getPresencePenalty());
@@ -311,7 +311,7 @@ public class AIService {
             log.info("✅ Generated detailed recipe for: {}", mealTitle);
 
 
-            return formatRecipe(rawRecipe);
+            return formatRecipeWithUsedIngredients(rawRecipe);
 
         } catch (Exception e) {
             log.error("❌ Error generating detailed recipe for {}: {}", mealTitle, e.getMessage());

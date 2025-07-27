@@ -519,3 +519,77 @@
     border: none;
     cursor: pointer;
 }
+
+/* Make meal cards clickable */
+.meal-card--clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.meal-card--clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+}
+
+.meal-card--clickable:active {
+    transform: translateY(0);
+}
+
+/* Click indicator */
+.meal-card__click-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    text-align: center;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+}
+
+.meal-card--clickable:hover .meal-card__click-indicator {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Banner meals clickable */
+.banner-meal--clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.banner-meal--clickable:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+.banner-meal--clickable:active {
+    transform: scale(0.98);
+}
+
+/* Add some visual feedback for clickable state */
+.meal-card--clickable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 86, 179, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.meal-card--clickable:hover::before {
+    opacity: 1;
+}

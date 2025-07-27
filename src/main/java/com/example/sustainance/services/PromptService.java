@@ -20,7 +20,6 @@ public class PromptService {
     }
 
     public String buildRecipePrompt(String ingredients, RecipePreferences preferences) {
-        // Build preferences context
         StringBuilder preferencesContext = new StringBuilder();
 
         if (preferences.getCuisine() != null && !preferences.getCuisine().isEmpty()) {
@@ -191,10 +190,18 @@ public class PromptService {
 
     public String getDetailedRecipeSystemMessage() {
         return """
-        You are a professional chef creating detailed recipes.
-        Provide complete, easy-to-follow recipes with exact measurements.
-        Include prep time, cook time, difficulty level, and number of servings.
-        Format the recipe clearly with sections for ingredients and instructions.
+        You are a professional chef creating detailed recipes with ingredient tracking.
+        
+        CRITICAL FORMATTING RULES:
+        1. Always include USED_INGREDIENTS_START/END section with exact amounts used
+        2. Use bullet points (•) for ingredients
+        3. Bold action words in instructions using **text**
+        4. Include Chef's Tips section
+        5. Format cooking time as: [prep] (prep) + [cook] (cook) = [total]
+        6. Provide complete, easy-to-follow recipes with exact measurements
+        7. Include prep time, cook time, difficulty level, and number of servings
+        
+        Follow the exact format structure provided in the user prompt.
         """;
     }
 
@@ -211,31 +218,41 @@ public class PromptService {
         Meal Type: %s
         Dietary Preferences: %s
         
-        === %s ===
+        🎯 PREFERENCE INTEGRATION:
+        - Follow dietary restrictions strictly if specified
+        - Design for the specified meal type
+        - Make it practical and easy to follow
         
-        Provide:
+        Format your response EXACTLY like this:
+        
+        USED_INGREDIENTS_START
+        • [ingredient name]: [actual amount used] [unit]
+        • [ingredient name]: [actual amount used] [unit]
+        • [basic seasoning]: [actual amount used] [unit]
+        USED_INGREDIENTS_END
         
         Ingredients:
-        • [List each ingredient with exact measurements]
+        • [main ingredient]: [amount] [unit] ([amount used] used)
+        • [main ingredient]: [amount] [unit] ([amount used] used)
+        • [basic seasoning]: small amount ([amount used])
         
         Instructions:
-        1. [Detailed step-by-step instructions]
-        2. [Continue with clear steps]
+        1. **[Action]**: [Detailed step with temperature/time if needed]
+        2. **[Action]**: [Next step with specific techniques]
+        3. **[Action]**: [Continue with clear, actionable steps]
         
         Chef's Tips:
-        • [Any helpful tips]
+        • [Helpful cooking tip]
+        • [Storage or serving suggestion]
         
-        Prep Time: [X minutes]
-        Cook Time: [Y minutes]
-        Total Time: [Z minutes]
-        Serves: [number]
+        Cooking Time: [prep time] (prep) + [cook time] (cook) = [total time]
+        Serves: [number] people
         Difficulty: [Easy/Medium/Hard]
         """,
                 mealTitle,
                 mealDescription,
                 mealType,
-                preferencesStr,
-                mealTitle
+                preferencesStr
         );
     }
 }

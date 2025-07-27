@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './RecipeDetailView.css';
 
-const StarRating = ({ rating, readOnly = false, size = 'medium' }) => {
+const StarRating = ({ rating, size = 'medium' }) => {
     const starSize = size === 'small' ? '16px' : size === 'large' ? '32px' : '24px';
 
     return (
@@ -216,7 +216,9 @@ const RecipeDetailView = ({
                               onDelete,
                               recipeUrl,
                               isOwner = true,
-                              averageRating = 0
+                              averageRating = 0,
+                              fromMealPlan = false,
+                              mealInfo = null
                           }) => {
     const [showFullContent, setShowFullContent] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -253,10 +255,22 @@ const RecipeDetailView = ({
     return (
         <div className="recipe-detail-view">
             <div className="recipe-detail-view__header">
-                <button className="recipe-detail-view__back-btn" onClick={onBack}>
-                    <span className="recipe-detail-view__back-icon">←</span>
-                    <span>Back to Recipes</span>
-                </button>
+                <div className="recipe-detail-view__header-left">
+                    <button className="recipe-detail-view__back-btn" onClick={onBack}>
+                        <span className="recipe-detail-view__back-icon">←</span>
+                        <span>
+                {fromMealPlan ? 'Back to Meal Plan' : 'Back to Recipes'}
+            </span>
+                    </button>
+
+                    {fromMealPlan && mealInfo && (
+                        <div className="recipe-detail-view__meal-context">
+                <span className="meal-context-badge">
+                    🍽️ {mealInfo.mealType} • Day {mealInfo.day}
+                </span>
+                        </div>
+                    )}
+                </div>
 
                 <div className="recipe-detail-view__header-actions">
                     <button

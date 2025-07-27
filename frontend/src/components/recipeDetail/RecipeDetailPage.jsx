@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import RecipeDetailView from '../recipeDetail/RecipeDetailView';
 import RatingComponent from '../rating/RatingComponent';
 
@@ -13,6 +13,10 @@ const RecipeDetailPage = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
     const [userRating, setUserRating] = useState(0);
     const [averageRating, setAverageRating] = useState(0);
+
+    const location = useLocation();
+    const fromMealPlan = location.state?.fromMealPlan;
+    const mealInfo = location.state?.mealInfo;
 
     const API_BASE_URL = 'http://localhost:9097/api';
 
@@ -51,7 +55,6 @@ const RecipeDetailPage = () => {
                 return;
             }
 
-            // Use your existing endpoint
             const response = await fetch(`${API_BASE_URL}/recipeSaver/${recipeId}`, {
                 method: 'GET',
                 credentials: 'include',
@@ -62,7 +65,6 @@ const RecipeDetailPage = () => {
                 setRecipe(data.recipe);
                 setIsOwner(data.isOwner);
 
-                // Fetch ratings using your existing endpoints
                 await fetchRatings(userId);
             } else if (response.status === 404) {
                 setError('Recipe not found');
@@ -79,7 +81,6 @@ const RecipeDetailPage = () => {
 
     const fetchRatings = async (userId) => {
         try {
-            // Get average rating
             const avgResponse = await fetch(`${API_BASE_URL}/ratings/average/${recipeId}`, {
                 method: 'GET',
                 credentials: 'include',
@@ -90,7 +91,6 @@ const RecipeDetailPage = () => {
                 setAverageRating(avgRating || 0);
             }
 
-            // Get user's current rating
             const userResponse = await fetch(`${API_BASE_URL}/ratings/user?recipeId=${recipeId}&userId=${userId}`, {
                 method: 'GET',
                 credentials: 'include',
@@ -110,7 +110,11 @@ const RecipeDetailPage = () => {
     }, [recipeId]);
 
     const handleBack = () => {
-        navigate('/saved-recipes');
+        if (fromMealPlan) {
+            navigate('/meal-plan');
+        } else {
+            navigate('/saved-recipes');
+        }
     };
 
     const handleDelete = async (recipeToDelete) => {
@@ -158,7 +162,6 @@ const RecipeDetailPage = () => {
             if (response.ok) {
                 alert('Rating saved! 🌟');
                 setUserRating(rating);
-                // Refresh average rating
                 await fetchRatings(currentUserId);
             } else {
                 alert('Failed to save rating. Please try again.');
@@ -260,6 +263,8 @@ const RecipeDetailPage = () => {
                 currentUserId={currentUserId}
                 onSaveToCollection={!isOwner ? handleSaveToCollection : null}
                 averageRating={averageRating}
+                fromMealPlan={fromMealPlan}
+                mealInfo={mealInfo}
             />
 
             <RatingComponent
